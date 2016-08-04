@@ -1,0 +1,18 @@
+@font-face {
+    font-family: 'din_alternatebold';
+    src: url('../fonts/din_alternate_bold-webfont.woff2') format('woff2'),
+         url('../fonts/din_alternate_bold-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+	margin: 0;
+	background-color: #0000FF; /* Colors.blue in js */
+    color: #fff;
+    font-family: 'din_alternatebold';
+    font-size: 8px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-align: left;
+}
