@@ -8,8 +8,9 @@ var Colors = {
 
 var container, controls, camera, fieldOfView, aspectRatio, nearPlane, farPlane;
 var hemisphereLight, shadowLight, mesh, geometry, HEIGHT, WIDTH;
-
 var mousePos = { x: 0, y: 0 };
+var dataRendered = false;
+var data;
 
 function createScene() {
 	// DOM setup
@@ -82,13 +83,9 @@ function onWindowResize() {
 }
 
 function loop() {
-	// if (scene.line) {
-	// 	camera.lookAt(scene.line.position);
-	// }
-	// else {
-		camera.lookAt(scene.position);
-	// }
+	camera.lookAt(scene.position);
 	controls.update();
+	if (dataRendered) { node.updateNode(); }
 	render();
 	requestAnimationFrame(loop);
 }
@@ -97,50 +94,60 @@ function render() {
 	renderer.render( scene, camera );
 }
 
-
-
 function renderData(d) {
-	// console.log(d);
-	// var anchorMesh = new THREE.Object3D();
-	// var geom = new THREE.SphereGeometry(2, 20, 20);
-	// var mat = new THREE.MeshPhongMaterial ({
-	// 	wireframe: true,
-	// 	color: Colors.white
-	// });
-	// var anchor = new THREE.Mesh(geom, mat);
-	// anchorMesh.add(anchor);
-	// scene.add(anchorMesh);
-
-
-	var pathMat = new THREE.LineBasicMaterial({
+	var mat = new THREE.LineBasicMaterial({
 		color: Colors.white
 	});
-	var pathGeom = new THREE.Geometry();
-	var line = new THREE.Line(pathGeom, pathMat);
-	var counter = 0;
+	var geom = new THREE.Geometry();
+	var line = new THREE.Line(geom, mat);
 	for (vector in d) {
-		// if (counter % 1000 == 0) {
-		// 	console.log(Math.sin(d.indexOf(d[vector])));
-		// }
-		// console.log(d.indexOf(d[vector]));
-		// console.log(d[vector].x);
-		pathGeom.vertices.push(
+		geom.vertices.push(
 			new THREE.Vector3 (
 				d[vector].x,
 				d[vector].y,
 				0
-				// Math.sin(counter)
 			)
 		);
-		counter ++;
 	}
 	scene.add(line);
+	data = d;
+	dataRendered = true;
+}
+
+var Node = function() {
+	this.mesh = new THREE.Object3D();
+	var geom = new THREE.SphereGeometry(0.25,10,10);
+	var mat = new THREE.MeshPhongMaterial ({
+		wireframe: true,
+		color:Colors.white
+	});
+
+	var n = new THREE.Mesh(geom, mat);
+	n.castShadow = true;
+	n.receiveShadow = true;
+	this.mesh.add(n);
+	var counter = 1000;
+	this.updateNode = function() {
+		if (counter === data.length-1001) { counter = 1000; }
+		this.mesh.position.x = data[counter].x;
+		this.mesh.position.y = data[counter].y;
+		counter ++;
+	}
+}
+
+function createNode(){
+	this.mesh = new THREE.Object3D();
+	var node = new Node();
+	this.mesh.add(node.mesh);
+	this.node = node;
+	scene.add(this.mesh);
 }
 
 function init() {
 	createScene();
 	createLights();
 	loadData();
+	createNode();
 	loop();
 }
 
