@@ -13,6 +13,17 @@ var dataRendered = false;
 var data;
 var nodeArray = [];
 
+// Global Settings //
+var arrWidth = 20;
+var arrHeight = 10;
+var arrDepth = 30;
+var spread = 10;
+var nodeSize = 1;
+var nodeRes = 2;
+var delay = 0;
+var falloff = 1/spread;
+var friction = 0.125;
+
 function createScene() {
 	// DOM setup
 	var container = document.createElement( 'div' );
@@ -33,9 +44,13 @@ function createScene() {
 		nearPlane,
 		farPlane
 		);
-	camera.position.x = 0;
-	camera.position.y = 0;
-	camera.position.z = 20;
+	// camera.position.x = 0;
+	// camera.position.y = 0;
+	// camera.position.z = 20;
+	camera.position.x = 42.6961183872563;
+	camera.position.y = 28.84978967449806;
+	camera.position.z = 45.901855941777896;
+	camera.rotation = (-0.5611195939970497,0.667090950310542,0.2763639986659358);
 
 	controls = new THREE.TrackballControls( camera );
 
@@ -89,13 +104,15 @@ function loop() {
 
 	if (dataRendered) {
 		for (n = 0; n < nodeArray.length; n++) {
-			var phaseOff = Math.floor(nodeArray[n].distance);
+			var phaseOff = Math.floor(nodeArray[n].distance*falloff);
 			nodeArray[n].updateNode(phaseOff);
 		}
 	}
 
 	render();
-	requestAnimationFrame(loop);
+	setTimeout(function() {
+		requestAnimationFrame(loop);
+	}, delay);
 }
 
 function render() {
@@ -124,7 +141,7 @@ function renderData(d) {
 
 var Node = function() {
 	this.mesh = new THREE.Object3D();
-	var geom = new THREE.SphereGeometry(0.125,10,10);
+	var geom = new THREE.SphereGeometry(nodeSize,nodeRes,nodeRes);
 	var mat = new THREE.MeshPhongMaterial ({
 		wireframe: true,
 		color:Colors.white
@@ -134,30 +151,32 @@ var Node = function() {
 	n.castShadow = true;
 	n.receiveShadow = true;
 	this.mesh.add(n);
+	this.previousOffset = 0;
 
 	var counter = 1000;
+
 	this.updateNode = function(phaseOffset) {
 		if (phaseOffset+counter >= data.length-1000) { counter = 1000; }
-		// this.mesh.position.x = data[counter+phaseOffset].x;
-		this.mesh.position.y = this.initialHeight + this.initialHeight * 0.5*data[phaseOffset+counter].y;
-		this.mesh.position.x = this.initialWidth + this.initialWidth * 0.5*data[phaseOffset+counter].y;
-		this.mesh.position.z = this.initialDepth + this.initialDepth * 0.5*data[phaseOffset+counter].y;
+		// console.log("phase offset: " + phaseOffset);
+		// console.log("counter: " + counter);
+		// this.mesh.position.x = data[co;unter+phaseOffset].x;
+		this.mesh.position.y = this.initialHeight + this.initialHeight * friction * data[phaseOffset+counter].y;
+		this.mesh.position.x = this.initialWidth + this.initialWidth * friction * data[phaseOffset+counter].y;
+		this.mesh.position.z = this.initialDepth + this.initialDepth * friction * data[phaseOffset+counter].y;
+		this.distance = getDist(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
+		this.previousOffset = phaseOffset;
 		counter ++;
 	}
 }
 
 function createNodeArray(){
-	arrWidth = 10;
-	arrHeight = 10;
-	arrDepth = 10;
 	for (i=arrWidth*-0.5; i<arrWidth*0.5; i++) {
 		for (j=arrHeight*-0.5; j<arrHeight*0.5; j++) {
 			for (k=arrDepth*-0.5; k<arrDepth*0.5; k++) {
-				createNode(i, j, k);
+				createNode(i, j, k, spread);
 			}
 		}
 	}
-	console.log(nodeArray[0]);
 }
 function getDist(x, y, z) {
 	var dist = Math.sqrt((x*x) + (y*y) + (z*z));
@@ -165,16 +184,17 @@ function getDist(x, y, z) {
 	return nodeDist;
 }
 
-function createNode(xVal, yVal, zVal) {
+function createNode(xVal, yVal, zVal, spread) {
 	this.mesh = new THREE.Object3D();
 	var node = new Node();
-	node.mesh.position.x = xVal;
-	node.mesh.position.y = yVal;
-	node.mesh.position.z = zVal;
-	node.initialWidth = xVal;
-	node.initialHeight = yVal;
-	node.initialDepth = zVal;
-	node.distance = getDist(xVal, yVal, zVal);
+	node.mesh.position.x = xVal*spread;
+	node.mesh.position.y = yVal*spread;
+	node.mesh.position.z = zVal*spread;
+	node.initialWidth = xVal*spread;
+	node.initialHeight = yVal*spread;
+	node.initialDepth = zVal*spread;
+	node.distance = getDist(xVal*spread, yVal*spread, zVal*spread);
+
 
 	this.mesh.add(node.mesh);
 	this.node = node;
