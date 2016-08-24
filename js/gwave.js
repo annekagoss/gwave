@@ -23,16 +23,15 @@ var nodeRes = 2;
 var delay = 0;
 var newDataFrame;
 
-// var friction = 0.125;
-var friction = .125;
 
-var cubeWidth = 1000,
+// Default settings
+var friction = .125,
+		cubeWidth = 1000,
     cubeHeight = 1000,
     cubeDepth = 1000,
     cubeRes = 20,
-    cubeSpread = 500;
-
-var falloff = 20;  // Wiggliness
+    cubeSpread = 500,
+		falloff = 10;  // Wiggliness
 
 // Beautiful water droplet Settings
 // var cubeWidth = 1000,
@@ -47,14 +46,15 @@ var falloff = 20;  // Wiggliness
 //     cubeHeight = 1000,
 //     cubeDepth = 1000,
 //     cubeRes = 100,
-//     cubeSpread = 500;
-// var falloff = 10;
+//     cubeSpread = 500,
+// 		falloff = 10,
+// 		friction = .25;
 
 var cubeArray = [],
     cubeVertices = [],
     vertexNodes = [];
 
-var lerpDuration = 4;
+var lerpDuration = 6;
 
 function createScene() {
 	// DOM setup
@@ -133,26 +133,39 @@ function onWindowResize() {
 var frame = 0;
 
 function countFrames() {
-  frame ++
+	// console.log(frame);
+  frame ++;
   if (frame === lerpDuration) {
     frame = 0;
   }
-  requestAnimationFrame(countFrames);
+	setTimeout(function(){
+	  requestAnimationFrame(countFrames);
+	},delay);
 }
 
 var posDataUpdated = false;
-
+var phaseOff;
 function loop() {
 	camera.lookAt(scene.position);
 	controls.update();
-  // var currentFrame = frame;
+
+
+  if (frame === lerpDuration) {
+    frame = 0;
+  }
+
+
+	if (frame/lerpDuration === 0) {
+			posDataUpdated = false;
+	}
+
 
   if (dataRendered) {
       // console.log(posDataUpdated);
       if (!posDataUpdated) {
         // console.log('updating position data');
         for (n = 0; n <= vertexNodes.length-1; n++) {
-            var phaseOff = Math.floor(vertexNodes[n].distance*falloff/cubeSpread);
+            phaseOff = Math.floor(vertexNodes[n].distance*falloff/cubeSpread);
             vertexNodes[n].updatePositionData(phaseOff);
             if (n === vertexNodes.length-1) {
               posDataUpdated = true;
@@ -165,19 +178,30 @@ function loop() {
         for (n = 0; n <= vertexNodes.length-1; n++) {
     			vertexNodes[n].moveWithLerp();
           if (n === vertexNodes.length-1){
-            setTimeout(function() {
-              posDataUpdated = false;
-            },0);
+						// console.log(vertexNodes[n].finishedLerp);
+						// console.log(vertexNodes[n].parentCube.vertices[vertexNodes[n].indexInParent].x - vertexNodes[n].newPositionX);
+						// if (vertexNodes[n].finishedLerp) {
+						// setTimeout(function() {
+
+
+
+						// },0);
+						// }
+            // setTimeout(function() {
+            //   posDataUpdated = false;
+            // },0);
 
           }
     		}
       }
   }
 
+	frame ++;
+
 	render();
-	setTimeout(function() {
+	// setTimeout(function() {
 		requestAnimationFrame(loop);
-	}, delay);
+	// }, delay);
 }
 
 function getDist(x, y, z) {
@@ -186,8 +210,8 @@ function getDist(x, y, z) {
 	return nodeDist;
 }
 
-function lerpPosition(posA, posB, duration, frame) {
-  var t = frame/duration;
+function lerpPosition(posA, posB, duration, f) {
+  var t = f/duration;
   var newPos = posA + t * (posB - posA);
   return newPos;
 }
@@ -203,27 +227,29 @@ var VertexNode = function(vertex,parent,index) {
   this.distance = getDist(vertex.x, vertex.y, vertex.z);
   this.parentCube = parent.children[0].geometry;
   this.indexInParent = index;
+	this.finishedLerp = false;
 
   var counter = 1000;
 
   // Get new position from dataset to use for lerp movement
   this.updatePositionData = function(phaseOffset) {
+		this.finishedLerp = false;
     if (phaseOffset+counter >= data.length-1000) {
       counter = 1000;
-      this.previousPositionX = this.initialX;
-      this.previousPositionY = this.initialY;
-      this.previousPositionZ = this.initialZ;
-
-      this.parentCube.vertices[this.indexInParent].x = this.initialX;
-      this.parentCube.vertices[this.indexInParent].y = this.initialY;
-      this.parentCube.vertices[this.indexInParent].z = this.initialZ;
-      this.parentCube.verticesNeedUpdate = true;
+      // this.previousPositionX = this.initialX;
+      // this.previousPositionY = this.initialY;
+      // this.previousPositionZ = this.initialZ;
+			//
+      // this.parentCube.vertices[this.indexInParent].x = this.initialX;
+      // this.parentCube.vertices[this.indexInParent].y = this.initialY;
+      // this.parentCube.vertices[this.indexInParent].z = this.initialZ;
+      // this.parentCube.verticesNeedUpdate = true;
     }
-    else {
+    // else {
       this.previousPositionX = this.parentCube.vertices[this.indexInParent].x;
       this.previousPositionY = this.parentCube.vertices[this.indexInParent].y;
       this.previousPositionZ = this.parentCube.vertices[this.indexInParent].z;
-    }
+    // }
 
     this.newPositionX = this.initialX + (this.initialX * friction * data[phaseOffset+counter].y);
     this.newPositionY = this.initialY + (this.initialY * friction * data[phaseOffset+counter].y);
@@ -234,10 +260,24 @@ var VertexNode = function(vertex,parent,index) {
   }
 
   this.moveWithLerp = function() {
-      this.parentCube.vertices[this.indexInParent].x = lerpPosition(this.previousPositionX, this.newPositionX, lerpDuration, frame);
-      this.parentCube.vertices[this.indexInParent].y = lerpPosition(this.previousPositionY, this.newPositionY, lerpDuration, frame);
-      this.parentCube.vertices[this.indexInParent].z = lerpPosition(this.previousPositionZ, this.newPositionZ, lerpDuration, frame);
+
+      this.parentCube.vertices[this.indexInParent].x = lerpPosition(this.parentCube.vertices[this.indexInParent].x, this.newPositionX, lerpDuration, frame);
+      this.parentCube.vertices[this.indexInParent].y = lerpPosition(this.parentCube.vertices[this.indexInParent].y, this.newPositionY, lerpDuration, frame);
+      this.parentCube.vertices[this.indexInParent].z = lerpPosition(this.parentCube.vertices[this.indexInParent].z, this.newPositionZ, lerpDuration, frame);
       this.parentCube.verticesNeedUpdate = true;
+			// console.log
+
+
+			// if (this.indexInParent === 100) {
+				// console.log(this.parentCube.vertices[this.indexInParent].x);
+				// if (Math.floor(this.parentCube.vertices[this.indexInParent].x - this.newPositionX) === 0) {
+				// 		this.finishedLerp = true;
+						// console.log(frame/lerpDuration);
+				// }
+			// }
+			// if (this.parentCube.vertices[this.indexInParent].x === this.newPositionX) {
+			// 	this.finishedLerp = true;
+			// }
   }
 
   // Movement without lerp
@@ -316,7 +356,7 @@ function init() {
   createCubeMesh();
   setTimeout(function(){
     loop();
-    countFrames();
+    // countFrames();
   },0);
 
 }
