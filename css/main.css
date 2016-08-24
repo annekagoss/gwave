@@ -16,3 +16,17 @@ body {
     text-transform: uppercase;
     text-align: left;
 }
+
+.button {
+  display: inline-block;
+  margin: 20px;
+  padding: 4px;
+  cursor: pointer;
+  border: solid 1px rgba(255, 255, 255, 0);
+  transition: border 0.2s ease;
+  box-sizing: border-box;
+}
+
+.button:hover {
+  border: solid 1px rgba(255, 255, 255, 1);
+}
