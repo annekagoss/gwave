@@ -24,23 +24,37 @@ var delay = 0;
 var newDataFrame;
 
 // var friction = 0.125;
-var friction = .5;
+var friction = .125;
 
 var cubeWidth = 1000,
     cubeHeight = 1000,
     cubeDepth = 1000,
-    cubeRes = 10,
-    // cubeSpread = 100;
-    cubeSpread = 200;
+    cubeRes = 20,
+    cubeSpread = 500;
 
-var falloff = 1;
+var falloff = 20;  // Wiggliness
+
+// Beautiful water droplet Settings
+// var cubeWidth = 1000,
+//     cubeHeight = 1000,
+//     cubeDepth = 1000,
+//     cubeRes = 20,
+//     cubeSpread = 500;
+// var falloff = 20;  // Wiggliness
+
+// Crazy settings:
+// var cubeWidth = 1000,
+//     cubeHeight = 1000,
+//     cubeDepth = 1000,
+//     cubeRes = 100,
+//     cubeSpread = 500;
+// var falloff = 10;
 
 var cubeArray = [],
     cubeVertices = [],
     vertexNodes = [];
 
-var lerpDuration = 1000;
-var dataBuffer = 50;
+var lerpDuration = 4;
 
 function createScene() {
 	// DOM setup
@@ -150,12 +164,7 @@ function loop() {
         // console.log('lerping');
         for (n = 0; n <= vertexNodes.length-1; n++) {
     			vertexNodes[n].moveWithLerp();
-
-          // console.log('n: ' + n + " , total length: " + (vertexNodes.length-1));
-          // console.log(currentFrame - frame);
           if (n === vertexNodes.length-1){
-            // console.log(currentFrame - frame);
-            //  && Math.abs(currentFrame - frame) >= lerpDuration) {
             setTimeout(function() {
               posDataUpdated = false;
             },0);
@@ -164,14 +173,6 @@ function loop() {
     		}
       }
   }
-      // console.log(vertexNodes[0].parentCube.vertices[vertexNodes[0].indexInParent].x);
-        // Actual movement
-        // for (n = 0; n < vertexNodes.length-1; n++) {
-    		// 	var phaseOff = Math.floor(vertexNodes[n].distance*falloff/cubeSpread);
-    		// 	vertexNodes[n].updateVertexNode(phaseOff);
-    		// }
-
-
 
 	render();
 	setTimeout(function() {
@@ -207,11 +208,23 @@ var VertexNode = function(vertex,parent,index) {
 
   // Get new position from dataset to use for lerp movement
   this.updatePositionData = function(phaseOffset) {
-    this.previousPositionX = this.parentCube.vertices[this.indexInParent].x;
-    this.previousPositionY = this.parentCube.vertices[this.indexInParent].y;
-    this.previousPositionZ = this.parentCube.vertices[this.indexInParent].z;
+    if (phaseOffset+counter >= data.length-1000) {
+      counter = 1000;
+      this.previousPositionX = this.initialX;
+      this.previousPositionY = this.initialY;
+      this.previousPositionZ = this.initialZ;
 
-    if (phaseOffset+counter >= data.length-1000) { counter = 1000; }
+      this.parentCube.vertices[this.indexInParent].x = this.initialX;
+      this.parentCube.vertices[this.indexInParent].y = this.initialY;
+      this.parentCube.vertices[this.indexInParent].z = this.initialZ;
+      this.parentCube.verticesNeedUpdate = true;
+    }
+    else {
+      this.previousPositionX = this.parentCube.vertices[this.indexInParent].x;
+      this.previousPositionY = this.parentCube.vertices[this.indexInParent].y;
+      this.previousPositionZ = this.parentCube.vertices[this.indexInParent].z;
+    }
+
     this.newPositionX = this.initialX + (this.initialX * friction * data[phaseOffset+counter].y);
     this.newPositionY = this.initialY + (this.initialY * friction * data[phaseOffset+counter].y);
     this.newPositionZ = this.initialZ + (this.initialZ * friction * data[phaseOffset+counter].y);
@@ -226,8 +239,6 @@ var VertexNode = function(vertex,parent,index) {
       this.parentCube.vertices[this.indexInParent].z = lerpPosition(this.previousPositionZ, this.newPositionZ, lerpDuration, frame);
       this.parentCube.verticesNeedUpdate = true;
   }
-
-
 
   // Movement without lerp
 	this.updateVertexNode = function(phaseOffset) {
@@ -253,7 +264,6 @@ function createCubeMesh() {
   setTimeout(function() {
     cubeArray.forEach(function(cube) {
       var vertices = cube.children[0].geometry.vertices;
-      // var vertices = cube.vertices;
       vertices.forEach(function(v) {
         var vertexNode = new VertexNode(v,cube,vertices.indexOf(v));
 
@@ -261,9 +271,6 @@ function createCubeMesh() {
       })
     });
   },0);
-  // setTimeout(function() {
-    // console.log(cubeArray);
-  // },0);
 }
 
 function createCube(size, res){
@@ -281,60 +288,6 @@ function createCube(size, res){
   scene.add(this.mesh);
   cubeArray.push(this.mesh);
 }
-
-// var Node = function() {
-// 	this.mesh = new THREE.Object3D();
-// 	var geom = new THREE.SphereGeometry(nodeSize,nodeRes,nodeRes);
-// 	var mat = new THREE.MeshPhongMaterial ({
-// 		wireframe: true,
-// 		color:Colors.white
-// 	});
-//
-// 	var n = new THREE.Mesh(geom, mat);
-// 	n.castShadow = true;
-// 	n.receiveShadow = true;
-// 	this.mesh.add(n);
-// 	this.previousOffset = 0;
-//
-// 	var counter = 1000;
-//
-// 	this.updateNode = function(phaseOffset) {
-// 		if (phaseOffset+counter >= data.length-1000) { counter = 1000; }
-// 		this.mesh.position.y = this.initialHeight + this.initialHeight * friction * data[phaseOffset+counter].y;
-// 		this.mesh.position.x = this.initialWidth + this.initialWidth * friction * data[phaseOffset+counter].y;
-// 		this.mesh.position.z = this.initialDepth + this.initialDepth * friction * data[phaseOffset+counter].y;
-// 		this.distance = getDist(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
-// 		this.previousOffset = phaseOffset;
-// 		counter ++;
-// 	}
-// }
-
-// function createNodeArray(){
-// 	for (i=arrWidth*-0.5; i<arrWidth*0.5; i++) {
-// 		for (j=arrHeight*-0.5; j<arrHeight*0.5; j++) {
-// 			for (k=arrDepth*-0.5; k<arrDepth*0.5; k++) {
-// 				createNode(i, j, k, spread);
-// 			}
-// 		}
-// 	}
-// }
-
-// function createNode(xVal, yVal, zVal, spread) {
-// 	this.mesh = new THREE.Object3D();
-// 	var node = new Node();
-// 	node.mesh.position.x = xVal*spread;
-// 	node.mesh.position.y = yVal*spread;
-// 	node.mesh.position.z = zVal*spread;
-// 	node.initialWidth = xVal*spread;
-// 	node.initialHeight = yVal*spread;
-// 	node.initialDepth = zVal*spread;
-// 	node.distance = getDist(xVal*spread, yVal*spread, zVal*spread);
-//
-// 	this.mesh.add(node.mesh);
-// 	this.node = node;
-// 	scene.add(this.mesh);
-// 	nodeArray.push(this.node);
-// }
 
 function renderData(d) {
 	var mat = new THREE.LineBasicMaterial({
