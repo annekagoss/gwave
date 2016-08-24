@@ -165,7 +165,7 @@ function loop() {
       if (!posDataUpdated) {
         // console.log('updating position data');
         for (n = 0; n <= vertexNodes.length-1; n++) {
-            phaseOff = Math.floor(vertexNodes[n].distance*falloff/cubeSpread);
+            phaseOff = Math.round(vertexNodes[n].distance*falloff/cubeSpread);
             vertexNodes[n].updatePositionData(phaseOff);
             if (n === vertexNodes.length-1) {
               posDataUpdated = true;
