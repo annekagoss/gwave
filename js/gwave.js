@@ -21,23 +21,26 @@ var spread = 10;
 var nodeSize = 1;
 var nodeRes = 2;
 var delay = 0;
+var newDataFrame;
 
 // var friction = 0.125;
-var friction = .25;
+var friction = .5;
 
 var cubeWidth = 1000,
     cubeHeight = 1000,
     cubeDepth = 1000,
     cubeRes = 10,
-    cubeSpread = 100;
+    // cubeSpread = 100;
+    cubeSpread = 200;
 
-var falloff = .5;
+var falloff = 1;
 
 var cubeArray = [],
     cubeVertices = [],
     vertexNodes = [];
 
-var lerpDuration = 50;
+var lerpDuration = 1000;
+var dataBuffer = 50;
 
 function createScene() {
 	// DOM setup
@@ -116,33 +119,59 @@ function onWindowResize() {
 var frame = 0;
 
 function countFrames() {
-  if (frame === delay) {
+  frame ++
+  if (frame === lerpDuration) {
     frame = 0;
   }
-  // console.log(frame/delay);
-  frame ++
   requestAnimationFrame(countFrames);
 }
+
+var posDataUpdated = false;
 
 function loop() {
 	camera.lookAt(scene.position);
 	controls.update();
-
-	// if (dataRendered) {
-	// 	for (n = 0; n < nodeArray.length; n++) {
-	// 		var phaseOff = Math.floor(nodeArray[n].distance*falloff);
-	// 		nodeArray[n].updateNode(phaseOff);
-	// 	}
-	// }
+  // var currentFrame = frame;
 
   if (dataRendered) {
-    // if (frame === delay) {
-  		for (n = 0; n < vertexNodes.length-1; n++) {
-  			var phaseOff = Math.floor(vertexNodes[n].distance*falloff/cubeSpread);
-  			vertexNodes[n].updateVertexNode(phaseOff);
-  		}
-    // }
-	}
+      // console.log(posDataUpdated);
+      if (!posDataUpdated) {
+        // console.log('updating position data');
+        for (n = 0; n <= vertexNodes.length-1; n++) {
+            var phaseOff = Math.floor(vertexNodes[n].distance*falloff/cubeSpread);
+            vertexNodes[n].updatePositionData(phaseOff);
+            if (n === vertexNodes.length-1) {
+              posDataUpdated = true;
+            }
+          }
+      }
+      else {
+
+        // console.log('lerping');
+        for (n = 0; n <= vertexNodes.length-1; n++) {
+    			vertexNodes[n].moveWithLerp();
+
+          // console.log('n: ' + n + " , total length: " + (vertexNodes.length-1));
+          // console.log(currentFrame - frame);
+          if (n === vertexNodes.length-1){
+            // console.log(currentFrame - frame);
+            //  && Math.abs(currentFrame - frame) >= lerpDuration) {
+            setTimeout(function() {
+              posDataUpdated = false;
+            },0);
+
+          }
+    		}
+      }
+  }
+      // console.log(vertexNodes[0].parentCube.vertices[vertexNodes[0].indexInParent].x);
+        // Actual movement
+        // for (n = 0; n < vertexNodes.length-1; n++) {
+    		// 	var phaseOff = Math.floor(vertexNodes[n].distance*falloff/cubeSpread);
+    		// 	vertexNodes[n].updateVertexNode(phaseOff);
+    		// }
+
+
 
 	render();
 	setTimeout(function() {
@@ -150,8 +179,13 @@ function loop() {
 	}, delay);
 }
 
+function getDist(x, y, z) {
+	var dist = Math.sqrt((x*x) + (y*y) + (z*z));
+	var nodeDist = dist ? dist : 0;
+	return nodeDist;
+}
+
 function lerpPosition(posA, posB, duration, frame) {
-  // console.log(frame/duration);
   var t = frame/duration;
   var newPos = posA + t * (posB - posA);
   return newPos;
@@ -160,6 +194,147 @@ function lerpPosition(posA, posB, duration, frame) {
 function render() {
 	renderer.render( scene, camera );
 }
+
+var VertexNode = function(vertex,parent,index) {
+  this.initialX = vertex.x;
+  this.initialY = vertex.y;
+  this.initialZ = vertex.z;
+  this.distance = getDist(vertex.x, vertex.y, vertex.z);
+  this.parentCube = parent.children[0].geometry;
+  this.indexInParent = index;
+
+  var counter = 1000;
+
+  // Get new position from dataset to use for lerp movement
+  this.updatePositionData = function(phaseOffset) {
+    this.previousPositionX = this.parentCube.vertices[this.indexInParent].x;
+    this.previousPositionY = this.parentCube.vertices[this.indexInParent].y;
+    this.previousPositionZ = this.parentCube.vertices[this.indexInParent].z;
+
+    if (phaseOffset+counter >= data.length-1000) { counter = 1000; }
+    this.newPositionX = this.initialX + (this.initialX * friction * data[phaseOffset+counter].y);
+    this.newPositionY = this.initialY + (this.initialY * friction * data[phaseOffset+counter].y);
+    this.newPositionZ = this.initialZ + (this.initialZ * friction * data[phaseOffset+counter].y);
+
+    this.distance = getDist(this.parentCube.vertices[this.indexInParent].x, this.parentCube.vertices[this.indexInParent].y, this.parentCube.vertices[this.indexInParent].z);
+    counter ++;
+  }
+
+  this.moveWithLerp = function() {
+      this.parentCube.vertices[this.indexInParent].x = lerpPosition(this.previousPositionX, this.newPositionX, lerpDuration, frame);
+      this.parentCube.vertices[this.indexInParent].y = lerpPosition(this.previousPositionY, this.newPositionY, lerpDuration, frame);
+      this.parentCube.vertices[this.indexInParent].z = lerpPosition(this.previousPositionZ, this.newPositionZ, lerpDuration, frame);
+      this.parentCube.verticesNeedUpdate = true;
+  }
+
+
+
+  // Movement without lerp
+	this.updateVertexNode = function(phaseOffset) {
+		if (phaseOffset+counter >= data.length-1000) { counter = 1000; }
+
+		this.parentCube.vertices[this.indexInParent].x = this.initialX + this.initialX * friction * data[phaseOffset+counter].y;
+    this.parentCube.vertices[this.indexInParent].y = this.initialY + this.initialY * friction * data[phaseOffset+counter].y;
+    this.parentCube.vertices[this.indexInParent].z = this.initialZ + this.initialZ * friction * data[phaseOffset+counter].y;
+
+		this.distance = getDist(this.parentCube.vertices[this.indexInParent].x, this.parentCube.vertices[this.indexInParent].y, this.parentCube.vertices[this.indexInParent].z);
+
+		counter ++;
+    this.parentCube.verticesNeedUpdate = true;
+	}
+
+}
+
+function createCubeMesh() {
+  for (i=0;i<cubeWidth;i+=cubeSpread) {
+    var resolution = i < cubeRes ? i : cubeRes;
+    createCube(i,resolution);
+  }
+  setTimeout(function() {
+    cubeArray.forEach(function(cube) {
+      var vertices = cube.children[0].geometry.vertices;
+      // var vertices = cube.vertices;
+      vertices.forEach(function(v) {
+        var vertexNode = new VertexNode(v,cube,vertices.indexOf(v));
+
+        vertexNodes.push(vertexNode);
+      })
+    });
+  },0);
+  // setTimeout(function() {
+    // console.log(cubeArray);
+  // },0);
+}
+
+function createCube(size, res){
+  this.mesh = new THREE.Object3D();
+	var geom = new THREE.CubeGeometry(size,size,size,res,res,res);
+	var mat = new THREE.MeshPhongMaterial ({
+		wireframe: true,
+		color:Colors.white
+	});
+
+	var n = new THREE.Mesh(geom, mat);
+	// n.castShadow = true;
+	// n.receiveShadow = true;
+	this.mesh.add(n);
+  scene.add(this.mesh);
+  cubeArray.push(this.mesh);
+}
+
+// var Node = function() {
+// 	this.mesh = new THREE.Object3D();
+// 	var geom = new THREE.SphereGeometry(nodeSize,nodeRes,nodeRes);
+// 	var mat = new THREE.MeshPhongMaterial ({
+// 		wireframe: true,
+// 		color:Colors.white
+// 	});
+//
+// 	var n = new THREE.Mesh(geom, mat);
+// 	n.castShadow = true;
+// 	n.receiveShadow = true;
+// 	this.mesh.add(n);
+// 	this.previousOffset = 0;
+//
+// 	var counter = 1000;
+//
+// 	this.updateNode = function(phaseOffset) {
+// 		if (phaseOffset+counter >= data.length-1000) { counter = 1000; }
+// 		this.mesh.position.y = this.initialHeight + this.initialHeight * friction * data[phaseOffset+counter].y;
+// 		this.mesh.position.x = this.initialWidth + this.initialWidth * friction * data[phaseOffset+counter].y;
+// 		this.mesh.position.z = this.initialDepth + this.initialDepth * friction * data[phaseOffset+counter].y;
+// 		this.distance = getDist(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
+// 		this.previousOffset = phaseOffset;
+// 		counter ++;
+// 	}
+// }
+
+// function createNodeArray(){
+// 	for (i=arrWidth*-0.5; i<arrWidth*0.5; i++) {
+// 		for (j=arrHeight*-0.5; j<arrHeight*0.5; j++) {
+// 			for (k=arrDepth*-0.5; k<arrDepth*0.5; k++) {
+// 				createNode(i, j, k, spread);
+// 			}
+// 		}
+// 	}
+// }
+
+// function createNode(xVal, yVal, zVal, spread) {
+// 	this.mesh = new THREE.Object3D();
+// 	var node = new Node();
+// 	node.mesh.position.x = xVal*spread;
+// 	node.mesh.position.y = yVal*spread;
+// 	node.mesh.position.z = zVal*spread;
+// 	node.initialWidth = xVal*spread;
+// 	node.initialHeight = yVal*spread;
+// 	node.initialDepth = zVal*spread;
+// 	node.distance = getDist(xVal*spread, yVal*spread, zVal*spread);
+//
+// 	this.mesh.add(node.mesh);
+// 	this.node = node;
+// 	scene.add(this.mesh);
+// 	nodeArray.push(this.node);
+// }
 
 function renderData(d) {
 	var mat = new THREE.LineBasicMaterial({
@@ -181,138 +356,10 @@ function renderData(d) {
 	dataRendered = true;
 }
 
-var Node = function() {
-	this.mesh = new THREE.Object3D();
-	var geom = new THREE.SphereGeometry(nodeSize,nodeRes,nodeRes);
-	var mat = new THREE.MeshPhongMaterial ({
-		wireframe: true,
-		color:Colors.white
-	});
-
-	var n = new THREE.Mesh(geom, mat);
-	n.castShadow = true;
-	n.receiveShadow = true;
-	this.mesh.add(n);
-	this.previousOffset = 0;
-
-	var counter = 1000;
-
-	this.updateNode = function(phaseOffset) {
-		if (phaseOffset+counter >= data.length-1000) { counter = 1000; }
-		this.mesh.position.y = this.initialHeight + this.initialHeight * friction * data[phaseOffset+counter].y;
-		this.mesh.position.x = this.initialWidth + this.initialWidth * friction * data[phaseOffset+counter].y;
-		this.mesh.position.z = this.initialDepth + this.initialDepth * friction * data[phaseOffset+counter].y;
-		this.distance = getDist(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
-		this.previousOffset = phaseOffset;
-		counter ++;
-	}
-}
-
-var VertexNode = function(vertex,parent,index) {
-  this.initialX = vertex.x;
-  this.initialY = vertex.y;
-  this.initialZ = vertex.z;
-  this.distance = getDist(vertex.x, vertex.y, vertex.z);
-  this.parentCube = parent.children[0].geometry;
-  this.indexInParent = index;
-
-  var counter = 1000;
-
-	this.updateVertexNode = function(phaseOffset) {
-		if (phaseOffset+counter >= data.length-1000) { counter = 1000; }
-
-		this.parentCube.vertices[this.indexInParent].x = this.initialX + this.initialX * friction * data[phaseOffset+counter].y;
-    this.parentCube.vertices[this.indexInParent].y = this.initialY + this.initialY * friction * data[phaseOffset+counter].y;
-    this.parentCube.vertices[this.indexInParent].z = this.initialZ + this.initialZ * friction * data[phaseOffset+counter].y;
-
-		this.distance = getDist(this.parentCube.vertices[this.indexInParent].x, this.parentCube.vertices[this.indexInParent].y, this.parentCube.vertices[this.indexInParent].z);
-
-		this.previousOffset = phaseOffset;
-		counter ++;
-    this.parentCube.verticesNeedUpdate = true;
-
-	}
-
-}
-
-
-
-function createCubeMesh() {
-  for (i=0;i<cubeWidth;i+=cubeSpread) {
-    var resolution = i < cubeRes ? i : cubeRes;
-    createCube(i,resolution);
-  }
-  setTimeout(function() {
-    cubeArray.forEach(function(cube) {
-      var vertices = cube.children[0].geometry.vertices;
-      // var vertices = cube.vertices;
-      vertices.forEach(function(v) {
-        var vertexNode = new VertexNode(v,cube,vertices.indexOf(v));
-        vertexNodes.push(vertexNode);
-      })
-    });
-  },0);
-  setTimeout(function() {
-    console.log(vertexNodes[0]);
-  },0);
-
-}
-
-function createCube(size, res){
-  this.mesh = new THREE.Object3D();
-	var geom = new THREE.CubeGeometry(size,size,size,res,res,res);
-	var mat = new THREE.MeshPhongMaterial ({
-		wireframe: true,
-		color:Colors.white
-	});
-
-	var n = new THREE.Mesh(geom, mat);
-	// n.castShadow = true;
-	// n.receiveShadow = true;
-	this.mesh.add(n);
-  scene.add(this.mesh);
-  cubeArray.push(this.mesh);
-}
-
-function createNodeArray(){
-	for (i=arrWidth*-0.5; i<arrWidth*0.5; i++) {
-		for (j=arrHeight*-0.5; j<arrHeight*0.5; j++) {
-			for (k=arrDepth*-0.5; k<arrDepth*0.5; k++) {
-				createNode(i, j, k, spread);
-			}
-		}
-	}
-}
-
-function getDist(x, y, z) {
-	var dist = Math.sqrt((x*x) + (y*y) + (z*z));
-	var nodeDist = dist ? dist : 0;
-	return nodeDist;
-}
-
-function createNode(xVal, yVal, zVal, spread) {
-	this.mesh = new THREE.Object3D();
-	var node = new Node();
-	node.mesh.position.x = xVal*spread;
-	node.mesh.position.y = yVal*spread;
-	node.mesh.position.z = zVal*spread;
-	node.initialWidth = xVal*spread;
-	node.initialHeight = yVal*spread;
-	node.initialDepth = zVal*spread;
-	node.distance = getDist(xVal*spread, yVal*spread, zVal*spread);
-
-	this.mesh.add(node.mesh);
-	this.node = node;
-	scene.add(this.mesh);
-	nodeArray.push(this.node);
-}
-
 function init() {
 	createScene();
 	createLights();
 	loadData();
-	// createNodeArray();
-  // createCube();
   createCubeMesh();
   setTimeout(function(){
     loop();
