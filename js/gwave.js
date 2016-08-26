@@ -26,6 +26,7 @@ var nodeSize = 1;
 var nodeRes = 2;
 var delay = 0;
 var newDataFrame;
+var nodeSpread = 8;
 
 
 // Default settings
@@ -37,6 +38,10 @@ var friction = .125,
 	cubeSpread = 500,
 	falloff = 10, // Wiggliness
 	flatAmp = 100;
+
+var nodeWidth = cubeWidth/nodeSpread*0.1, // Rendering will be slow without the *0.1
+	nodeHeight = cubeHeight/nodeSpread*0.1,
+	nodeDepth = cubeDepth/nodeSpread*0.1;
 
 // Beautiful water droplet Settings
 // var cubeWidth = 1000,
@@ -133,6 +138,9 @@ function createScene() {
 			vertexNodes[n].reset();
 		}
 	});
+	jQuery('.view').on('click', function(){
+		removeAll();
+	});
 }
 
 function createLights() {
@@ -169,17 +177,25 @@ function loop() {
 
 	if (dataRendered) {
 		if (!posDataUpdated) {
-			for (n = 0; n <= vertexNodes.length - 1; n++) {
-				phaseOff = Math.round(vertexNodes[n].distance * falloff / cubeSpread);
-				vertexNodes[n].updatePositionData(phaseOff);
-				if (n === vertexNodes.length - 1) {
-					posDataUpdated = true;
-				}
+
+			// console.log(nodeArray[0]);
+			// Cube Mesh animation
+			// for (n = 0; n <= vertexNodes.length - 1; n++) {
+			// 	phaseOff = Math.round(vertexNodes[n].distance * falloff / cubeSpread);
+			// 	vertexNodes[n].updatePositionData(phaseOff);
+			// 	if (n === vertexNodes.length - 1) {
+			// 		posDataUpdated = true;
+			// 	}
+			// }
+			for (n = 0; n < nodeArray.length; n++) {
+				var phaseOff = Math.floor(nodeArray[n].distance*falloff);
+				// nodeArray[n].updatePositionData(phaseOff);
 			}
 		} else {
-			for (n = 0; n <= vertexNodes.length - 1; n++) {
-				vertexNodes[n].moveWithLerp();
-			}
+			// Cube Mesh animation
+			// for (n = 0; n <= vertexNodes.length - 1; n++) {
+			// 	vertexNodes[n].moveWithLerp();
+			// }
 		}
 	}
 	frame++;
@@ -203,6 +219,57 @@ function render() {
 	renderer.render(scene, camera);
 }
 
+var Node = function() {
+	this.mesh = new THREE.Object3D();
+	var geom = new THREE.SphereGeometry(nodeSize,nodeRes,nodeRes);
+	var mat = new THREE.MeshPhongMaterial ({
+		wireframe: true,
+		color:Colors.white
+	});
+
+	var n = new THREE.Mesh(geom, mat);
+	n.castShadow = true;
+	n.receiveShadow = true;
+	this.mesh.add(n);
+	this.previousOffset = 0;
+	var counter = 1000;
+	// console.log(this);
+	// if (nodeArray.indexOf(this) === 0) {
+	//
+	// }
+	// this.initialX = this.mesh.position.x;
+	// this.initialY = this.mesh.position.y;
+	// this.initialZ = this.mesh.position.z;
+
+	// Get new position from dataset to use for lerp movement
+	this.updatePositionData = function(phaseOffset) {
+		if (phaseOffset + counter >= data.length - 1000) {
+			// this.reset();
+		} else {
+			this.previousPositionX = this.mesh.position.x;
+			this.previousPositionY = this.mesh.position.y;
+			this.previousPositionZ = this.mesh.position.z;
+		}
+		this.newPositionX = this.initialX + (this.initialX * friction * data[phaseOffset + counter].y);
+		this.newPositionY = this.initialY + (this.initialY * friction * data[phaseOffset + counter].y);
+		this.newPositionZ = this.initialZ + (this.initialZ * friction * data[phaseOffset + counter].y);
+
+		this.distance = getDist(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
+		counter++;
+	}
+
+	// Movement without lerp
+	this.updateNode = function(phaseOffset) {
+		if (phaseOffset+counter >= data.length-1000) { counter = 1000; }
+		this.mesh.position.y = this.initialHeight + this.initialHeight * friction * data[phaseOffset+counter].y;
+		this.mesh.position.x = this.initialWidth + this.initialWidth * friction * data[phaseOffset+counter].y;
+		this.mesh.position.z = this.initialDepth + this.initialDepth * friction * data[phaseOffset+counter].y;
+		this.distance = getDist(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
+		this.previousOffset = phaseOffset;
+		counter ++;
+	}
+}
+
 var VertexNode = function(vertex, parent, index) {
 	this.initialX = vertex.x;
 	this.initialY = vertex.y;
@@ -210,13 +277,11 @@ var VertexNode = function(vertex, parent, index) {
 	this.distance = getDist(vertex.x, vertex.y, vertex.z);
 	this.parentCube = parent.children[0].geometry;
 	this.indexInParent = index;
-	this.finishedLerp = false;
 
 	var counter = 1000;
 
 	// Get new position from dataset to use for lerp movement
 	this.updatePositionData = function(phaseOffset) {
-		this.finishedLerp = false;
 		if (phaseOffset + counter >= data.length - 1000) {
 			this.reset();
 		} else {
@@ -319,6 +384,34 @@ function createCube(size, res) {
 	cubeArray.push(this.mesh);
 }
 
+function createNode(xVal, yVal, zVal, res) {
+	this.mesh = new THREE.Object3D();
+	var node = new Node();
+	node.mesh.position.x = xVal*nodeSpread;
+	node.mesh.position.y = yVal*nodeSpread;
+	node.mesh.position.z = zVal*nodeSpread;
+	node.initialWidth = xVal*nodeSpread;
+	node.initialHeight = yVal*nodeSpread;
+	node.initialDepth = zVal*nodeSpread;
+	node.distance = getDist(xVal*nodeSpread, yVal*nodeSpread, zVal*nodeSpread);
+
+	this.mesh.add(node.mesh);
+	// this.node = node;
+	scene.add(this.mesh);
+	nodeArray.push(node);
+}
+
+
+function createNodeArray() {
+	for (i=nodeWidth*-0.5; i<nodeWidth*0.5; i++) {
+		for (j=nodeHeight*-0.5; j<nodeHeight*0.5; j++) {
+			for (k=nodeDepth*-0.5; k<nodeDepth*0.5; k++) {
+				createNode(i, j, k, nodeSpread);
+			}
+		}
+	}
+}
+
 function renderData(d) {
 	var mat = new THREE.LineBasicMaterial({
 		color: Colors.white
@@ -350,25 +443,23 @@ function uiControls(e) {
 			vertexNodes[n].expand();
 		}
 	}
-	// running = true;
-	// loop();
 }
 
-// function flattenSpaceTime() {
-// 	for (n = 0; n <= vertexNodes.length - 1; n++) {
-// 		vertexNodes[n].flatten;
-// 	}
-// }
-
-function expandSpaceTime() {
-
+function removeAll() {
+	scene.children.forEach(function(c) {
+		if (c.type =="Object3D") {
+			scene.remove(c);
+		}
+	});
 }
 
 function init() {
 	createScene();
 	createLights();
 	loadData();
-	createCubeMesh();
+	// createCubeMesh();
+	createNodeArray();
+	// console.log(nodeArray[0].mesh.position.x);
 	loop();
 }
 
