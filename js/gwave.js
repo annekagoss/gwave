@@ -15,6 +15,7 @@ var mousePos = {
 var dataRendered = false;
 var data;
 var nodeArray = [];
+var running = true;
 
 // Global Settings //
 var arrWidth = 20;
@@ -34,7 +35,8 @@ var friction = .125,
 	cubeDepth = 1000,
 	cubeRes = 60,
 	cubeSpread = 500,
-	falloff = 10; // Wiggliness
+	falloff = 10, // Wiggliness
+	flatAmp = 100;
 
 // Beautiful water droplet Settings
 // var cubeWidth = 1000,
@@ -112,8 +114,24 @@ function createScene() {
 	container.appendChild(renderer.domElement);
 
 	window.addEventListener('resize', onWindowResize, false);
-	jQuery('.button').on('click', function(){
+	jQuery('.transform').on('click', function(){
+		running = false;
 		uiControls(jQuery(this));
+		setTimeout(function(){
+			running = true;
+			loop();
+		},0);
+	});
+	jQuery('.pause').on('click', function(){
+		running = !running;
+		if (running) {
+			loop();
+		}
+	});
+	jQuery('.reset').on('click', function(){
+		for (n = 0; n <= vertexNodes.length - 1; n++) {
+			vertexNodes[n].reset();
+		}
 	});
 }
 
@@ -164,10 +182,9 @@ function loop() {
 			}
 		}
 	}
-
 	frame++;
 	render();
-	requestAnimationFrame(loop);
+	if (running) {	requestAnimationFrame(loop);}
 }
 
 function getDist(x, y, z) {
@@ -201,15 +218,7 @@ var VertexNode = function(vertex, parent, index) {
 	this.updatePositionData = function(phaseOffset) {
 		this.finishedLerp = false;
 		if (phaseOffset + counter >= data.length - 1000) {
-			counter = 1000;
-			this.previousPositionX = this.initialX;
-			this.previousPositionY = this.initialY;
-			this.previousPositionZ = this.initialZ;
-
-			this.parentCube.vertices[this.indexInParent].x = this.initialX;
-			this.parentCube.vertices[this.indexInParent].y = this.initialY;
-			this.parentCube.vertices[this.indexInParent].z = this.initialZ;
-			this.parentCube.verticesNeedUpdate = true;
+			this.reset();
 		} else {
 			this.previousPositionX = this.parentCube.vertices[this.indexInParent].x;
 			this.previousPositionY = this.parentCube.vertices[this.indexInParent].y;
@@ -228,6 +237,37 @@ var VertexNode = function(vertex, parent, index) {
 		this.parentCube.vertices[this.indexInParent].x = lerpPosition(this.parentCube.vertices[this.indexInParent].x, this.newPositionX, lerpDuration, frame);
 		this.parentCube.vertices[this.indexInParent].y = lerpPosition(this.parentCube.vertices[this.indexInParent].y, this.newPositionY, lerpDuration, frame);
 		this.parentCube.vertices[this.indexInParent].z = lerpPosition(this.parentCube.vertices[this.indexInParent].z, this.newPositionZ, lerpDuration, frame);
+		this.parentCube.verticesNeedUpdate = true;
+	}
+
+	this.reset = function() {
+		counter = 1000;
+		this.previousPositionX = this.initialX;
+		this.previousPositionY = this.initialY;
+		this.previousPositionZ = this.initialZ;
+
+		this.parentCube.vertices[this.indexInParent].x = this.initialX;
+		this.parentCube.vertices[this.indexInParent].y = this.initialY;
+		this.parentCube.vertices[this.indexInParent].z = this.initialZ;
+		this.distance = getDist(this.initialX,this.initialY,this.initialZ);
+
+		this.parentCube.verticesNeedUpdate = true;
+	}
+
+	this.flatten = function() {
+		this.parentCube.vertices[this.indexInParent].y = flatAmp;
+		this.previousPositionY = flatAmp;
+		this.expandedY = this.initialY;
+		this.initialY = flatAmp;
+		this.distance = getDist(this.parentCube.vertices[this.indexInParent].x, this.parentCube.vertices[this.indexInParent].y, this.parentCube.vertices[this.indexInParent].z);
+		this.parentCube.verticesNeedUpdate = true;
+	}
+
+	this.expand = function() {
+		this.parentCube.vertices[this.indexInParent].y = this.expandedY;
+		this.previousPositionY = this.expandedY;
+		this.initialY = this.expandedY;
+		this.distance = getDist(this.parentCube.vertices[this.indexInParent].x, this.parentCube.vertices[this.indexInParent].y, this.parentCube.vertices[this.indexInParent].z);
 		this.parentCube.verticesNeedUpdate = true;
 	}
 
@@ -301,21 +341,27 @@ function renderData(d) {
 
 function uiControls(e) {
 	var value = jQuery(e).attr('value');
-	if (value === "2d") {
-		flattenSpaceTime();
+	// running = false;
+	for (n = 0; n <= vertexNodes.length - 1; n++) {
+		if (value === "2d") {
+			vertexNodes[n].flatten();
+		}
+		else if (value === "3d") {
+			vertexNodes[n].expand();
+		}
 	}
-	else if (value === "3d") {
-		expandSpaceTime();
-	}
+	// running = true;
+	// loop();
 }
 
-function flattenSpaceTime() {
-	for (n = 0; n <= vertexNodes.length - 1; n++) {
-		var vertices = vertexNodes[n].parentCube.vertices;
-		vertices.forEach(function(v){
-			v.position.y = lerpPosition(v.position.y, 0, lerpDuration, frame);
-		});
-	}
+// function flattenSpaceTime() {
+// 	for (n = 0; n <= vertexNodes.length - 1; n++) {
+// 		vertexNodes[n].flatten;
+// 	}
+// }
+
+function expandSpaceTime() {
+
 }
 
 function init() {
