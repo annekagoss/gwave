@@ -12,17 +12,19 @@ var mousePos = { x: 0, y: 0 };
 var dataRendered = false;
 var data;
 var nodeArray = [];
+var running, blackHolePresent, draggingBlackHole = false;
 
 // Global Settings //
 var arrWidth = 20;
-var arrHeight = 10;
-var arrDepth = 30;
+var arrHeight = 20;
+var arrDepth = 20;
 var spread = 10;
 var nodeSize = 1;
 var nodeRes = 2;
 var delay = 0;
 var falloff = 1/spread;
 var friction = 0.125;
+var curvature = 0.00001;
 
 function createScene() {
 	// DOM setup
@@ -80,6 +82,21 @@ function createScene() {
 	container.appendChild(renderer.domElement);
 
 	window.addEventListener( 'resize', onWindowResize, false );
+	jQuery('.pause').on('click', function() {
+		running = !running;
+	});
+	jQuery('.hole').on('click', function() {
+		for (n = 0; n < nodeArray.length; n++) {
+			nodeArray[n].createBlackHole();
+			blackHolePresent = true;
+		}
+	});
+	jQuery('.container').on('mousedown', function() {
+		draggingBlackHole = blackHolePresent ? true : false;
+	});
+	jQuery('.container').on('mouseup', function() {
+		draggingBlackHole = false;
+	});
 }
 
 function createLights() {
@@ -102,10 +119,15 @@ function loop() {
 	camera.lookAt(scene.position);
 	controls.update();
 
-	if (dataRendered) {
-		for (n = 0; n < nodeArray.length; n++) {
-			var phaseOff = Math.floor(nodeArray[n].distance*falloff);
-			nodeArray[n].updateNode(phaseOff);
+	if (running) {
+		if (dataRendered) {
+			for (n = 0; n < nodeArray.length; n++) {
+				var phaseOff = Math.floor(nodeArray[n].distance*falloff);
+				nodeArray[n].updateNode(phaseOff);
+				if (draggingBlackHole) {
+					nodeArray[n].updateHole();
+				}
+			}
 		}
 	}
 
@@ -148,24 +170,35 @@ var Node = function() {
 	});
 
 	var n = new THREE.Mesh(geom, mat);
-	n.castShadow = true;
-	n.receiveShadow = true;
+	// n.castShadow = true;
+	// n.receiveShadow = true;
 	this.mesh.add(n);
-	this.previousOffset = 0;
+	// this.previousOffset = 0;
 
 	var counter = 1000;
 
 	this.updateNode = function(phaseOffset) {
 		if (phaseOffset+counter >= data.length-1000) { counter = 1000; }
-		// console.log("phase offset: " + phaseOffset);
-		// console.log("counter: " + counter);
-		// this.mesh.position.x = data[co;unter+phaseOffset].x;
 		this.mesh.position.y = this.initialHeight + this.initialHeight * friction * data[phaseOffset+counter].y;
 		this.mesh.position.x = this.initialWidth + this.initialWidth * friction * data[phaseOffset+counter].y;
 		this.mesh.position.z = this.initialDepth + this.initialDepth * friction * data[phaseOffset+counter].y;
 		this.distance = getDist(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
-		this.previousOffset = phaseOffset;
+		// this.previousOffset = phaseOffset;
 		counter ++;
+	}
+
+	this.createBlackHole = function() {
+		this.mesh.position.x = this.initialWidth * curvature * Math.pow(this.distance,2);
+		this.mesh.position.y = this.initialHeight * curvature * Math.pow(this.distance,2);
+		this.mesh.position.z = this.initialDepth * curvature * Math.pow(this.distance,2);
+		this.distance = getDist(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
+		this.initialWidth = this.mesh.position.x;
+		this.initialHeight = this.mesh.position.y;
+		this.initialDepth = this.mesh.position.z;
+	}
+
+	this.updateHole = function() {
+		console.log(mouse.x);
 	}
 }
 
