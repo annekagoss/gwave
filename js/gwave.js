@@ -26,6 +26,7 @@ var nodeSize = 1;
 var nodeRes = 2;
 var delay = 0;
 var newDataFrame;
+var currentTransformation = "3d";
 
 
 // Default settings
@@ -341,24 +342,19 @@ function renderData(d) {
 
 function uiControls(e) {
 	var value = jQuery(e).attr('value');
-	// running = false;
-	for (n = 0; n <= vertexNodes.length - 1; n++) {
-		if (value === "2d") {
-			vertexNodes[n].flatten();
-		}
-		else if (value === "3d") {
-			vertexNodes[n].expand();
-		}
+	if (value === "2d" && currentTransformation !== value) {
+		vertexNodes.forEach(function(node) {
+			node.flatten();
+		});
 	}
-	// running = true;
-	// loop();
+	else if (value === "3d" && !currentTransformation !== value) {
+		vertexNodes.forEach(function(node) {
+			node.expand();
+		});
+	}
+	currentTransformation = value;
 }
 
-// function flattenSpaceTime() {
-// 	for (n = 0; n <= vertexNodes.length - 1; n++) {
-// 		vertexNodes[n].flatten;
-// 	}
-// }
 
 function expandSpaceTime() {
 
