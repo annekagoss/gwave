@@ -39,6 +39,17 @@ var friction = .125,
 	falloff = 10, // Wiggliness
 	flatAmp = 100;
 
+// 16384hz settings
+var friction = .25,
+	cubeWidth = 1000,
+	cubeHeight = 1000,
+	cubeDepth = 1000,
+	cubeRes = 60,
+	cubeSpread = 500,
+	falloff = 20, // Wiggliness
+	flatAmp = 100;
+
+
 // Beautiful water droplet Settings
 // var cubeWidth = 1000,
 //     cubeHeight = 1000,
@@ -170,19 +181,25 @@ function loop() {
 	}
 
 	if (dataRendered) {
-		if (!posDataUpdated) {
-			for (n = 0; n <= vertexNodes.length - 1; n++) {
-				phaseOff = Math.round(vertexNodes[n].distance * falloff / cubeSpread);
-				vertexNodes[n].updatePositionData(phaseOff);
-				if (n === vertexNodes.length - 1) {
-					posDataUpdated = true;
-				}
-			}
-		} else {
-			for (n = 0; n <= vertexNodes.length - 1; n++) {
-				vertexNodes[n].moveWithLerp();
-			}
+		// Use this to animate using lerp for downsampled data
+		// if (!posDataUpdated) {
+		// 	for (n = 0; n <= vertexNodes.length - 1; n++) {
+		// 		phaseOff = Math.round(vertexNodes[n].distance * falloff / cubeSpread);
+		// 		vertexNodes[n].updatePositionData(phaseOff);
+		// 		if (n === vertexNodes.length - 1) {
+		// 			posDataUpdated = true;
+		// 		}
+		// 	}
+		// } else {
+		// 	for (n = 0; n <= vertexNodes.length - 1; n++) {
+		// 		vertexNodes[n].moveWithLerp();
+		// 	}
+		// }
+		for (n = 0; n <= vertexNodes.length - 1; n++) {
+			phaseOff = Math.round(vertexNodes[n].distance * falloff / cubeSpread);
+			vertexNodes[n].updateVertexNode(phaseOff);
 		}
+
 	}
 	frame++;
 	render();
