@@ -120,6 +120,7 @@ function createScene() {
 		uiControls(jQuery(this));
 		setTimeout(function(){
 			running = true;
+			render();
 			loop();
 		},0);
 	});
