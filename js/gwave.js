@@ -17,18 +17,19 @@ var data;
 var nodeArray = [];
 var running = true;
 var counterStart = 0;
+var nodeParent;
 
 // Global Settings //
-var arrWidth = 20;
-var arrHeight = 10;
-var arrDepth = 30;
-var spread = 10;
-var nodeSize = 1;
-var nodeRes = 2;
+// var arrWidth = 20;
+// var arrHeight = 10;
+// var arrDepth = 30;
+// var spread = 10;
+// var nodeSize = 1;
+//
 var delay = 0;
 var newDataFrame;
 var currentTransformation = "3d";
-var currentRenderStyle = "mesh";
+var currentRenderStyle = "nodes";
 
 // 4096hz settings
 // var friction = .125,
@@ -47,9 +48,16 @@ var friction = .25,
 	cubeDepth = 1000,
 	cubeRes = 60,
 	cubeSpread = 200,
+	nodeSpread = 30,
+	nodeSize = 5,
+	nodeRes = 2,
 	falloff = 10, // Wiggliness
 	flatAmp = 100
-	maxDistance = getDist(cubeWidth, cubeHeight, cubeDepth);
+	maxMeshDistance = getDist(cubeWidth, cubeHeight, cubeDepth),
+	nodeWidth = cubeWidth/nodeSpread*.5, // Rendering will be slow without the *0.1
+	nodeHeight = cubeHeight/nodeSpread*.5,
+	nodeDepth = cubeDepth/nodeSpread*.5,
+	maxNodeDistance = getDist(nodeWidth*.5*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*.5*nodeSpread);
 
 var cubeArray = [],
 	cubeVertices = [],
@@ -199,18 +207,27 @@ function loop() {
 			// Use this for 16384hz data
 			meshVertices.forEach(function(v) {
 				if (v.parentVisibility) {
-					phaseOff = Math.round((maxDistance - v.distance+1) * falloff / cubeSpread);
+					phaseOff = Math.round((maxMeshDistance - v.distance+1) * falloff / cubeSpread);
 					v.updateMeshVertex(phaseOff);
 				}
 			});
 
 			// Send phase to dashboard
 			var phase = meshVertices[0].counter;
-
 			dashboard.updatePosition(phase);
-
 		}
+		else {
+			nodeArray.forEach(function(n) {
 
+				phaseOff = Math.round((maxNodeDistance - n.distance+1)*falloff/nodeSpread);
+
+				n.updateNode(phaseOff);
+			});
+
+			// Send phase to dashboard
+			var phase = nodeArray[0].counter;
+			dashboard.updatePosition(phase);
+		}
 	}
 
 	frame++;
@@ -232,6 +249,60 @@ function lerpPosition(posA, posB, duration, f) {
 
 function render() {
 	renderer.render(scene, camera);
+}
+
+var Node = function() {
+	this.mesh = new THREE.Object3D();
+	var geom = new THREE.SphereGeometry(nodeSize,nodeRes,nodeRes);
+	var mat = new THREE.MeshPhongMaterial ({
+		wireframe: true,
+		color:Colors.white
+	});
+
+	var n = new THREE.Mesh(geom, mat);
+	n.castShadow = true;
+	n.receiveShadow = true;
+	this.mesh.add(n);
+	this.previousOffset = 0;
+	this.counter = counterStart;
+
+	this.updateNode = function(phaseOffset) {
+		if (phaseOffset+this.counter >= data.length-counterStart) { this.counter = counterStart; }
+		this.mesh.position.y = this.initialHeight + this.initialHeight * friction * data[phaseOffset+this.counter].y;
+		this.mesh.position.x = this.initialWidth + this.initialWidth * friction * data[phaseOffset+this.counter].y;
+		this.mesh.position.z = this.initialDepth + this.initialDepth * friction * data[phaseOffset+this.counter].y;
+		this.distance = getDist(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
+		this.previousOffset = phaseOffset;
+		this.counter ++;
+	}
+}
+
+function createNode(xVal, yVal, zVal, spread) {
+	this.mesh = new THREE.Object3D();
+	var node = new Node();
+	node.mesh.position.x = xVal*spread;
+	node.mesh.position.y = yVal*spread;
+	node.mesh.position.z = zVal*spread;
+	node.initialWidth = xVal*spread;
+	node.initialHeight = yVal*spread;
+	node.initialDepth = zVal*spread;
+	node.distance = getDist(xVal*spread, yVal*spread, zVal*spread);
+
+
+	this.mesh.add(node.mesh);
+	this.node = node;
+	scene.add(this.mesh);
+	nodeArray.push(this.node);
+}
+
+function createNodeArray() {
+	for (i=nodeWidth*-0.5; i<nodeWidth*0.5; i++) {
+		for (j=nodeHeight*-0.5; j<nodeHeight*0.5; j++) {
+			for (k=nodeDepth*-0.5; k<nodeDepth*0.5; k++) {
+				createNode(i, j, k, nodeSpread);
+			}
+		}
+	}
 }
 
 function createCubeMesh() {
@@ -342,7 +413,8 @@ function init() {
 	createScene();
 	createLights();
 	loadData();
-	createCubeMesh();
+	// createCubeMesh();
+	createNodeArray();
 	setTimeout(function(){
 		loop();
 	},0);
