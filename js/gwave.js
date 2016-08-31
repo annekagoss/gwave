@@ -28,16 +28,17 @@ var nodeRes = 2;
 var delay = 0;
 var newDataFrame;
 var currentTransformation = "3d";
+var currentRenderStyle = "mesh";
 
 // 4096hz settings
-var friction = .125,
-	cubeWidth = 1000,
-	cubeHeight = 1000,
-	cubeDepth = 1000,
-	cubeRes = 60,
-	cubeSpread = 500,
-	falloff = 10, // Wiggliness
-	flatAmp = 100;
+// var friction = .125,
+// 	cubeWidth = 1000,
+// 	cubeHeight = 1000,
+// 	cubeDepth = 1000,
+// 	cubeRes = 60,
+// 	cubeSpread = 500,
+// 	falloff = 10, // Wiggliness
+// 	flatAmp = 100;
 
 // 16384hz settings
 var friction = .25,
@@ -45,13 +46,14 @@ var friction = .25,
 	cubeHeight = 1000,
 	cubeDepth = 1000,
 	cubeRes = 60,
-	cubeSpread = 500,
-	falloff = 30, // Wiggliness
-	flatAmp = 100;
+	cubeSpread = 200,
+	falloff = 10, // Wiggliness
+	flatAmp = 100
+	maxDistance = getDist(cubeWidth, cubeHeight, cubeDepth);
 
 var cubeArray = [],
 	cubeVertices = [],
-	vertexNodes = [];
+	meshVertices = [];
 
 var lerpDuration = 6;
 
@@ -110,12 +112,15 @@ function createScene() {
 	window.addEventListener('resize', onWindowResize, false);
 	jQuery('.transform').on('click', function(){
 		running = false;
+		meshVertices.forEach(function(v) {
+			v.reset();
+		})
 		uiControls(jQuery(this));
 		setTimeout(function(){
 			running = true;
 			render();
 			loop();
-		},0);
+		},1);
 	});
 	jQuery('.pause').on('click', function(){
 		running = !running;
@@ -124,9 +129,20 @@ function createScene() {
 		}
 	});
 	jQuery('.reset').on('click', function(){
-		for (n = 0; n <= vertexNodes.length - 1; n++) {
-			vertexNodes[n].reset();
+		meshVertices.forEach(function(v) {
+			v.reset();
+		})
+	});
+	jQuery('.render-style').on('click', function(){
+		var newStyle = jQuery(this).attr('value');
+		if (currentRenderStyle !== newStyle) {
+			currentRenderStyle = jQuery(this).attr('value');
+			destroySpaceTime();
+			createNodeArray();
 		}
+
+		// running = false;
+		console.log(currentRenderStyle);
 	});
 }
 
@@ -162,30 +178,39 @@ function loop() {
 	}
 
 	if (dataRendered) {
-		// Use this to animate using lerp for 4096hz data
-		// if (!posDataUpdated) {
-		// 	for (n = 0; n <= vertexNodes.length - 1; n++) {
-		// 		phaseOff = Math.round(vertexNodes[n].distance * falloff / cubeSpread);
-		// 		vertexNodes[n].updatePositionData(phaseOff);
-		// 		if (n === vertexNodes.length - 1) {
-		// 			posDataUpdated = true;
-		// 		}
-		// 	}
-		// } else {
-		// 	for (n = 0; n <= vertexNodes.length - 1; n++) {
-		// 		vertexNodes[n].moveWithLerp();
-		// 	}
-		// }
 
-		// Use this for 16384hz data
-		vertexNodes.forEach(function(v) {
-			phaseOff = Math.round(v.distance * falloff / cubeSpread);
-			v.updateVertexNode(phaseOff);
-		})
+		if (currentRenderStyle === "mesh") {
 
-		// Send phase to dashboard
-		var phase = vertexNodes[0].counter;
-		dashboard.updatePosition(phase);
+			// Use this to animate using lerp for 4096hz data
+			// if (!posDataUpdated) {
+			// 	for (n = 0; n <= meshVertices.length - 1; n++) {
+			// 		phaseOff = Math.round(meshVertices[n].distance * falloff / cubeSpread);
+			// 		meshVertices[n].updatePositionData(phaseOff);
+			// 		if (n === meshVertices.length - 1) {
+			// 			posDataUpdated = true;
+			// 		}
+			// 	}
+			// } else {
+			// 	for (n = 0; n <= meshVertices.length - 1; n++) {
+			// 		meshVertices[n].moveWithLerp();
+			// 	}
+			// }
+
+			// Use this for 16384hz data
+			meshVertices.forEach(function(v) {
+				if (v.parentVisibility) {
+					phaseOff = Math.round((maxDistance - v.distance+1) * falloff / cubeSpread);
+					v.updateMeshVertex(phaseOff);
+				}
+			});
+
+			// Send phase to dashboard
+			var phase = meshVertices[0].counter;
+
+			dashboard.updatePosition(phase);
+
+		}
+
 	}
 
 	frame++;
@@ -209,92 +234,6 @@ function render() {
 	renderer.render(scene, camera);
 }
 
-var VertexNode = function(vertex, parent, index) {
-	this.initialX = vertex.x;
-	this.initialY = vertex.y;
-	this.initialZ = vertex.z;
-	this.distance = getDist(vertex.x, vertex.y, vertex.z);
-	this.parentCube = parent.children[0].geometry;
-	this.indexInParent = index;
-	this.finishedLerp = false;
-
-	this.counter = counterStart;
-
-	// Get new position from dataset to use for lerp movement
-	this.updatePositionData = function(phaseOffset) {
-		this.finishedLerp = false;
-		if (phaseOffset + this.counter >= data.length - counterStart) {
-			this.reset();
-		} else {
-			this.previousPositionX = this.parentCube.vertices[this.indexInParent].x;
-			this.previousPositionY = this.parentCube.vertices[this.indexInParent].y;
-			this.previousPositionZ = this.parentCube.vertices[this.indexInParent].z;
-		}
-
-		this.newPositionX = this.initialX + (this.initialX * friction * data[phaseOffset + this.counter].y);
-		this.newPositionY = this.initialY + (this.initialY * friction * data[phaseOffset + this.counter].y);
-		this.newPositionZ = this.initialZ + (this.initialZ * friction * data[phaseOffset + this.counter].y);
-
-		this.distance = getDist(this.parentCube.vertices[this.indexInParent].x, this.parentCube.vertices[this.indexInParent].y, this.parentCube.vertices[this.indexInParent].z);
-		this.counter++;
-	}
-
-	this.moveWithLerp = function() {
-		this.parentCube.vertices[this.indexInParent].x = lerpPosition(this.parentCube.vertices[this.indexInParent].x, this.newPositionX, lerpDuration, frame);
-		this.parentCube.vertices[this.indexInParent].y = lerpPosition(this.parentCube.vertices[this.indexInParent].y, this.newPositionY, lerpDuration, frame);
-		this.parentCube.vertices[this.indexInParent].z = lerpPosition(this.parentCube.vertices[this.indexInParent].z, this.newPositionZ, lerpDuration, frame);
-		this.parentCube.verticesNeedUpdate = true;
-	}
-
-	this.reset = function() {
-		this.counter = counterStart;
-		this.previousPositionX = this.initialX;
-		this.previousPositionY = this.initialY;
-		this.previousPositionZ = this.initialZ;
-
-		this.parentCube.vertices[this.indexInParent].x = this.initialX;
-		this.parentCube.vertices[this.indexInParent].y = this.initialY;
-		this.parentCube.vertices[this.indexInParent].z = this.initialZ;
-		this.distance = getDist(this.initialX,this.initialY,this.initialZ);
-
-		this.parentCube.verticesNeedUpdate = true;
-	}
-
-	this.flatten = function() {
-		this.parentCube.vertices[this.indexInParent].y = flatAmp;
-		this.previousPositionY = flatAmp;
-		this.expandedY = this.initialY;
-		this.initialY = flatAmp;
-		this.distance = getDist(this.parentCube.vertices[this.indexInParent].x, this.parentCube.vertices[this.indexInParent].y, this.parentCube.vertices[this.indexInParent].z);
-		this.parentCube.verticesNeedUpdate = true;
-	}
-
-	this.expand = function() {
-		this.parentCube.vertices[this.indexInParent].y = this.expandedY;
-		this.previousPositionY = this.expandedY;
-		this.initialY = this.expandedY;
-		this.distance = getDist(this.parentCube.vertices[this.indexInParent].x, this.parentCube.vertices[this.indexInParent].y, this.parentCube.vertices[this.indexInParent].z);
-		this.parentCube.verticesNeedUpdate = true;
-	}
-
-	// Movement without lerp
-	this.updateVertexNode = function(phaseOffset) {
-		if (phaseOffset + this.counter >= data.length - counterStart) {
-			this.counter = counterStart;
-		}
-
-		this.parentCube.vertices[this.indexInParent].x = this.initialX + this.initialX * friction * data[phaseOffset + this.counter].y;
-		this.parentCube.vertices[this.indexInParent].y = this.initialY + this.initialY * friction * data[phaseOffset + this.counter].y;
-		this.parentCube.vertices[this.indexInParent].z = this.initialZ + this.initialZ * friction * data[phaseOffset + this.counter].y;
-
-		this.distance = getDist(this.parentCube.vertices[this.indexInParent].x, this.parentCube.vertices[this.indexInParent].y, this.parentCube.vertices[this.indexInParent].z);
-
-		this.counter++;
-		this.parentCube.verticesNeedUpdate = true;
-	}
-
-}
-
 function createCubeMesh() {
 	for (i = 0; i < cubeWidth; i += cubeSpread) {
 		var resolution = i < cubeRes ? i : cubeRes;
@@ -304,8 +243,8 @@ function createCubeMesh() {
 		cubeArray.forEach(function(cube) {
 			var vertices = cube.children[0].geometry.vertices;
 			vertices.forEach(function(v) {
-				var vertexNode = new VertexNode(v, cube, vertices.indexOf(v));
-				vertexNodes.push(vertexNode);
+				var meshVertex = new MeshVertex(v, cube, vertices.indexOf(v));
+				meshVertices.push(meshVertex);
 			})
 		});
 	}, 0);
@@ -321,17 +260,46 @@ function createCube(size, res) {
 
 	var n = new THREE.Mesh(geom, mat);
 	this.mesh.add(n);
+	this.mesh.name = "cube mesh " + size;
 	scene.add(this.mesh);
 	cubeArray.push(this.mesh);
 }
 
+function destroySpaceTime() {
+	if (currentRenderStyle === "nodes") {
+		cubeArray.forEach(function(cube) {
+			scene.remove(cube);
+		});
+		cubeArray = [];
+		meshVertices = [];
+	}
+	console.log(cubeArray);
+}
+
+function flattenSpaceTime(){
+		cubeArray.forEach(function(cube) {
+			if (cubeArray.indexOf(cube) !== cubeArray.length-1) {
+				cube.visible = false;
+			}
+		})
+		//
+}
+
+function expandSpaceTime(){
+	cubeArray.forEach(function(cube) {
+		if (!cube.visible) {
+			cube.visible = true;
+		}
+	})
+}
+
 function renderDataPerspective(d) {
-	// renderDataAsSpline(d);
+	// renderDataSpline(d);
 	data = d;
 	dataRendered = true;
 }
 
-function renderDataAsSpline(d) {
+function renderDataSpline(d) {
 	var mat = new THREE.LineBasicMaterial({
 		color: Colors.white
 	});
@@ -352,13 +320,19 @@ function renderDataAsSpline(d) {
 function uiControls(e) {
 	var value = jQuery(e).attr('value');
 	if (value === "2d" && currentTransformation !== value) {
-		vertexNodes.forEach(function(node) {
-			node.flatten();
+		flattenSpaceTime();
+		meshVertices.forEach(function(node) {
+			if (node.parentVisibility) {
+				node.flatten();
+			}
 		});
 	}
 	else if (value === "3d" && !currentTransformation !== value) {
-		vertexNodes.forEach(function(node) {
-			node.expand();
+		meshVertices.forEach(function(node) {
+			if (node.parentVisibility) {
+				node.expand();
+			}
+			expandSpaceTime();
 		});
 	}
 	currentTransformation = value;
