@@ -16,6 +16,7 @@ var dataRendered = false;
 var data;
 var nodeArray = [];
 var running = true;
+var counterStart = 0;
 
 // Global Settings //
 var arrWidth = 20;
@@ -28,8 +29,7 @@ var delay = 0;
 var newDataFrame;
 var currentTransformation = "3d";
 
-
-// Default settings
+// 4096hz settings
 var friction = .125,
 	cubeWidth = 1000,
 	cubeHeight = 1000,
@@ -46,26 +46,8 @@ var friction = .25,
 	cubeDepth = 1000,
 	cubeRes = 60,
 	cubeSpread = 500,
-	falloff = 20, // Wiggliness
+	falloff = 30, // Wiggliness
 	flatAmp = 100;
-
-
-// Beautiful water droplet Settings
-// var cubeWidth = 1000,
-//     cubeHeight = 1000,
-//     cubeDepth = 1000,
-//     cubeRes = 20,
-//     cubeSpread = 500;
-// var falloff = 20;  // Wiggliness
-
-// Crazy settings:
-// var cubeWidth = 1000,
-//     cubeHeight = 1000,
-//     cubeDepth = 1000,
-//     cubeRes = 100,
-//     cubeSpread = 500,
-// 		falloff = 10,
-// 		friction = .25;
 
 var cubeArray = [],
 	cubeVertices = [],
@@ -163,7 +145,6 @@ function onWindowResize() {
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	controls.handleResize();
 }
-
 var frame = 0;
 var posDataUpdated = false;
 var phaseOff;
@@ -181,7 +162,7 @@ function loop() {
 	}
 
 	if (dataRendered) {
-		// Use this to animate using lerp for downsampled data
+		// Use this to animate using lerp for 4096hz data
 		// if (!posDataUpdated) {
 		// 	for (n = 0; n <= vertexNodes.length - 1; n++) {
 		// 		phaseOff = Math.round(vertexNodes[n].distance * falloff / cubeSpread);
@@ -195,12 +176,18 @@ function loop() {
 		// 		vertexNodes[n].moveWithLerp();
 		// 	}
 		// }
-		for (n = 0; n <= vertexNodes.length - 1; n++) {
-			phaseOff = Math.round(vertexNodes[n].distance * falloff / cubeSpread);
-			vertexNodes[n].updateVertexNode(phaseOff);
-		}
 
+		// Use this for 16384hz data
+		vertexNodes.forEach(function(v) {
+			phaseOff = Math.round(v.distance * falloff / cubeSpread);
+			v.updateVertexNode(phaseOff);
+		})
+
+		// Send phase to dashboard
+		var phase = vertexNodes[0].counter;
+		dashboard.updatePosition(phase);
 	}
+
 	frame++;
 	render();
 	if (running) {	requestAnimationFrame(loop);}
@@ -231,12 +218,12 @@ var VertexNode = function(vertex, parent, index) {
 	this.indexInParent = index;
 	this.finishedLerp = false;
 
-	var counter = 1000;
+	this.counter = counterStart;
 
 	// Get new position from dataset to use for lerp movement
 	this.updatePositionData = function(phaseOffset) {
 		this.finishedLerp = false;
-		if (phaseOffset + counter >= data.length - 1000) {
+		if (phaseOffset + this.counter >= data.length - counterStart) {
 			this.reset();
 		} else {
 			this.previousPositionX = this.parentCube.vertices[this.indexInParent].x;
@@ -244,12 +231,12 @@ var VertexNode = function(vertex, parent, index) {
 			this.previousPositionZ = this.parentCube.vertices[this.indexInParent].z;
 		}
 
-		this.newPositionX = this.initialX + (this.initialX * friction * data[phaseOffset + counter].y);
-		this.newPositionY = this.initialY + (this.initialY * friction * data[phaseOffset + counter].y);
-		this.newPositionZ = this.initialZ + (this.initialZ * friction * data[phaseOffset + counter].y);
+		this.newPositionX = this.initialX + (this.initialX * friction * data[phaseOffset + this.counter].y);
+		this.newPositionY = this.initialY + (this.initialY * friction * data[phaseOffset + this.counter].y);
+		this.newPositionZ = this.initialZ + (this.initialZ * friction * data[phaseOffset + this.counter].y);
 
 		this.distance = getDist(this.parentCube.vertices[this.indexInParent].x, this.parentCube.vertices[this.indexInParent].y, this.parentCube.vertices[this.indexInParent].z);
-		counter++;
+		this.counter++;
 	}
 
 	this.moveWithLerp = function() {
@@ -260,7 +247,7 @@ var VertexNode = function(vertex, parent, index) {
 	}
 
 	this.reset = function() {
-		counter = 1000;
+		this.counter = counterStart;
 		this.previousPositionX = this.initialX;
 		this.previousPositionY = this.initialY;
 		this.previousPositionZ = this.initialZ;
@@ -292,17 +279,17 @@ var VertexNode = function(vertex, parent, index) {
 
 	// Movement without lerp
 	this.updateVertexNode = function(phaseOffset) {
-		if (phaseOffset + counter >= data.length - 1000) {
-			counter = 1000;
+		if (phaseOffset + this.counter >= data.length - counterStart) {
+			this.counter = counterStart;
 		}
 
-		this.parentCube.vertices[this.indexInParent].x = this.initialX + this.initialX * friction * data[phaseOffset + counter].y;
-		this.parentCube.vertices[this.indexInParent].y = this.initialY + this.initialY * friction * data[phaseOffset + counter].y;
-		this.parentCube.vertices[this.indexInParent].z = this.initialZ + this.initialZ * friction * data[phaseOffset + counter].y;
+		this.parentCube.vertices[this.indexInParent].x = this.initialX + this.initialX * friction * data[phaseOffset + this.counter].y;
+		this.parentCube.vertices[this.indexInParent].y = this.initialY + this.initialY * friction * data[phaseOffset + this.counter].y;
+		this.parentCube.vertices[this.indexInParent].z = this.initialZ + this.initialZ * friction * data[phaseOffset + this.counter].y;
 
 		this.distance = getDist(this.parentCube.vertices[this.indexInParent].x, this.parentCube.vertices[this.indexInParent].y, this.parentCube.vertices[this.indexInParent].z);
 
-		counter++;
+		this.counter++;
 		this.parentCube.verticesNeedUpdate = true;
 	}
 
@@ -338,7 +325,13 @@ function createCube(size, res) {
 	cubeArray.push(this.mesh);
 }
 
-function renderData(d) {
+function renderDataPerspective(d) {
+	// renderDataAsSpline(d);
+	data = d;
+	dataRendered = true;
+}
+
+function renderDataAsSpline(d) {
 	var mat = new THREE.LineBasicMaterial({
 		color: Colors.white
 	});
@@ -354,8 +347,6 @@ function renderData(d) {
 		);
 	}
 	scene.add(line);
-	data = d;
-	dataRendered = true;
 }
 
 function uiControls(e) {
@@ -373,17 +364,14 @@ function uiControls(e) {
 	currentTransformation = value;
 }
 
-
-function expandSpaceTime() {
-
-}
-
 function init() {
 	createScene();
 	createLights();
 	loadData();
 	createCubeMesh();
-	loop();
+	setTimeout(function(){
+		loop();
+	},0);
 }
 
 init();

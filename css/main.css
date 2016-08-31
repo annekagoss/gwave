@@ -19,14 +19,44 @@ body {
 
 .button {
   display: inline-block;
-  margin: 20px;
+  margin: 20px 20px 40px;
   padding: 4px;
   cursor: pointer;
   border: solid 1px rgba(255, 255, 255, 0);
   transition: border 0.2s ease;
   box-sizing: border-box;
+	cursor: pointer;
 }
 
 .button:hover {
   border: solid 1px rgba(255, 255, 255, 1);
+}
+
+.hudCanvas {
+	top: 0;
+	position: absolute;
+}
+
+.ui {
+	position: absolute;
+}
+
+.ui .graph {
+  display: block;
+	stroke: #fff;
+	stroke-width: .5;
+	fill: none;
+}
+
+.graph text {
+	stroke: none;
+	fill: #fff;
+}
+
+.graph .scrub-line {
+	stroke-width: 1;
+}
+
+.graph-container .title {
+	margin: 20px 24px 0;
 }

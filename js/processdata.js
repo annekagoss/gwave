@@ -21,5 +21,7 @@ function processData(allText) {
 		data = jQuery.grep(data, function(d, i) {
 			return d.x > -30 && d.x < 30;
 		});
-	renderData(data);
+		var title = "LIGO Hanford Observatory, Mon Sep 14 09:16:37 GMT 2015, 16384 Hz";
+		renderDataPerspective(data);
+		renderDataDashboard(data, title);
 }
