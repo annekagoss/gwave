@@ -74,7 +74,7 @@ var lerpDuration = 6;
 function createScene() {
 	// DOM setup
 	var container = document.createElement('div');
-	document.body.appendChild(container);
+	jQuery('body').prepend(container);
 	container.className = 'container';
 
 	// Camera setup
