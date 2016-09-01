@@ -56,14 +56,15 @@ var friction = .25,
 	nodeRes = 2,
 	nodeFalloff = 2, // Wiggliness.  Higher than 2 will make points erratic during peak.
 	meshFalloff = 2,
-	flatAmp = 100,
+	flatAmp = 10,
 	distBoundary = 0,
 	maxMeshDistance = getDist(cubeWidth, cubeHeight, cubeDepth),
 	nodeWidth = cubeWidth/nodeSpread*1, // Rendering will be slow without the *0.1
 	nodeHeight = cubeHeight/nodeSpread*1,
 	nodeDepth = cubeDepth/nodeSpread*1,
-	maxNodeDistance = getDist(nodeWidth*1*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*1*nodeSpread),
-	expandedNodeWidth, expandedNodeHeight, expandedNodeDepth, expandedNodeSpread, expandedNodeFalloff;
+	maxNodeDistance = getDist(nodeWidth*1*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*1*nodeSpread);
+
+	var expandedNodeWidth, expandedNodeHeight, expandedNodeDepth, expandedNodeSpread, expandedNodeFalloff;
 
 var cubeArray = [],
 	cubeVertices = [],
@@ -158,10 +159,16 @@ function createScene() {
 	jQuery('.speed-val').text(speed);
 	jQuery('.slider').val(speed);
 	jQuery('.slider').on('mouseup', function(e) {
+		running = false;
 		resetSpaceTime();
 		speed = e.target.valueAsNumber;
 		jQuery('.speed-val').text(speed);
 		controls.enabled = true;
+		setTimeout(function() {
+			running = true;
+			render();
+			loop();
+		},0);
 	});
 }
 
@@ -227,6 +234,9 @@ function loop() {
 			// 	}
 			// }
 
+			// console.log(Math.round((maxMeshDistance - meshVertices[0].distance+1)*meshFalloff/cubeSpread));
+			// console.log(meshVertices[0]);
+
 			// Use this for 16384hz data
 			meshVertices.forEach(function(v) {
 				if (v.parentVisibility) {
@@ -234,6 +244,7 @@ function loop() {
 					v.updateMeshVertex(phaseOff, counter);
 				}
 				meshVertices[0].checkForReset(phaseOff, counter);
+
 			});
 		}
 		else {
@@ -241,7 +252,7 @@ function loop() {
 				phaseOff = Math.round((maxNodeDistance - n.distance+1)*nodeFalloff/nodeSpread);
 				n.updateNode(phaseOff, counter);
 			});
-			nodeArray[0].checkForReset(phaseOff, counter);
+
 		}
 		// console.log(counter);
 		dashboard.updatePosition(counter);
@@ -274,13 +285,14 @@ function render() {
 function createNode(xVal, yVal, zVal, spread) {
 	this.mesh = new THREE.Object3D();
 	var node = new Node();
+	var amplitude = currentTransformation === "2d" ? flatAmp : 1;
 	node.mesh.position.x = xVal*spread;
-	node.mesh.position.y = yVal*spread;
+	node.mesh.position.y = yVal*spread * amplitude;
 	node.mesh.position.z = zVal*spread;
 	node.initialWidth = xVal*spread;
-	node.initialHeight = yVal*spread;
+	node.initialHeight = yVal*spread * amplitude;
 	node.initialDepth = zVal*spread;
-	node.distance = getDist(xVal*spread, yVal*spread, zVal*spread);
+	node.distance = getDist(xVal*spread, yVal*spread+ amplitude, zVal*spread);
 
 	this.mesh.add(node.mesh);
 	this.node = node;
@@ -302,6 +314,8 @@ function createNodeArray() {
 			}
 		}
 	}
+
+	maxNodeDistance = getDist(nodeWidth*1*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*1*nodeSpread);
 }
 
 function createNodePlane() {
@@ -323,6 +337,7 @@ function createNodePlane() {
 			}
 		}
 	}
+	maxNodeDistance = getDist(nodeWidth*1*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*1*nodeSpread);
 }
 
 function createCubeMesh() {
@@ -370,6 +385,7 @@ function destroySpaceTime() {
 		});
 		nodeArray = [];
 	}
+	dashboard.updatePosition(counter);
 }
 
 function createSpaceTime() {
@@ -395,6 +411,7 @@ function flattenSpaceTime(){
 				vertex.flatten();
 			}
 		});
+		maxMeshDistance = getDist(cubeWidth, flatAmp, cubeDepth);
 	}
 	else if (currentRenderStyle === "nodes") {
 		destroySpaceTime();
@@ -415,6 +432,7 @@ function expandSpaceTime(){
 				cube.visible = true;
 			}
 		});
+		maxMeshDistance = getDist(cubeWidth, cubeHeight, cubeDepth)
 	}
 	else if (currentRenderStyle === "nodes") {
 		destroySpaceTime();

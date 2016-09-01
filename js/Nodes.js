@@ -16,31 +16,13 @@ var Node = function() {
 			this.reset();
 			return;
 		}
+		// console.log(counter);
 		this.mesh.position.y = this.initialHeight + this.initialHeight * friction * data[phaseOffset+counter].y;
-		this.mesh.position.x = this.initialWidth + this.initialWidth * friction * data[phaseOffset+counter].y;
-		this.mesh.position.z = this.initialDepth + this.initialDepth * friction * data[phaseOffset+counter].y;
-		this.distance = getDist(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
-	}
 
-	this.flatten = function(scale) {
-		var newScale;
-		if (this.initialHeight !== 0) {
-			newScale = scale;
+		if (currentTransformation === "3d") {
+			this.mesh.position.x = this.initialWidth + this.initialWidth * friction * data[phaseOffset+counter].y;
+			this.mesh.position.z = this.initialDepth + this.initialDepth * friction * data[phaseOffset+counter].y;
 		}
-		else {
-			newScale = scale - 0.25;
-		}
-		this.mesh.position.y = 0;
-		this.expandedY = this.initialHeight;
-		this.initialHeight = this.mesh.position.y;
-
-		this.mesh.position.x = this.initialWidth*newScale;
-		this.expandedX = this.initialWidth;
-		this.initialWidth = this.mesh.position.x;
-
-		this.mesh.position.z = this.initialDepth*newScale;
-		this.expandedZ = this.initialDepth;
-
 
 		this.distance = getDist(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
 	}

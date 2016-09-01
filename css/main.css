@@ -73,6 +73,7 @@ input[type="range" i]::-webkit-slider-thumb, input[type="range" i]::-webkit-medi
 
 .ui {
 	position: absolute;
+    top: 0;
 }
 
 .ui .graph {
