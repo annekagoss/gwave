@@ -16,7 +16,7 @@ var dataRendered = false;
 var data;
 var nodeArray = [];
 var running = true;
-var counterStart = 0;
+var counterStart = 4700;
 var nodeParent;
 
 // Global Settings //
@@ -30,6 +30,7 @@ var delay = 0;
 var newDataFrame;
 var currentTransformation = "3d";
 var currentRenderStyle = "nodes";
+var speed = 2;
 
 // 4096hz settings
 // var friction = .125,
@@ -51,8 +52,9 @@ var friction = .25,
 	nodeSpread = 30,
 	nodeSize = 5,
 	nodeRes = 2,
-	falloff = 10, // Wiggliness
-	flatAmp = 100
+	falloff = 2, // Wiggliness.  Higher than 2 will make points erratic during peak.
+	flatAmp = 100,
+	distBoundary = 0,
 	maxMeshDistance = getDist(cubeWidth, cubeHeight, cubeDepth),
 	nodeWidth = cubeWidth/nodeSpread*.5, // Rendering will be slow without the *0.1
 	nodeHeight = cubeHeight/nodeSpread*.5,
@@ -137,9 +139,7 @@ function createScene() {
 		}
 	});
 	jQuery('.reset').on('click', function(){
-		meshVertices.forEach(function(v) {
-			v.reset();
-		})
+		resetSpaceTime();
 	});
 	jQuery('.render-style').on('click', function(){
 		var newStyle = jQuery(this).attr('value');
@@ -148,10 +148,29 @@ function createScene() {
 			destroySpaceTime();
 			createNodeArray();
 		}
-
-		// running = false;
-		console.log(currentRenderStyle);
 	});
+	jQuery('.slider').on('mousedown', function() {
+		controls.enabled = false;
+	})
+	jQuery('.speed-val').text(speed);
+	jQuery('.slider').on('mouseup', function(e) {
+		resetSpaceTime();
+		speed = e.target.valueAsNumber;
+		jQuery('.speed-val').text(speed);
+	})
+}
+
+function resetSpaceTime() {
+	if (currentRenderStyle === "mesh") {
+		meshVertices.forEach(function(v) {
+			v.reset();
+		});
+	}
+	else if (currentRenderStyle === "nodes") {
+		nodeArray.forEach(function(n){
+			n.reset();
+		});
+	}
 }
 
 function createLights() {
@@ -186,7 +205,6 @@ function loop() {
 	}
 
 	if (dataRendered) {
-
 		if (currentRenderStyle === "mesh") {
 
 			// Use this to animate using lerp for 4096hz data
@@ -212,17 +230,18 @@ function loop() {
 				}
 			});
 
+
 			// Send phase to dashboard
 			var phase = meshVertices[0].counter;
 			dashboard.updatePosition(phase);
 		}
 		else {
 			nodeArray.forEach(function(n) {
-
 				phaseOff = Math.round((maxNodeDistance - n.distance+1)*falloff/nodeSpread);
-
 				n.updateNode(phaseOff);
 			});
+
+			// console.log((maxNodeDistance - nodeArray[0].distance+1)*falloff/nodeSpread);
 
 			// Send phase to dashboard
 			var phase = nodeArray[0].counter;
@@ -263,7 +282,6 @@ var Node = function() {
 	n.castShadow = true;
 	n.receiveShadow = true;
 	this.mesh.add(n);
-	this.previousOffset = 0;
 	this.counter = counterStart;
 
 	this.updateNode = function(phaseOffset) {
@@ -272,8 +290,15 @@ var Node = function() {
 		this.mesh.position.x = this.initialWidth + this.initialWidth * friction * data[phaseOffset+this.counter].y;
 		this.mesh.position.z = this.initialDepth + this.initialDepth * friction * data[phaseOffset+this.counter].y;
 		this.distance = getDist(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
-		this.previousOffset = phaseOffset;
-		this.counter ++;
+		this.counter += speed;
+	}
+
+	this.reset = function() {
+		this.counter = counterStart;
+		this.mesh.position.x = this.initialWidth;
+		this.mesh.position.y = this.initialHeight;
+		this.mesh.position.z = this.initialDepth;
+		this.distance = getDist(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
 	}
 }
 

@@ -31,6 +31,33 @@ body {
 .button:hover {
   border: solid 1px rgba(255, 255, 255, 1);
 }
+.slider-container {
+    border: none;
+}
+
+.slider-container:hover {
+    border: none;
+}
+
+.slider {
+    -webkit-appearance: none;
+    height: 1px;
+    cursor: pointer;
+}
+
+input:focus {
+    outline: none;
+}
+
+input[type="range" i]::-webkit-slider-thumb, input[type="range" i]::-webkit-media-slider-thumb {
+    -webkit-appearance: none;
+    background: #0000FF;
+    height: 15px;
+    width: 15px;
+    border-radius: 50em;
+    border: solid 1px #fff;
+    cursor: pointer;
+}
 
 .hudCanvas {
 	top: 0;
