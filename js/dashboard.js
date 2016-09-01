@@ -68,7 +68,7 @@ var Dashboard =  function(data, graphTitle) {
     // });
 
     this.updatePosition = function(phase) {
-      console.log(phase);
+    //   console.log(phase);
       var posX = x(data[phase-1].x);
       // console.log(posX);
       svg.select(".scrub-line")
