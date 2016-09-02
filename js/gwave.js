@@ -16,7 +16,7 @@ var dataRendered = false;
 var data;
 var nodeArray = [];
 var running = true;
-var counterStart = 1; // Must be higher than 0
+var counterStart = 4500; // Must be higher than 0
 var nodeParent;
 var counter = counterStart;
 
@@ -126,6 +126,7 @@ function createScene() {
 
 	window.addEventListener('resize', onWindowResize, false);
 	jQuery('.transform').on('click', function(){
+		friction = .25;
 		running = false;
 		transformSpaceTime(jQuery(this));
 		setTimeout(function(){
@@ -144,6 +145,7 @@ function createScene() {
 		resetSpaceTime();
 	});
 	jQuery('.render-style').on('click', function(){
+		friction = .25;
 		currentTransformation = "3d";
 		var newStyle = jQuery(this).attr('value');
 		if (currentRenderStyle !== newStyle) {
@@ -175,7 +177,9 @@ function createScene() {
 function resetSpaceTime() {
 	if (currentRenderStyle === "mesh") {
 		meshVertices.forEach(function(v) {
-			v.reset();
+			if (v.parentVisibility) {
+				v.reset();
+			}
 		});
 	}
 	else if (currentRenderStyle === "nodes") {
@@ -237,17 +241,23 @@ function loop() {
 			// console.log(Math.round((maxMeshDistance - meshVertices[0].distance+1)*meshFalloff/cubeSpread));
 			// console.log(meshVertices[0]);
 
+
 			// Use this for 16384hz data
 			meshVertices.forEach(function(v) {
 				if (v.parentVisibility) {
 					phaseOff = Math.round((maxMeshDistance - v.distance+1) * meshFalloff / cubeSpread);
 					v.updateMeshVertex(phaseOff, counter);
 				}
-				meshVertices[0].checkForReset(phaseOff, counter);
-
 			});
+			if (meshVertices[0]) {
+				meshVertices[0].checkForReset(phaseOff, counter);
+			}
+
 		}
 		else {
+			// console.log((maxNodeDistance - nodeArray[0].distance+1));
+			// console.log(nodeArray.length);
+
 			nodeArray.forEach(function(n) {
 				phaseOff = Math.round((maxNodeDistance - n.distance+1)*nodeFalloff/nodeSpread);
 				n.updateNode(phaseOff, counter);
@@ -285,14 +295,13 @@ function render() {
 function createNode(xVal, yVal, zVal, spread) {
 	this.mesh = new THREE.Object3D();
 	var node = new Node();
-	var amplitude = currentTransformation === "2d" ? flatAmp : 1;
 	node.mesh.position.x = xVal*spread;
-	node.mesh.position.y = yVal*spread * amplitude;
+	node.mesh.position.y = yVal*spread;
 	node.mesh.position.z = zVal*spread;
 	node.initialWidth = xVal*spread;
-	node.initialHeight = yVal*spread * amplitude;
+	node.initialHeight = yVal*spread;
 	node.initialDepth = zVal*spread;
-	node.distance = getDist(xVal*spread, yVal*spread+ amplitude, zVal*spread);
+	node.distance = getDist(xVal*spread, yVal*spread, zVal*spread);
 
 	this.mesh.add(node.mesh);
 	this.node = node;
@@ -314,8 +323,6 @@ function createNodeArray() {
 			}
 		}
 	}
-
-	maxNodeDistance = getDist(nodeWidth*1*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*1*nodeSpread);
 }
 
 function createNodePlane() {
@@ -328,7 +335,7 @@ function createNodePlane() {
 	expandedNodeDepth = nodeDepth;
 	nodeDepth *= 5;
 	expandedNodeFalloff = nodeFalloff;
-	nodeFalloff = 1.25;
+	nodeFalloff = 2;
 
 	for (i=nodeWidth*-0.5; i<nodeWidth*0.5; i++) {
 		for (j=nodeHeight*-0.5; j<nodeHeight*0.5; j++) {
@@ -399,6 +406,7 @@ function createSpaceTime() {
 
 function flattenSpaceTime(){
 	console.log(currentRenderStyle);
+	friction = 6;
 	if (currentRenderStyle === "mesh") {
 
 		cubeArray.forEach(function(cube) {
