@@ -3,7 +3,8 @@ var Colors = {
 	black: 0x000000,
 	blue: 0x0000FF,
 	blue2: 0x3E529F,
-	white: 0xFFFFFF
+	white: 0xFFFFFF,
+	green: 0x2ECC71
 };
 
 var container, controls, camera, fieldOfView, aspectRatio, nearPlane, farPlane;
@@ -53,7 +54,7 @@ var friction = .25,
 	cubeSpeed = speed - 1,
 	nodeSpread = 50,
 	nodeSize = 5,
-	nodeRes = 2,
+	nodeRes = 1,
 	nodeFalloff = 2, // Wiggliness.  Higher than 2 will make points erratic during peak.
 	meshFalloff = 2,
 	flatAmp = 10,
@@ -111,7 +112,7 @@ function createScene() {
 
 	// Scene setup
 	scene = new THREE.Scene();
-	scene.fog = new THREE.Fog(Colors.blue, 0, 3000);
+	scene.fog = new THREE.Fog(Colors.black, 0, 3000);
 
 	// Renderer setup
 	renderer = new THREE.WebGLRenderer({
@@ -193,7 +194,7 @@ function createLights() {
 	// A hemisphere light is a gradient colored light;
 	// the first parameter is the sky color, the second parameter is the ground color,
 	// the third parameter is the intensity of the light
-	hemisphereLight = new THREE.HemisphereLight(Colors.pink, Colors.blue, 1);
+	hemisphereLight = new THREE.HemisphereLight(Colors.blue, Colors.green, 1);
 	hemisphereLight.position.set(0, 0, 0);
 	scene.add(hemisphereLight);
 }
