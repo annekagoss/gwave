@@ -19,15 +19,15 @@ body {
 }
 
 .button {
-  display: inline-block;
-  margin: 20px 20px 40px;
+  /*display: inline-block;*/
+  margin: 20px 32px 20px;
   padding: 4px;
   cursor: pointer;
   border: solid 1px rgba(255, 255, 255, 0);
   transition: border 0.2s ease;
   box-sizing: border-box;
   cursor: pointer;
-      vertical-align: middle;
+  vertical-align: middle;
 }
 
 .button:hover {
@@ -77,10 +77,16 @@ input[type="range" i]::-webkit-slider-thumb, input[type="range" i]::-webkit-medi
     top: 0;
 }
 
+.graph-section {
+  display: block;
+  position: fixed;
+  bottom: 30px;
+}
+
 .ui .graph {
   display: block;
 	stroke: #fff;
-	stroke-width: .5;
+	stroke-width: 1;
 	fill: none;
 }
 
@@ -93,6 +99,10 @@ input[type="range" i]::-webkit-slider-thumb, input[type="range" i]::-webkit-medi
 	stroke-width: 1;
 }
 
-.graph-container .title {
+.graph-container, .graph-container-2 {
+  display: inline-block;
+}
+
+.graph-container .title,  .graph-container-2 .title{
 	margin: 20px 24px 0;
 }

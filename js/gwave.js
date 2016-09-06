@@ -14,10 +14,13 @@ var mousePos = {
 	y: 0
 };
 var dataRendered = false;
-var data;
+var dataSetH1, dataSetTemplate, data;
+var h1Enabled = true;
+var templateEnabled = false;
 var nodeArray = [];
 var running = true;
-var counterStart = 4500; // Must be higher than 0
+// var counterStart = 4500; // Must be higher than 0
+var counterStart = 2;
 var nodeParent;
 var counter = counterStart;
 
@@ -32,6 +35,8 @@ var delay = 0;
 var newDataFrame;
 var currentTransformation = "3d";
 var currentRenderStyle = "nodes";
+var currentDataset;
+var currentDashboard;
 var speed = 1;
 
 // 4096hz settings
@@ -263,13 +268,11 @@ function loop() {
 				phaseOff = Math.round((maxNodeDistance - n.distance+1)*nodeFalloff/nodeSpread);
 				n.updateNode(phaseOff, counter);
 			});
-
 		}
-		// console.log(counter);
-		dashboard.updatePosition(counter);
+
+		currentDashboard.updatePosition(counter);
 	}
 
-	// console.log(getSpeed());
 	counter += speed;
 	frame++;
 	render();
@@ -393,7 +396,7 @@ function destroySpaceTime() {
 		});
 		nodeArray = [];
 	}
-	dashboard.updatePosition(counter);
+	currentDashboard.updatePosition(counter);
 }
 
 function createSpaceTime() {
@@ -406,7 +409,7 @@ function createSpaceTime() {
 }
 
 function flattenSpaceTime(){
-	console.log(currentRenderStyle);
+	// console.log(currentRenderStyle);
 	friction = 6;
 	if (currentRenderStyle === "mesh") {
 
@@ -461,6 +464,22 @@ function transformSpaceTime(e) {
 	currentTransformation = value;
 }
 
+function setCurrentDataset() {
+	currentDataset = h1Enabled === true ? dataSetH1 : dataSetTemplate;
+	currentDashboard = h1Enabled === true ? dashboardH1 : dashboardTemplate;
+}
+
+function sendToSimulation (dataSet, setName) {
+	if (setName = "H1") {
+		dataSetH1 = dataSet;
+	}
+	else if (setName = "Template") {
+		dataSetTemplate = dataSet;
+	}
+	setCurrentDataset();
+	renderDataPerspective(currentDataset);
+}
+
 function renderDataPerspective(d) {
 	// renderDataSpline(d);
 	data = d;
@@ -492,7 +511,7 @@ function init() {
 	createSpaceTime();
 	setTimeout(function(){
 		loop();
-	},0);
+	},20);
 }
 
 init();

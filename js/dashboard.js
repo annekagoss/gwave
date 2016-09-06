@@ -1,9 +1,9 @@
-var dashboard;
+var dashboardH1, dashboardTemplate;
 
 var Dashboard =  function(data, graphTitle) {
 
-  var margin = {top: 20, right: 20, bottom: 30, left: 50},
-      width = 300 - margin.left - margin.right,
+  var margin = {top: 20, right: 60, bottom: 20, left: 60},
+      width = window.innerWidth*0.5 - margin.left - margin.right,
       height = 150 - margin.top - margin.bottom;
 
   var x = d3.scaleLinear()
@@ -18,20 +18,39 @@ var Dashboard =  function(data, graphTitle) {
       .x(function(d) { return x(d.x); })
       .y(function(d) { return y(d.y); });
 
-  var graphContainer = d3.select(".ui").append("div")
-    .attr("class", "graph-container");
+  if (jQuery('.graph-container-1').length === 0) {
 
-  var title = d3.select(".graph-container").append("div")
-    .attr("class","title")
-    .html(graphTitle);
+    var graphContainer = d3.select(".graph-section").append("div")
+      .attr("class", "graph-container graph-container-1");
 
-  var svg = d3.select(".graph-container").append("svg")
-      .attr("class", "graph")
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-      .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-    // .on("mouseover", function() { scrubGraph(); });
+    var title = d3.select(".graph-container-1").append("div")
+      .attr("class","title")
+      .html(graphTitle);
+
+    var svg = d3.select(".graph-container-1").append("svg")
+        .attr("class", "graph")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+      // .on("mouseover", function() { scrubGraph(); });
+  }
+  else {
+    var graphContainer = d3.select(".graph-section").append("div")
+      .attr("class", "graph-container graph-container-2");
+
+    var title = d3.select(".graph-container-2").append("div")
+      .attr("class","title")
+      .html(graphTitle);
+
+    var svg = d3.select(".graph-container-2").append("svg")
+        .attr("class", "graph")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+      // .on("mouseover", function() { scrubGraph(); });
+  }
 
   svg.append("g")
      .attr("class", "axis axis--x")
@@ -68,7 +87,7 @@ var Dashboard =  function(data, graphTitle) {
     // });
 
     this.updatePosition = function(phase) {
-    //   console.log(phase);
+      // console.log(data[phase]);
       var posX = x(data[phase-1].x);
       // console.log(posX);
       svg.select(".scrub-line")
@@ -78,6 +97,11 @@ var Dashboard =  function(data, graphTitle) {
 }
 
 
-function renderDataDashboard(data, title) {
-  dashboard = new Dashboard(data, title);
+function renderDataDashboard(data, title, setName) {
+  if (setName === "H1") {
+    dashboardH1 = new Dashboard(data, title);
+  }
+  else if (setName === "Template") {
+    dashboardTemplate = new Dashboard(data, title);
+  }
 }
