@@ -12,17 +12,43 @@
 	</head>
 	<body>
 		<div class="ui">
-			<div class="button pause">Pause</div>
-			<div class="button reset">Reset</div>
-			<div class="button slider-container">
+			<div class="data-picker">
+				<div class="picker-label">
+					Choose Dataset
+				</div>
+				<div class="button data-icon" value="template">
+					<div class="icon-label">
+						Numerical Relativity Template</br>&nbsp;
+					</div>
+					<div class="icon-container template-icon"></div>
+				</div>
+				<div class="button data-icon selected" value="h1">
+					<div class="icon-label">
+						LIGO Hanford Observatory,</br>Mon Sep 14, 2015
+					</div>
+					<div class="icon-container h1-icon"></div>
+				</div>
+			</div>
+
+			<div class="button pause playing selected">
+				<div class="pause-rect"></div>
+				<div class="pause-rect"></div>
+				<div class="pause-triangle">&#9658;</div>
+			</div>
+			<div class="button reset selected">Reset</div>
+			<div class="button slider-container selected">
 				<div class="slider-label">Speed: <span class="speed-val"></span></div>
 				<input class="slider" id="speed-slider" type="range" min="1" max="20" step="1" value="2"/>
 			</div>
-			<div class="button transform" value="2d">Flatten to 2D Spacetime</div>
-			<div class="button transform" value="3d">Expand to 3D Spacetime</div>
-			<div class="button render-style" value="mesh">Render as mesh</div>
-			<div class="button render-style" value="nodes">Render as nodes</div>
+			<div class="button transform flat" value="2d"><div class="transform-icon flat"></div>Flatten to 2D Spacetime</div>
+			<div class="button transform expanded selected" value="3d"><div class="transform-icon expanded"></div>Expand to 3D Spacetime</div>
+			<div class="button render-style mesh" value="mesh"><div class="render-icon mesh"></div>Render as mesh</div>
+			<div class="button render-style nodes selected" value="nodes"><div class="render-icon nodes"></div>Render as nodes</div>
 			<div class="graph-section"></div>
+		</div>
+
+		<div class="loading">
+			<div class="loading-text">(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;&nbsp;)&nbsp;&nbsp;&nbsp;&nbsp;)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</div>
 		</div>
 
 		<script src="//d3js.org/d3.v4.0.0-alpha.15.min.js"></script>

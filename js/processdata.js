@@ -1,9 +1,11 @@
+var datasets = [];
+
 function loadData() {
 	$.ajax({
         type: "GET",
         url: "data/H1_whitened_16384hz.csv",
         dataType: "text",
-        success: function(data) { processData(data, "H1"); },
+        success: function(data) { processData(data, "h1"); },
 		error: function(req, status, err) {console.log(status, err);}
    });
 
@@ -11,7 +13,14 @@ function loadData() {
          type: "GET",
  				 url: "data/template_downsampled.csv",
          dataType: "text",
-         success: function(data) { processData(data, "Template"); },
+         success: function(data) { processData(data, "template");
+		 setTimeout(function(){
+			 datasets.forEach(function(d){
+				 renderDataDashboard(d.data, d.title, d.name);
+			 });
+			 retrieveDataset("h1")
+		 },100);
+		 ;},
  		error: function(req, status, err) {console.log(status, err);}
       });
 }
@@ -29,9 +38,17 @@ function processData(text, setName) {
 		data = jQuery.grep(data, function(d, i) {
 			return d.x > -15 && d.x < 5;
 		});
-		var title = setName === "H1" ? "LIGO Hanford Observatory, Mon Sep 14 09:16:37 GMT 2015, 16384 Hz" : "Numerical Relativity Template";
-		renderDataDashboard(data, title, setName);
-		setTimeout(function() {
-			sendToSimulation(data, setName);
-		},0);
+		var title = setName === "h1" ? "LIGO Hanford Observatory, Mon Sep 14 09:16:37 GMT 2015, 16384 Hz" : "Numerical Relativity Template";
+		datasets.push({name:setName,data:data,title:title});
+}
+
+function retrieveDataset(name) {
+	for (i = 0; i < datasets.length; i++) {
+		if (datasets[i].name === name) {
+			sendToSimulation(datasets[i].data, datasets[i].name);
+		}
+		else {
+			continue;
+		}
+	}
 }
