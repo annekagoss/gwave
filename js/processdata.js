@@ -1,28 +1,41 @@
 var datasets = [];
 
 function loadData() {
-	$.ajax({
+
+	function loadH1Data() {
+		$.ajax({
         type: "GET",
         url: "data/H1_whitened_16384hz.csv",
         dataType: "text",
-        success: function(data) { processData(data, "h1"); },
-		error: function(req, status, err) {console.log(status, err);}
-   });
+        success: function(data) {
+        	processData(data, "h1");
+        },
+				error: function(req, status, err) {console.log(status, err);},
+				complete: function() {
+					console.log("h1 complete");
+					datasets.forEach(function(d){
+						renderDataDashboard(d.data, d.title, d.name);
+			 		});
+			 		retrieveDataset("h1")
+				}
+	  });
+	}
 
-	 $.ajax({
-         type: "GET",
- 				 url: "data/template_downsampled.csv",
-         dataType: "text",
-         success: function(data) { processData(data, "template");
-		 setTimeout(function(){
-			 datasets.forEach(function(d){
-				 renderDataDashboard(d.data, d.title, d.name);
-			 });
-			 retrieveDataset("h1")
-		 },100);
-		 ;},
- 		error: function(req, status, err) {console.log(status, err);}
-      });
+	function loadTemplateData() {
+			$.ajax({
+	         type: "GET",
+	 				 url: "data/template_downsampled.csv",
+	         dataType: "text",
+	         success: function(data) { processData(data, "template"); },
+					error: function(req, status, err) {console.log(status, err);},
+					complete: function() {
+						console.log("template complete");
+						loadH1Data();
+					}
+	    });
+		}
+
+		loadTemplateData();
 }
 
 function processData(text, setName) {
