@@ -7,12 +7,13 @@ function loadData() {
         type: "GET",
         url: "data/H1_whitened_16384hz.csv",
         dataType: "text",
-        success: function(data) {
-        	processData(data, "h1");
+        success: function() {
+        	console.log("h1 success");
         },
 				error: function(req, status, err) {console.log(status, err);},
-				complete: function() {
+				complete: function(data) {
 					console.log("h1 complete");
+					processData(data.responseText, "h1");
 					datasets.forEach(function(d){
 						renderDataDashboard(d.data, d.title, d.name);
 			 		});
@@ -26,10 +27,13 @@ function loadData() {
 	         type: "GET",
 	 				 url: "data/template_downsampled.csv",
 	         dataType: "text",
-	         success: function(data) { processData(data, "template"); },
+	         success: function() {
+	         		console.log("template success");
+	          },
 					error: function(req, status, err) {console.log(status, err);},
-					complete: function() {
+					complete: function(data) {
 						console.log("template complete");
+						processData(data.responseText, "template");
 						loadH1Data();
 					}
 	    });
