@@ -19,19 +19,11 @@ var h1Enabled = true;
 var templateEnabled = false;
 var nodeArray = [];
 var running = true;
-// var counterStart = 4500; // Must be higher than 0
-var counterStart = 2;
+var counterStart = 2; // Must be higher than 0
 var nodeParent;
 var counter = counterStart;
 var simulatedPhase;
 
-// Global Settings //
-// var arrWidth = 20;
-// var arrHeight = 10;
-// var arrDepth = 30;
-// var spread = 10;
-// var nodeSize = 1;
-//
 var delay = 0;
 var newDataFrame;
 var currentTransformation = "3d";
@@ -39,16 +31,6 @@ var currentRenderStyle = "nodes";
 var currentDataset;
 var currentDashboard = dashboardTemplate;
 var speed = 2;
-
-// 4096hz settings
-// var friction = .125,
-// 	cubeWidth = 1000,
-// 	cubeHeight = 1000,
-// 	cubeDepth = 1000,
-// 	cubeRes = 60,
-// 	cubeSpread = 500,
-// 	falloff = 10, // Wiggliness
-// 	flatAmp = 100;
 
 // 16384hz settings
 var friction = .25,
@@ -242,25 +224,6 @@ function loop() {
 
 	if (dataRendered) {
 		if (currentRenderStyle === "mesh") {
-
-			// Use this to animate using lerp for 4096hz data
-			// if (!posDataUpdated) {
-			// 	for (n = 0; n <= meshVertices.length - 1; n++) {
-			// 		phaseOff = Math.round(meshVertices[n].distance * falloff / cubeSpread);
-			// 		meshVertices[n].updatePositionData(phaseOff);
-			// 		if (n === meshVertices.length - 1) {
-			// 			posDataUpdated = true;
-			// 		}
-			// 	}
-			// } else {
-			// 	for (n = 0; n <= meshVertices.length - 1; n++) {
-			// 		meshVertices[n].moveWithLerp();
-			// 	}
-			// }
-
-			// console.log(Math.round((maxMeshDistance - meshVertices[0].distance+1)*meshFalloff/cubeSpread));
-			// console.log(meshVertices[0]);
-
 
 			// Use this for 16384hz data
 			if (meshVertices[0]) {

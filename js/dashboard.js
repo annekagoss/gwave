@@ -117,18 +117,6 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
     .attr("y1","0")
     .attr("y2",height)
 
-    // jQuery(".graph").mousemove(function(event) {
-    //   var mouseX = event.pageX-margin.left;
-    //   svg.select(".scrub-line")
-    //       .attr("x1", mouseX)
-    //       .attr("x2", mouseX);
-    // });
-    // console.log(currentTransformation);
-    // if (currentTransformation === "2d" && this.name === "template") {
-    //     console.log('got here');
-    //     counterOffset += 200;
-    // }
-
     this.updatePosition = function(phase) {
         if (currentRenderStyle === "nodes" && currentTransformation === "2d" && this.name === "template") {
             counterOffset = 190;
@@ -140,7 +128,6 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
             counterOffset = 20;
         }
       if ((phase+counterOffset-1) < data.length) {
-        //   console.log(data[phase+counterOffset-1].x);
           var posX = x(data[phase+counterOffset-1].x);
       }
       else {
