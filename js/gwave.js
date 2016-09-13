@@ -23,6 +23,7 @@ var running = true;
 var counterStart = 2;
 var nodeParent;
 var counter = counterStart;
+var simulatedPhase;
 
 // Global Settings //
 // var arrWidth = 20;
@@ -36,8 +37,8 @@ var newDataFrame;
 var currentTransformation = "3d";
 var currentRenderStyle = "nodes";
 var currentDataset;
-var currentDashboard;
-var speed = 1;
+var currentDashboard = dashboardTemplate;
+var speed = 2;
 
 // 4096hz settings
 // var friction = .125,
@@ -101,10 +102,10 @@ function createScene() {
 	// camera.position.x = 0;
 	// camera.position.y = 0;
 	// camera.position.z = 20;
-	camera.position.x = 303;
-	camera.position.y = 205;
-	camera.position.z = 326;
-	camera.rotation = (-0.5611195939970497, 0.667090950310542, 0.2763639986659358);
+	camera.position.x = 920;
+	camera.position.y = 692;
+	camera.position.z = 809;
+	camera.rotation = (-0.7076907934882674, 0.7128062225857894, 0.4640637998884659);
 
 	controls = new THREE.TrackballControls(camera);
 	controls.rotateSpeed = 1.0;
@@ -134,6 +135,7 @@ function createScene() {
 	jQuery('.transform').on('click', function(){
 		friction = .25;
 		running = false;
+		jQuery('.transform').toggleClass('selected');
 		transformSpaceTime(jQuery(this));
 		setTimeout(function(){
 			running = true;
@@ -146,6 +148,7 @@ function createScene() {
 		if (running) {
 			loop();
 		}
+		jQuery(this).toggleClass('playing');
 	});
 	jQuery('.reset').on('click', function(){
 		resetSpaceTime();
@@ -154,6 +157,9 @@ function createScene() {
 		friction = .25;
 		currentTransformation = "3d";
 		var newStyle = jQuery(this).attr('value');
+		jQuery('.render-style').toggleClass('selected');
+		jQuery('.transform.expanded').addClass('selected');
+		jQuery('.transform.flat').removeClass('selected');
 		if (currentRenderStyle !== newStyle) {
 			destroySpaceTime();
 			currentRenderStyle = jQuery(this).attr('value');
@@ -177,6 +183,14 @@ function createScene() {
 			render();
 			loop();
 		},0);
+	});
+
+	jQuery('.data-picker .button').on('click', function(){
+		currentDashboard = jQuery(this).attr('value') === "template" ? dashboardTemplate : dashboardH1;
+		jQuery('.graph-container').toggleClass('shown');
+		jQuery('.data-picker .button').toggleClass('selected');
+		retrieveDataset(jQuery(this).attr('value'));
+		resetSpaceTime();
 	});
 }
 
@@ -249,34 +263,34 @@ function loop() {
 
 
 			// Use this for 16384hz data
+			if (meshVertices[0]) {
+				meshVertices[0].checkForReset(phaseOff, counter+1);
+			}
 			meshVertices.forEach(function(v) {
 				if (v.parentVisibility) {
 					phaseOff = Math.round((maxMeshDistance - v.distance+1) * meshFalloff / cubeSpread);
 					v.updateMeshVertex(phaseOff, counter);
 				}
 			});
-			if (meshVertices[0]) {
-				meshVertices[0].checkForReset(phaseOff, counter);
-			}
 
 		}
 		else {
-			// console.log((maxNodeDistance - nodeArray[0].distance+1));
-			// console.log(nodeArray.length);
-
 			nodeArray.forEach(function(n) {
-				phaseOff = Math.round((maxNodeDistance - n.distance+1)*nodeFalloff/nodeSpread);
+				phaseOff = Math.round((maxNodeDistance -n.distance+1)*nodeFalloff/nodeSpread);
 				n.updateNode(phaseOff, counter);
 			});
 		}
 
-		currentDashboard.updatePosition(counter);
+		if (currentDashboard) {
+			currentDashboard.updatePosition(counter);
+		}
 	}
-
-	counter += speed;
-	frame++;
-	render();
-	if (running) {	requestAnimationFrame(loop);}
+	setTimeout(function(){
+		counter += speed;
+		frame++;
+		render();
+		if (running) {	requestAnimationFrame(loop);}
+	},1000/60);
 }
 
 function getDist(x, y, z) {
@@ -464,19 +478,16 @@ function transformSpaceTime(e) {
 	currentTransformation = value;
 }
 
-function setCurrentDataset() {
-	currentDataset = h1Enabled === true ? dataSetH1 : dataSetTemplate;
-	currentDashboard = h1Enabled === true ? dashboardH1 : dashboardTemplate;
-}
+// function setCurrentDataset() {
+// 	currentDataset = h1Enabled === true ? dataSetH1 : dataSetTemplate;
+// 	console.log(currentDataset);
+// }
 
-function sendToSimulation (dataSet, setName) {
-	if (setName = "H1") {
-		dataSetH1 = dataSet;
-	}
-	else if (setName = "Template") {
-		dataSetTemplate = dataSet;
-	}
-	setCurrentDataset();
+function sendToSimulation (data, name) {
+	// console.log(name);
+	currentDataset = data;
+	currentDashboard = name === "template" ? dashboardTemplate : dashboardH1;
+	jQuery('.graph-container.'+name).addClass('shown');
 	renderDataPerspective(currentDataset);
 }
 
@@ -484,6 +495,7 @@ function renderDataPerspective(d) {
 	// renderDataSpline(d);
 	data = d;
 	dataRendered = true;
+	jQuery('.loading').addClass('done');
 }
 
 function renderDataSpline(d) {
@@ -511,7 +523,7 @@ function init() {
 	createSpaceTime();
 	setTimeout(function(){
 		loop();
-	},20);
+	},10);
 }
 
 init();

@@ -8,19 +8,67 @@
 
 body {
 	margin: 0;
-	/*background-color: #0000FF; /* Colors.blue in js */
-  background-color: #000; /* Colors.blue in js */
+    background-color: #000;
     color: #fff;
     font-family: 'din_alternatebold';
     font-size: 8px;
     letter-spacing: 1px;
     text-transform: uppercase;
     text-align: left;
+    overflow: hidden;
+}
+
+.loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: black;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+}
+
+.loading.done {
+    opacity: 0;
+}
+
+.loading-text {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2em;
+    letter-spacing: 0.125em;
+    color: rgb(0, 79, 140);
+}
+
+.loading-icon {
+    width: 30px;
+    height: 30px;
+    display: inline-block;
+    background-image: url(../images/loading-icon.svg);
+    background-repeat: no-repeat;
+    background-size: contain;
+    margin-right: 6px;
+    vertical-align: middle;
+
+}
+
+.ui {
+	position: absolute;
+    top: 0;
+}
+
+.picker-label {
+    font-size: 2em;
+    margin: 20px 32px 0;
+    padding: 4px;
 }
 
 .button {
   /*display: inline-block;*/
-  margin: 20px 32px 20px;
+  margin: 10px 32px 10px;
   padding: 4px;
   cursor: pointer;
   border: solid 1px rgba(255, 255, 255, 0);
@@ -28,15 +76,23 @@ body {
   box-sizing: border-box;
   cursor: pointer;
   vertical-align: middle;
+  opacity: .5;
+}
+
+.button.selected {
+    opacity: 1;
 }
 
 .button:hover {
-  border: solid 1px rgba(255, 255, 255, 1);
+  text-decoration: underline;
 }
 
 .slider-container {
     border: none;
     padding: 0;
+    display: inline-block;
+    vertical-align: top;
+    margin: 10px 0px 10px 10px;
 }
 
 .slider-container:hover {
@@ -67,16 +123,6 @@ input[type="range" i]::-webkit-slider-thumb, input[type="range" i]::-webkit-medi
     cursor: pointer;
 }
 
-.hudCanvas {
-	top: 0;
-	position: absolute;
-}
-
-.ui {
-	position: absolute;
-    top: 0;
-}
-
 .graph-section {
   display: block;
   position: fixed;
@@ -105,4 +151,119 @@ input[type="range" i]::-webkit-slider-thumb, input[type="range" i]::-webkit-medi
 
 .graph-container .title,  .graph-container-2 .title{
 	margin: 20px 24px 0;
+}
+
+.data-picker {
+    margin-bottom: 10px;
+}
+
+.data-icon {
+    display: inline-block;
+    margin: 0 0 0 32px;
+    vertical-align: top;
+}
+
+.data-icon:last-child {
+    margin: 0 0 0 12px;
+}
+
+.icon-label {
+    margin-bottom: 4px;
+}
+
+.pause {
+    width: auto;
+    display: inline-block;
+    border: none;
+    margin: 10px 0 10px 32px;
+}
+
+.pause-rect {
+    width: 4px;
+    height: 16px;
+    border: solid 1px #fff;
+    background: transparent;
+    transition: background .1s ease;
+    display: inline-block;
+}
+
+.pause-triangle {
+    width: 12px;
+    height: 12px;
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: white;
+    color: transparent;
+    transition: color .1s ease;
+    font-size: 16px;
+}
+
+.pause:hover {
+    border: none;
+}
+
+.pause:hover .pause-rect {
+    background: #fff;
+}
+
+.pause:hover .pause-triangle {
+    color: #fff;
+}
+
+.pause.playing .pause-triangle {
+    display: none;
+}
+
+.pause:not(.playing) .pause-rect {
+    display: none;
+}
+
+.pause:not(.playing) .pause-triangle {
+    display: inline-block;
+}
+
+.reset {
+    display: inline-block;
+    margin: 10px 0px 10px 10px;
+}
+
+.transform, .render-style {
+    padding: 0;
+}
+
+.transform.flat, .render-style.mesh {
+    margin-top: 25px;
+}
+
+.transform-icon, .render-icon {
+    width: 30px;
+    height: 30px;
+    display: inline-block;
+    background-repeat: no-repeat;
+    background-size: contain;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+.transform-icon.flat {
+    background-image: url(../images/flat-icon-01.svg);
+}
+
+.transform-icon.expanded {
+    background-image: url(../images/expanded-icon-01.svg);
+}
+
+.render-icon.mesh {
+    background-image: url(../images/mesh-icon-01.svg);
+}
+
+.render-icon.nodes {
+    background-image: url(../images/nodes-icon.svg);
+}
+
+.graph-container {
+    display: none;
+}
+
+.graph-container.shown {
+    display: inline-block;
 }

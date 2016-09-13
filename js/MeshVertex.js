@@ -6,6 +6,7 @@ var MeshVertex = function(vertex, parent, index) {
 	this.parentCube = parent.children[0].geometry;
 	this.parentVisibility = parent.visible;
 	this.indexInParent = index;
+	this.dataPos;
 	// this.finishedLerp = false;
 
 	// Get new position from dataset to use for lerp movement
@@ -79,9 +80,9 @@ var MeshVertex = function(vertex, parent, index) {
 			this.parentCube.vertices[this.indexInParent].x = this.initialX + this.initialX * friction * data[phaseOffset + counter].y;
 			this.parentCube.vertices[this.indexInParent].z = this.initialZ + this.initialZ * friction * data[phaseOffset + counter].y;
 		}
-
+		this.dataPos = phaseOffset + counter;
 		this.parentCube.vertices[this.indexInParent].y = this.initialY + this.initialY * friction * data[phaseOffset + counter].y;
-		
+
 		this.distance = getDist(this.parentCube.vertices[this.indexInParent].x, this.parentCube.vertices[this.indexInParent].y, this.parentCube.vertices[this.indexInParent].z);
 		this.parentCube.verticesNeedUpdate = true;
 	}

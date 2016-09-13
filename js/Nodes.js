@@ -10,12 +10,15 @@ var Node = function() {
 	n.castShadow = true;
 	n.receiveShadow = true;
 	this.mesh.add(n);
+	this.dataPos;
 
 	this.updateNode = function(phaseOffset, counter) {
 		if (phaseOffset+counter >= data.length-counterStart) {
 			this.reset();
 			return;
 		}
+
+		this.dataPos = phaseOffset+counter;
 		// console.log(counter);
 		this.mesh.position.y = this.initialHeight + this.initialHeight * friction * data[phaseOffset+counter].y;
 

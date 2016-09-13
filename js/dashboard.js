@@ -1,10 +1,14 @@
 var dashboardH1, dashboardTemplate;
 
-var Dashboard =  function(data, graphTitle) {
+var Dashboard =  function(data, graphTitle, setName, counterOffset) {
+
+  this.name = setName;
 
   var margin = {top: 20, right: 60, bottom: 20, left: 60},
-      width = window.innerWidth*0.5 - margin.left - margin.right,
-      height = 150 - margin.top - margin.bottom;
+      width = window.innerWidth*1 - margin.left - margin.right,
+      height = 150 - margin.top - margin.bottom,
+      iconWidth = 100,
+      iconHeight = 33;
 
   var x = d3.scaleLinear()
       .range([0, width])
@@ -14,14 +18,26 @@ var Dashboard =  function(data, graphTitle) {
       .range([height, 0])
       .domain(d3.extent(data, function(d) { return d.y; }));
 
+  var iconX = d3.scaleLinear()
+      .range([0, iconWidth])
+      .domain(d3.extent(data, function(d) { return d.x; }));
+
+  var iconY = d3.scaleLinear()
+      .range([iconHeight, 0])
+      .domain(d3.extent(data, function(d) { return d.y; }));
+
   var line = d3.line()
       .x(function(d) { return x(d.x); })
       .y(function(d) { return y(d.y); });
 
-  if (jQuery('.graph-container-1').length === 0) {
+  var iconLine = d3.line()
+      .x(function(d) { return iconX(d.x); })
+      .y(function(d) { return iconY(d.y); });
+
+  if (this.name === "template") {
 
     var graphContainer = d3.select(".graph-section").append("div")
-      .attr("class", "graph-container graph-container-1");
+      .attr("class", "graph-container graph-container-1 "+this.name);
 
     var title = d3.select(".graph-container-1").append("div")
       .attr("class","title")
@@ -34,10 +50,21 @@ var Dashboard =  function(data, graphTitle) {
       .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
       // .on("mouseover", function() { scrubGraph(); });
+
+    var iconSvg = d3.select(".template-icon").append("svg")
+        .attr("class", "graph icon")
+        .attr("width", iconWidth)
+        .attr("height", iconHeight)
+        .append("g");
+
+    iconSvg.append("path")
+      .datum(data)
+      .attr("class", "line")
+      .attr("d", iconLine);
   }
   else {
     var graphContainer = d3.select(".graph-section").append("div")
-      .attr("class", "graph-container graph-container-2");
+      .attr("class", "graph-container graph-container-2 "+this.name);
 
     var title = d3.select(".graph-container-2").append("div")
       .attr("class","title")
@@ -50,6 +77,17 @@ var Dashboard =  function(data, graphTitle) {
       .append("g")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
       // .on("mouseover", function() { scrubGraph(); });
+
+      var iconSvg = d3.select(".h1-icon").append("svg")
+          .attr("class", "graph icon")
+          .attr("width", iconWidth)
+          .attr("height", iconHeight)
+          .append("g");
+
+      iconSvg.append("path")
+        .datum(data)
+        .attr("class", "line")
+        .attr("d", iconLine);
   }
 
   svg.append("g")
@@ -85,11 +123,29 @@ var Dashboard =  function(data, graphTitle) {
     //       .attr("x1", mouseX)
     //       .attr("x2", mouseX);
     // });
+    // console.log(currentTransformation);
+    // if (currentTransformation === "2d" && this.name === "template") {
+    //     console.log('got here');
+    //     counterOffset += 200;
+    // }
 
     this.updatePosition = function(phase) {
-      // console.log(data[phase]);
-      var posX = x(data[phase-1].x);
-      // console.log(posX);
+        if (currentRenderStyle === "nodes" && currentTransformation === "2d" && this.name === "template") {
+            counterOffset = 190;
+        }
+        else if (currentRenderStyle === "nodes" && currentTransformation === "3d" && this.name === "template") {
+            counterOffset = 40;
+        }
+        else if (currentRenderStyle === "mesh" && this.name === "template") {
+            counterOffset = 20;
+        }
+      if ((phase+counterOffset-1) < data.length) {
+        //   console.log(data[phase+counterOffset-1].x);
+          var posX = x(data[phase+counterOffset-1].x);
+      }
+      else {
+          var posX = x(data[0].x);
+      }
       svg.select(".scrub-line")
         .attr("x1", posX)
         .attr("x2", posX);
@@ -98,10 +154,10 @@ var Dashboard =  function(data, graphTitle) {
 
 
 function renderDataDashboard(data, title, setName) {
-  if (setName === "H1") {
-    dashboardH1 = new Dashboard(data, title);
+  if (setName === "h1") {
+    dashboardH1 = new Dashboard(data, title, setName, 40);
   }
-  else if (setName === "Template") {
-    dashboardTemplate = new Dashboard(data, title);
+  else if (setName === "template") {
+    dashboardTemplate = new Dashboard(data, title, setName, 40);
   }
 }
