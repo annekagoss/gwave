@@ -101,12 +101,18 @@ body {
 
 .slider {
     -webkit-appearance: none;
+    -moz-appearance: none;
     height: 1px;
     cursor: pointer;
+    margin: 0;
 }
 
 .slider-label {
     margin-bottom: 4px;
+}
+
+input {
+	-moz-appearance: none;
 }
 
 input:focus {
@@ -115,12 +121,36 @@ input:focus {
 
 input[type="range" i]::-webkit-slider-thumb, input[type="range" i]::-webkit-media-slider-thumb {
     -webkit-appearance: none;
+    -moz-appearance: none;
     background: transparent;
     height: 15px;
     width: 15px;
     border-radius: 50em;
     border: solid 1px #fff;
     cursor: pointer;
+}
+
+
+input[type=range]::-moz-range-track {
+    width: 100%;
+    height: 1px;
+    background: #fff;
+    border-radius: 0;
+}
+
+input[type=range]::-moz-range-thumb {
+    border: 1px solid #fff;
+    height: 15px;
+    width: 15px;
+    border-radius: 50em;
+    background: transparent;
+    cursor: pointer;
+}
+
+/*hide the outline behind the border*/
+input[type=range]:-moz-focusring{
+    outline: 1px solid transparent;
+    outline-offset: -1px;
 }
 
 .graph-section {

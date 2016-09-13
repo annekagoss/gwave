@@ -1,28 +1,45 @@
 var datasets = [];
 
 function loadData() {
-	$.ajax({
+
+	function loadH1Data() {
+		$.ajax({
         type: "GET",
         url: "data/H1_whitened_16384hz.csv",
         dataType: "text",
-        success: function(data) { processData(data, "h1"); },
-		error: function(req, status, err) {console.log(status, err);}
-   });
+        success: function() {
+        	console.log("h1 success");
+        },
+				error: function(req, status, err) {console.log(status, err);},
+				complete: function(data) {
+					console.log("h1 complete");
+					processData(data.responseText, "h1");
+					datasets.forEach(function(d){
+						renderDataDashboard(d.data, d.title, d.name);
+			 		});
+			 		retrieveDataset("h1")
+				}
+	  });
+	}
 
-	 $.ajax({
-         type: "GET",
- 				 url: "data/template_downsampled.csv",
-         dataType: "text",
-         success: function(data) { processData(data, "template");
-		 setTimeout(function(){
-			 datasets.forEach(function(d){
-				 renderDataDashboard(d.data, d.title, d.name);
-			 });
-			 retrieveDataset("h1")
-		 },100);
-		 ;},
- 		error: function(req, status, err) {console.log(status, err);}
-      });
+	function loadTemplateData() {
+			$.ajax({
+	         type: "GET",
+	 				 url: "data/template_downsampled.csv",
+	         dataType: "text",
+	         success: function() {
+	         		console.log("template success");
+	          },
+					error: function(req, status, err) {console.log(status, err);},
+					complete: function(data) {
+						console.log("template complete");
+						processData(data.responseText, "template");
+						loadH1Data();
+					}
+	    });
+		}
+
+		loadTemplateData();
 }
 
 function processData(text, setName) {
