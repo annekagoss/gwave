@@ -20,7 +20,7 @@ var templateEnabled = false;
 var nodeArray = [];
 var running = true;
 // var counterStart = 4500; // Must be higher than 0
-var counterStart = 2;
+var counterStart = 3000;
 var nodeParent;
 var counter = counterStart;
 var simulatedPhase;
@@ -37,8 +37,8 @@ var newDataFrame;
 var currentTransformation = "3d";
 var currentRenderStyle = "nodes";
 var currentDataset;
-var currentDashboard = dashboardTemplate;
-var speed = 2;
+var currentDashboard = dashboardH1;
+var speed = 25;
 
 // 4096hz settings
 // var friction = .125,
@@ -51,25 +51,47 @@ var speed = 2;
 // 	flatAmp = 100;
 
 // 16384hz settings
-var friction = .25,
-	cubeWidth = 800,
-	cubeHeight = 800,
-	cubeDepth = 800,
-	cubeRes = 0.075,
-	cubeSpread = 100,
-	cubeSpeed = speed - 1,
-	nodeSpread = 50,
-	nodeSize = 5,
-	nodeRes = 1,
-	nodeFalloff = 2, // Wiggliness.  Higher than 2 will make points erratic during peak.
-	meshFalloff = 2,
-	flatAmp = 10,
-	distBoundary = 0,
-	maxMeshDistance = getDist(cubeWidth, cubeHeight, cubeDepth),
-	nodeWidth = cubeWidth/nodeSpread*1, // Rendering will be slow without the *0.1
-	nodeHeight = cubeHeight/nodeSpread*1,
-	nodeDepth = cubeDepth/nodeSpread*1,
-	maxNodeDistance = getDist(nodeWidth*1*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*1*nodeSpread);
+// var friction = .25,
+// 	cubeWidth = 800,
+// 	cubeHeight = 800,
+// 	cubeDepth = 800,
+// 	cubeRes = 0.075,
+// 	cubeSpread = 100,
+// 	cubeSpeed = speed - 1,
+// 	nodeSpread = 50,
+// 	nodeSize = 5,
+// 	nodeRes = 1,
+// 	nodeFalloff = 2, // Wiggliness.  Higher than 2 will make points erratic during peak.
+// 	meshFalloff = 2,
+// 	flatAmp = 10,
+// 	distBoundary = 0,
+// 	maxMeshDistance = getDist(cubeWidth, cubeHeight, cubeDepth),
+// 	nodeWidth = cubeWidth/nodeSpread*1, // Rendering will be slow without the *0.1
+// 	nodeHeight = cubeHeight/nodeSpread*1,
+// 	nodeDepth = cubeDepth/nodeSpread*1,
+// 	maxNodeDistance = getDist(nodeWidth*1*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*1*nodeSpread);
+
+	// Audio settings
+	var friction = .25,
+		cubeWidth = 1000,
+		cubeHeight = 1000,
+		cubeDepth = 1000,
+		cubeRes = 0.075,
+		cubeSpread = 100,
+		cubeSpeed = speed - 1,
+		nodeSpread = 50,
+		nodeSize = 5,
+		nodeRes = 1,
+		nodeFalloff = 50, // Wiggliness.  Higher than 2 will make points erratic during peak.
+		meshFalloff = 200,
+		flatAmp = 10,
+		distBoundary = 0,
+		maxMeshDistance = getDist(cubeWidth, cubeHeight, cubeDepth),
+		nodeWidth = cubeWidth/nodeSpread*1, // Rendering will be slow without the *0.1
+		nodeHeight = cubeHeight/nodeSpread*1,
+		nodeDepth = cubeDepth/nodeSpread*1,
+		maxNodeDistance = getDist(nodeWidth*1*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*1*nodeSpread);
+
 
 	var expandedNodeWidth, expandedNodeHeight, expandedNodeDepth, expandedNodeSpread, expandedNodeFalloff;
 
@@ -133,7 +155,7 @@ function createScene() {
 
 	window.addEventListener('resize', onWindowResize, false);
 	jQuery('.transform').on('click', function(){
-		friction = .25;
+		// friction = .25;
 		running = false;
 		jQuery('.transform').toggleClass('selected');
 		transformSpaceTime(jQuery(this));
@@ -154,7 +176,7 @@ function createScene() {
 		resetSpaceTime();
 	});
 	jQuery('.render-style').on('click', function(){
-		friction = .25;
+		// friction = .25;
 		currentTransformation = "3d";
 		var newStyle = jQuery(this).attr('value');
 		jQuery('.render-style').toggleClass('selected');
@@ -424,7 +446,7 @@ function createSpaceTime() {
 
 function flattenSpaceTime(){
 	// console.log(currentRenderStyle);
-	friction = 6;
+	// friction = 6;
 	if (currentRenderStyle === "mesh") {
 
 		cubeArray.forEach(function(cube) {
@@ -485,6 +507,7 @@ function transformSpaceTime(e) {
 
 function sendToSimulation (data, name) {
 	// console.log(name);
+	// console.log(data);
 	currentDataset = data;
 	currentDashboard = name === "template" ? dashboardTemplate : dashboardH1;
 	jQuery('.graph-container.'+name).addClass('shown');

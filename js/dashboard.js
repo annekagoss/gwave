@@ -130,15 +130,16 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
     // }
 
     this.updatePosition = function(phase) {
-        if (currentRenderStyle === "nodes" && currentTransformation === "2d" && this.name === "template") {
-            counterOffset = 190;
-        }
-        else if (currentRenderStyle === "nodes" && currentTransformation === "3d" && this.name === "template") {
-            counterOffset = 40;
-        }
-        else if (currentRenderStyle === "mesh" && this.name === "template") {
-            counterOffset = 20;
-        }
+      // console.log(phase);
+        // if (currentRenderStyle === "nodes" && currentTransformation === "2d" && this.name === "template") {
+        //     counterOffset = 190;
+        // }
+        // else if (currentRenderStyle === "nodes" && currentTransformation === "3d" && this.name === "template") {
+        //     counterOffset = 40;
+        // }
+        // else if (currentRenderStyle === "mesh" && this.name === "template") {
+        //     counterOffset = 20;
+        // }
       if ((phase+counterOffset-1) < data.length) {
         //   console.log(data[phase+counterOffset-1].x);
           var posX = x(data[phase+counterOffset-1].x);
@@ -154,8 +155,10 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
 
 
 function renderDataDashboard(data, title, setName) {
+  // console.log(data);
+  // console.log(setName);
   if (setName === "h1") {
-    dashboardH1 = new Dashboard(data, title, setName, 40);
+    dashboardH1 = new Dashboard(data, title, setName, 0);
   }
   else if (setName === "template") {
     dashboardTemplate = new Dashboard(data, title, setName, 40);
