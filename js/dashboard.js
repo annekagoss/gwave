@@ -1,4 +1,4 @@
-var dashboardH1, dashboardTemplate;
+var dashboardH1, dashboardTemplate, dashboardAudio;
 
 var Dashboard =  function(data, graphTitle, setName, counterOffset) {
 
@@ -34,10 +34,10 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
       .x(function(d) { return iconX(d.x); })
       .y(function(d) { return iconY(d.y); });
 
-  if (this.name === "template") {
+  if (this.name !== "h1") {
 
     var graphContainer = d3.select(".graph-section").append("div")
-      .attr("class", "graph-container graph-container-1 "+this.name);
+      .attr("class", "graph-container graph-container-1 "+this.name+ " shown");
 
     var title = d3.select(".graph-container-1").append("div")
       .attr("class","title")
@@ -51,7 +51,7 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
       // .on("mouseover", function() { scrubGraph(); });
 
-    var iconSvg = d3.select(".template-icon").append("svg")
+    var iconSvg = d3.select("."+this.name+"-icon").append("svg")
         .attr("class", "graph icon")
         .attr("width", iconWidth)
         .attr("height", iconHeight)
@@ -61,6 +61,9 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
       .datum(data)
       .attr("class", "line")
       .attr("d", iconLine);
+
+    d3.select(".data-icon."+this.name+"-data .icon-label")
+      .html(graphTitle);
   }
   else {
     var graphContainer = d3.select(".graph-section").append("div")
@@ -78,7 +81,7 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
       // .on("mouseover", function() { scrubGraph(); });
 
-      var iconSvg = d3.select(".h1-icon").append("svg")
+      var iconSvg = d3.select("."+this.name+"-icon").append("svg")
           .attr("class", "graph icon")
           .attr("width", iconWidth)
           .attr("height", iconHeight)
@@ -155,12 +158,14 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
 
 
 function renderDataDashboard(data, title, setName) {
-  // console.log(data);
-  // console.log(setName);
+  // console.log(setName + ": " + data);
   if (setName === "h1") {
     dashboardH1 = new Dashboard(data, title, setName, 0);
   }
   else if (setName === "template") {
     dashboardTemplate = new Dashboard(data, title, setName, 40);
+  }
+  else if (setName === "audio") {
+    dashboardAudio = new Dashboard(data, title, setName, 0);
   }
 }

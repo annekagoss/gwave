@@ -14,9 +14,10 @@ var mousePos = {
 	y: 0
 };
 var dataRendered = false;
-var dataSetH1, dataSetTemplate, data;
-var h1Enabled = true;
+var dataSetH1, dataSetTemplate, dataSetAudio, data;
+var h1Enabled = false;
 var templateEnabled = false;
+var audioEnabled = true;
 var nodeArray = [];
 var running = false;
 // var counterStart = 4500; // Must be higher than 0
@@ -37,7 +38,7 @@ var newDataFrame;
 var currentTransformation = "3d";
 var currentRenderStyle = "nodes";
 var currentDataset;
-var currentDashboard = dashboardH1;
+var currentDashboard = dashboardAudio;
 var speed = 25;
 
 // 4096hz settings
@@ -208,7 +209,7 @@ function createScene() {
 	});
 
 	jQuery('.data-picker .button').on('click', function(){
-		currentDashboard = jQuery(this).attr('value') === "template" ? dashboardTemplate : dashboardH1;
+		currentDashboard = jQuery(this).attr('value') === "h1" ? dashboardH1 : dashboardAudio;
 		jQuery('.graph-container').toggleClass('shown');
 		jQuery('.data-picker .button').toggleClass('selected');
 		retrieveDataset(jQuery(this).attr('value'));
@@ -509,8 +510,7 @@ function sendToSimulation (data, name) {
 	// console.log(name);
 	// console.log(data);
 	currentDataset = data;
-	currentDashboard = name === "template" ? dashboardTemplate : dashboardH1;
-	jQuery('.graph-container.'+name).addClass('shown');
+	currentDashboard = name === "h1" ? dashboardH1 : dashboardAudio;
 	renderDataPerspective(currentDataset);
 }
 
