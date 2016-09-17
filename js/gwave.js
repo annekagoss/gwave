@@ -18,7 +18,7 @@ var dataSetH1, dataSetTemplate, data;
 var h1Enabled = true;
 var templateEnabled = false;
 var nodeArray = [];
-var running = true;
+var running = false;
 // var counterStart = 4500; // Must be higher than 0
 var counterStart = 3000;
 var nodeParent;
@@ -83,7 +83,7 @@ var speed = 25;
 		nodeSize = 5,
 		nodeRes = 1,
 		nodeFalloff = 50, // Wiggliness.  Higher than 2 will make points erratic during peak.
-		meshFalloff = 200,
+		meshFalloff = 400,
 		flatAmp = 10,
 		distBoundary = 0,
 		maxMeshDistance = getDist(cubeWidth, cubeHeight, cubeDepth),

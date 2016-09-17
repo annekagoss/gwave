@@ -14,20 +14,25 @@
 		<div class="ui">
 			<div class="data-picker">
 				<div class="picker-label">
-					Choose Dataset
+					Upload Audio File
 				</div>
+				<form id="file-form" action="handler.php" method="POST">
+				  <input type="file" id="file-select" name="audioFile"/>
+					<!-- <input type="file" id="audio" onchange="audioSubmit(this)" /> -->
+				  <button type="submit" id="upload-button">Upload</button>
+				</form>
 				<div class="button data-icon selected" value="h1">
 					<div class="icon-label">
-						Audio File 1 (dico bitch)
+						Audio File 1
 					</div>
 					<div class="icon-container h1-icon"></div>
 				</div>
-				<div class="button data-icon" value="template">
+				<!-- <div class="button data-icon" value="template">
 					<div class="icon-label">
 						Audio File 2 (qsine)
 					</div>
 					<div class="icon-container template-icon"></div>
-				</div>
+				</div> -->
 			</div>
 
 			<div class="button pause playing selected">
