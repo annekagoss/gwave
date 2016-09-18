@@ -22,7 +22,9 @@ var MeshVertex = function(vertex, parent, index) {
 	}
 
 	this.checkForReset = function(phaseOffset, counter) {
-		if (phaseOffset+counter >= data.length-counterStart) {
+		console.log(currentDataset.length);
+		if (phaseOffset+counter >= currentDataset.length-counterStart) {
+			console.log('reset spacetime');
 			resetSpaceTime();
 		}
 	}
@@ -46,17 +48,28 @@ var MeshVertex = function(vertex, parent, index) {
 
 	// Movement without lerp
 	this.updateMeshVertex = function(phaseOffset, counter) {
-		if (phaseOffset + this.counter >= data.length - counterStart) {
+		if (phaseOffset + counter >= data.length - counterStart) {
+			console.log('reset vertex');
 			this.reset();
+			return;
 		}
-		if (currentTransformation === "3d") {
-			this.parentCube.vertices[this.indexInParent].x = this.initialX + this.initialX * friction * data[phaseOffset + counter].y;
-			this.parentCube.vertices[this.indexInParent].z = this.initialZ + this.initialZ * friction * data[phaseOffset + counter].y;
-		}
-		this.dataPos = phaseOffset + counter;
-		this.parentCube.vertices[this.indexInParent].y = this.initialY + this.initialY * friction * data[phaseOffset + counter].y;
+		// else {
+			if (currentTransformation === "3d") {
+				if (this.indexInParent === 0) {
+					// console.log(phaseOffset+counter);
+					// console.log('phaseOffset: ' + phaseOffset);
+					// console.log('counter: ' + phaseOffset);
+					// console.log(currentDataset[phaseOffset + counter]);
+					// console.log(currentDataset.length);
+				}
+				this.parentCube.vertices[this.indexInParent].x = this.initialX + this.initialX * friction * currentDataset[phaseOffset + counter].y;
+				this.parentCube.vertices[this.indexInParent].z = this.initialZ + this.initialZ * friction * currentDataset[phaseOffset + counter].y;
+			}
+			this.dataPos = phaseOffset + counter;
+			this.parentCube.vertices[this.indexInParent].y = this.initialY + this.initialY * friction * currentDataset[phaseOffset + counter].y;
 
-		this.distance = getDist(this.parentCube.vertices[this.indexInParent].x, this.parentCube.vertices[this.indexInParent].y, this.parentCube.vertices[this.indexInParent].z);
-		this.parentCube.verticesNeedUpdate = true;
+			this.distance = getDist(this.parentCube.vertices[this.indexInParent].x, this.parentCube.vertices[this.indexInParent].y, this.parentCube.vertices[this.indexInParent].z);
+			this.parentCube.verticesNeedUpdate = true;
+		// }
 	}
 }

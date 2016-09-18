@@ -20,11 +20,14 @@ var Node = function() {
 
 		this.dataPos = phaseOffset+counter;
 		// console.log(counter);
-		this.mesh.position.y = this.initialHeight + this.initialHeight * friction * data[phaseOffset+counter].y;
 
 		if (currentTransformation === "3d") {
-			this.mesh.position.x = this.initialWidth + this.initialWidth * friction * data[phaseOffset+counter].y;
-			this.mesh.position.z = this.initialDepth + this.initialDepth * friction * data[phaseOffset+counter].y;
+			this.mesh.position.y = this.initialHeight + this.initialHeight * friction * currentDataset[phaseOffset+counter].y;
+			this.mesh.position.x = this.initialWidth + this.initialWidth * friction * currentDataset[phaseOffset+counter].y;
+			this.mesh.position.z = this.initialDepth + this.initialDepth * friction * currentDataset[phaseOffset+counter].y;
+		}
+		else {
+			this.mesh.position.y = this.initialHeight + this.initialHeight * friction * currentDataset[phaseOffset+counter].y * flatAmp;
 		}
 
 		this.distance = getDist(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);

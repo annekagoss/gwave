@@ -2,25 +2,7 @@ var datasets = [];
 
 function loadData() {
 
-	function loadCSVs() {
-		function loadAudioFile1() {
-				$.ajax({
-		         type: "GET",
-		 				 url: "data/QSine1.csv",
-		         dataType: "text",
-		         success: function() {
-		         		console.log("qsine success");
-		          },
-						error: function(req, status, err) {console.log(status, err);},
-						complete: function(data) {
-							console.log("qsine complete");
-							processData(data.responseText, "template");
-							loadAudioFile2();
-						}
-		    });
-			}
-
-		function loadAudioFile2() {
+		function loadCSVFile() {
 			$.ajax({
 	        type: "GET",
 	        url: "data/DiscoBitch1.csv",
@@ -32,16 +14,16 @@ function loadData() {
 					complete: function(data) {
 						console.log("disco bitch complete");
 						processData(data.responseText, "h1");
-						datasets.forEach(function(d){
-							renderDataDashboard(d.data, d.title, d.name);
-				 		});
-				 		retrieveDataset("h1")
+						setTimeout(function(){
+							loadAudioFile();
+						}, 1000);
+						// datasets.forEach(function(d){
+						// 	renderDataDashboard(d.data, d.title, d.name);
+						// 	});
+						// 	retrieveDataset("h1")
 					}
 		  });
 		}
-		loadAudioFile1();
-	}
-
 
 	// TO DO: GET THIS WORKING FOR USER-SUBMITTED AUDIO
 	// function audioSubmit() {
@@ -145,7 +127,8 @@ function loadData() {
 	}
 
 	// loadCSVs();
-	loadH1Data();
+	// loadH1Data();
+	loadCSVFile();
 	// jQuery('#file-select').on('change', function(){
 	// 	audioSubmit();
 	// });
@@ -162,10 +145,14 @@ function processData(text, setName) {
     }
 		// Filter out noise data from before and after event
 		data = jQuery.grep(data, function(d, i) {
-			return d.x > -15 && d.x < 5;
+			return d.x > 1000;
 		});
-		var title = setName === "h1" ? "LIGO Hanford Observatory, Mon Sep 14 09:16:37 GMT 2015, 16384 Hz" : "Numerical Relativity Template";
+		console.log(data);
+		var title = "disco_bitch.mp3";
+		// var title = setName === "h1" ? "LIGO Hanford Observatory, Mon Sep 14 09:16:37 GMT 2015, 16384 Hz" : "Numerical Relativity Template";
 		datasets.push({name:setName,data:data,title:title});
+
+
 }
 
 function processAudioArray(array, setName, title) {
@@ -185,8 +172,10 @@ function processAudioArray(array, setName, title) {
 }
 
 function retrieveDataset(name) {
+
 	for (i = 0; i < datasets.length; i++) {
 		if (datasets[i].name === name) {
+			console.log(name);
 			sendToSimulation(datasets[i].data, datasets[i].name);
 		}
 		else {

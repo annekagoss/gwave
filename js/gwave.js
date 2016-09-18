@@ -13,15 +13,16 @@ var mousePos = {
 	x: 0,
 	y: 0
 };
+var data;
 var dataRendered = false;
 var dataSetH1, dataSetTemplate, dataSetAudio, data;
 var h1Enabled = false;
 var templateEnabled = false;
 var audioEnabled = true;
 var nodeArray = [];
-var running = false;
+var running = true;
 // var counterStart = 4500; // Must be higher than 0
-var counterStart = 3000;
+var counterStart = 1;
 var nodeParent;
 var counter = counterStart;
 var simulatedPhase;
@@ -39,7 +40,7 @@ var currentTransformation = "3d";
 var currentRenderStyle = "nodes";
 var currentDataset;
 var currentDashboard = dashboardAudio;
-var speed = 25;
+var speed = 600;
 
 // 4096hz settings
 // var friction = .125,
@@ -72,29 +73,29 @@ var speed = 25;
 // 	nodeDepth = cubeDepth/nodeSpread*1,
 // 	maxNodeDistance = getDist(nodeWidth*1*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*1*nodeSpread);
 
-	// Audio settings
-	var friction = .25,
-		cubeWidth = 1000,
-		cubeHeight = 1000,
-		cubeDepth = 1000,
-		cubeRes = 0.075,
-		cubeSpread = 100,
-		cubeSpeed = speed - 1,
-		nodeSpread = 50,
-		nodeSize = 5,
-		nodeRes = 1,
-		nodeFalloff = 50, // Wiggliness.  Higher than 2 will make points erratic during peak.
-		meshFalloff = 400,
-		flatAmp = 10,
-		distBoundary = 0,
-		maxMeshDistance = getDist(cubeWidth, cubeHeight, cubeDepth),
-		nodeWidth = cubeWidth/nodeSpread*1, // Rendering will be slow without the *0.1
-		nodeHeight = cubeHeight/nodeSpread*1,
-		nodeDepth = cubeDepth/nodeSpread*1,
-		maxNodeDistance = getDist(nodeWidth*1*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*1*nodeSpread);
+// Audio settings
+var friction = .25,
+	cubeWidth = 600,
+	cubeHeight = 600,
+	cubeDepth = 600,
+	cubeRes = 0.075,
+	cubeSpread = 100,
+	cubeSpeed = speed - 1,
+	nodeSpread = 50,
+	nodeSize = 5,
+	nodeRes = 1,
+	nodeFalloff = 50, // Wiggliness.  Higher than 2 will make points erratic during peak.
+	meshFalloff = 400,
+	flatAmp = 100,
+	distBoundary = 0,
+	maxMeshDistance = getDist(cubeWidth, cubeHeight, cubeDepth),
+	nodeWidth = cubeWidth/nodeSpread*1, // Rendering will be slow without the *0.1
+	nodeHeight = cubeHeight/nodeSpread*1,
+	nodeDepth = cubeDepth/nodeSpread*1,
+	maxNodeDistance = getDist(nodeWidth*1*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*1*nodeSpread);
 
 
-	var expandedNodeWidth, expandedNodeHeight, expandedNodeDepth, expandedNodeSpread, expandedNodeFalloff;
+var expandedNodeWidth, expandedNodeHeight, expandedNodeDepth, expandedNodeSpread, expandedNodeFalloff;
 
 var cubeArray = [],
 	cubeVertices = [],
@@ -209,15 +210,29 @@ function createScene() {
 	});
 
 	jQuery('.data-picker .button').on('click', function(){
+		data = [];
 		currentDashboard = jQuery(this).attr('value') === "h1" ? dashboardH1 : dashboardAudio;
+		// counterStart = jQuery(this).attr('value') === "h1" ? 1 : 1;
+		// speed = jQuery(this).attr('value') === "h1" ? 25 : speed;
 		jQuery('.graph-container').toggleClass('shown');
 		jQuery('.data-picker .button').toggleClass('selected');
 		retrieveDataset(jQuery(this).attr('value'));
-		resetSpaceTime();
+		running = false;
+		destroySpaceTime();
+		createSpaceTime();
+
+		setTimeout(function() {
+			console.log(currentDataset.length);
+			// resetSpaceTime();
+			running = true;
+			render();
+			loop();
+		},100);
 	});
 }
 
 function resetSpaceTime() {
+	counter = counterStart;
 	if (currentRenderStyle === "mesh") {
 		meshVertices.forEach(function(v) {
 			if (v.parentVisibility) {
@@ -230,6 +245,7 @@ function resetSpaceTime() {
 			n.reset();
 		});
 	}
+
 }
 
 function createLights() {
@@ -264,6 +280,7 @@ function loop() {
 	}
 
 	if (dataRendered) {
+		// console.log(currentRenderStyle);
 		if (currentRenderStyle === "mesh") {
 
 			// Use this to animate using lerp for 4096hz data
@@ -286,11 +303,14 @@ function loop() {
 
 
 			// Use this for 16384hz data
+			// console.log()
 			if (meshVertices[0]) {
-				meshVertices[0].checkForReset(phaseOff, counter+1);
+				meshVertices[0].checkForReset(phaseOff, counter);
 			}
+			// console.log(Math.round((maxMeshDistance - meshVertices[0].distance+1) * meshFalloff / cubeSpread));
 			meshVertices.forEach(function(v) {
 				if (v.parentVisibility) {
+					// console.log(v.distance);
 					phaseOff = Math.round((maxMeshDistance - v.distance+1) * meshFalloff / cubeSpread);
 					v.updateMeshVertex(phaseOff, counter);
 				}
@@ -298,22 +318,31 @@ function loop() {
 
 		}
 		else {
+			// console.log(Math.round((maxNodeDistance*flatAmp-nodeArray[0].distance)*nodeFalloff/nodeSpread));
+
 			nodeArray.forEach(function(n) {
 				phaseOff = Math.round((maxNodeDistance -n.distance+1)*nodeFalloff/nodeSpread);
 				n.updateNode(phaseOff, counter);
+
 			});
 		}
 
+		// console.log(counter);
 		if (currentDashboard) {
 			currentDashboard.updatePosition(counter);
 		}
 	}
+	// if (currentDataset) {
+	// 	console.log(currentDataset.length);
+	// }
+
 	setTimeout(function(){
 		counter += speed;
 		frame++;
 		render();
 		if (running) {	requestAnimationFrame(loop);}
-	},1000/60);
+	// },1000/60);
+}, 0);
 }
 
 function getDist(x, y, z) {
@@ -337,12 +366,21 @@ function createNode(xVal, yVal, zVal, spread) {
 	this.mesh = new THREE.Object3D();
 	var node = new Node();
 	node.mesh.position.x = xVal*spread;
-	node.mesh.position.y = yVal*spread;
+
+	// console.log(currentTransformation);
+
+	if (currentTransformation === "2d") {
+		node.mesh.position.y = yVal*spread*flatAmp;
+	}
+	else {
+		node.mesh.position.y = yVal*spread;
+	}
+
 	node.mesh.position.z = zVal*spread;
 	node.initialWidth = xVal*spread;
 	node.initialHeight = yVal*spread;
 	node.initialDepth = zVal*spread;
-	node.distance = getDist(xVal*spread, yVal*spread, zVal*spread);
+	node.distance = getDist(node.mesh.position.z, node.mesh.position.y, node.mesh.position.z);
 
 	this.mesh.add(node.mesh);
 	this.node = node;
@@ -493,12 +531,13 @@ function expandSpaceTime(){
 function transformSpaceTime(e) {
 	var value = jQuery(e).attr('value');
 	if (value === "2d" && currentTransformation !== value) {
+		currentTransformation = value;
 		flattenSpaceTime();
 	}
 	else if (value === "3d" && !currentTransformation !== value) {
+		currentTransformation = value;
 		expandSpaceTime();
 	}
-	currentTransformation = value;
 }
 
 // function setCurrentDataset() {

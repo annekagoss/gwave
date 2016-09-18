@@ -91,6 +91,9 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
         .datum(data)
         .attr("class", "line")
         .attr("d", iconLine);
+
+      d3.select(".data-icon."+this.name+"-data .icon-label")
+        .html(graphTitle);
   }
 
   svg.append("g")
@@ -150,6 +153,8 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
       else {
           var posX = x(data[0].x);
       }
+      // console.log(phase);
+      // console.log(posX);
       svg.select(".scrub-line")
         .attr("x1", posX)
         .attr("x2", posX);
@@ -158,7 +163,7 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
 
 
 function renderDataDashboard(data, title, setName) {
-  // console.log(setName + ": " + data);
+  console.log(setName + ": " + data);
   if (setName === "h1") {
     dashboardH1 = new Dashboard(data, title, setName, 0);
   }
