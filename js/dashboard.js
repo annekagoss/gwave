@@ -136,7 +136,7 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
     // }
 
     this.updatePosition = function(phase) {
-      // console.log(phase);
+        // console.log(phase);
         // if (currentRenderStyle === "nodes" && currentTransformation === "2d" && this.name === "template") {
         //     counterOffset = 190;
         // }
@@ -146,18 +146,25 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
         // else if (currentRenderStyle === "mesh" && this.name === "template") {
         //     counterOffset = 20;
         // }
-      if ((phase+counterOffset-1) < data.length) {
+        if ((phase+counterOffset-1) < data.length) {
         //   console.log(data[phase+counterOffset-1].x);
-          var posX = x(data[phase+counterOffset-1].x);
-      }
-      else {
-          var posX = x(data[0].x);
-      }
-      // console.log(phase);
-      // console.log(posX);
-      svg.select(".scrub-line")
-        .attr("x1", posX)
-        .attr("x2", posX);
+              var posX = x(data[phase+counterOffset-1].x);
+
+              if (audioA) {
+                  var posInData = (phase+counterOffset-1) / data.length;
+                  updateAudioTrack(posInData);
+              }
+        }
+        else {
+              var posX = x(data[0].x);
+        }
+        // console.log(phase);
+        // console.log(posX);
+        svg.select(".scrub-line")
+            .attr("x1", posX)
+            .attr("x2", posX);
+
+
     }
 }
 

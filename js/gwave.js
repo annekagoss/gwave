@@ -170,7 +170,11 @@ function createScene() {
 	jQuery('.pause').on('click', function(){
 		running = !running;
 		if (running) {
+			audioA.play();
 			loop();
+		}
+		else {
+			audioA.pause();
 		}
 		jQuery(this).toggleClass('playing');
 	});
@@ -200,6 +204,7 @@ function createScene() {
 		running = false;
 		resetSpaceTime();
 		speed = e.target.valueAsNumber;
+		// setRate(speed);
 		jQuery('.speed-val').text(speed);
 		controls.enabled = true;
 		setTimeout(function() {
@@ -245,7 +250,11 @@ function resetSpaceTime() {
 			n.reset();
 		});
 	}
-
+	// audioA.l
+	// audioA.currentTime = 0;
+	// audioA.play();
+	console.log('reset');
+	loadSoundA('data/audio/vectortransfer.mp3');
 }
 
 function createLights() {
@@ -333,7 +342,9 @@ function loop() {
 	// if (currentDataset) {
 	// 	console.log(currentDataset.length);
 	// }
-
+	if (counter === counterStart) {
+		loadSoundA('data/audio/vectortransfer.mp3');
+	}
 	setTimeout(function(){
 		counter += speed;
 		frame++;

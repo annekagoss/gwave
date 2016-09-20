@@ -120,6 +120,7 @@ function loadData() {
 			audioContext.decodeAudioData(audioData, function(buffer) {
 				source.buffer = buffer;
 				processAudioArray(buffer.getChannelData(0), 'audio', 'vectortransfer.mp3');
+				loadSoundA('data/audio/vectortransfer.mp3');
 			},
 			function(e){"Error with decoding audio data" + e.err});
 		}
