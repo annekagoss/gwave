@@ -7,66 +7,13 @@
 
 	    <link rel="stylesheet" href="css/main.css">
 	    <script type="text/javascript" src="js/lib/jquery-2.2.2.min.js"></script>
-	    <script type="text/javascript" src="js/lib/three.min.js"></script>
-	    <script type="text/javascript" src="js/controls/TrackballControls.js"></script>
 	</head>
 	<body>
-		<div class="ui">
-			<div class="data-picker">
-				<div class="picker-label">
-					Upload Audio File
-				</div>
-				<!-- TO DO: Get user upload working -->
-				<!-- <form id="file-form" action="handler.php" method="POST">
-				  <input type="file" id="file-select" name="audioFile"/>
-				  <button type="submit" id="upload-button">Upload</button>
-				</form> -->
-				<div class="button data-icon h1-data" value="h1">
-					<div class="icon-label">
-						Data Label
-					</div>
-					<div class="icon-container h1-icon"></div>
-				</div>
-				<div class="button data-icon audio-data selected" value="audio">
-					<div class="icon-label">
-						Data Label
-					</div>
-					<div class="icon-container audio-icon"></div>
-				</div>
-				<!-- <div class="button data-icon" value="template">
-					<div class="icon-label">
-						Audio File 2 (qsine)
-					</div>
-					<div class="icon-container template-icon"></div>
-				</div> -->
-			</div>
-
-			<div class="button pause playing selected">
-				<div class="pause-rect"></div>
-				<div class="pause-rect"></div>
-				<div class="pause-triangle">&#9658;</div>
-			</div>
-			<div class="button reset selected">Reset</div>
-			<div class="button slider-container selected">
-				<div class="slider-label">Speed: <span class="speed-val"></span></div>
-				<input class="slider" id="speed-slider" type="range" min="1" max="2000" step="1" value="2"/>
-			</div>
-			<div class="button transform flat" value="2d"><div class="transform-icon flat"></div>Flatten to 2D Spacetime</div>
-			<div class="button transform expanded selected" value="3d"><div class="transform-icon expanded"></div>Expand to 3D Spacetime</div>
-			<div class="button render-style mesh" value="mesh"><div class="render-icon mesh"></div>Render as mesh</div>
-			<div class="button render-style nodes selected" value="nodes"><div class="render-icon nodes"></div>Render as nodes</div>
-			<div class="graph-section"></div>
+		<div class="nav-container">
+			<a class="button icon-label" href="http://annekagoss.github.io/gwave">Gravitational Waves</a>
+			<a class="button icon-label" href="audio.html">Sound Waves</a>
 		</div>
-
-		<div class="loading">
-			<div class="loading-text">(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;&nbsp;&nbsp;LOADING&nbsp;&nbsp;&nbsp;)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</div>
-		</div>
-
 		<script type="text/javascript" src="js/lib/d3.v4.0.0-alpha.15.min.js"></script>
-		<script src="js/dashboard.js"></script>
-		<script src="js/processdata.js"></script>
-		<script src="js/MeshVertex.js"></script>
-		<script src="js/Nodes.js"></script>
-		<script src="js/gwave.js"></script>
+		<script src="js/nav.js"></script>
 	</body>
 </html>

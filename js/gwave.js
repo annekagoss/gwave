@@ -222,7 +222,7 @@ function createScene() {
 		createSpaceTime();
 
 		setTimeout(function() {
-			console.log(currentDataset.length);
+			// console.log(currentDataset.length);
 			// resetSpaceTime();
 			running = true;
 			render();
@@ -301,7 +301,6 @@ function loop() {
 			// console.log(Math.round((maxMeshDistance - meshVertices[0].distance+1)*meshFalloff/cubeSpread));
 			// console.log(meshVertices[0]);
 
-
 			// Use this for 16384hz data
 			// console.log()
 			if (meshVertices[0]) {
@@ -319,7 +318,6 @@ function loop() {
 		}
 		else {
 			// console.log(Math.round((maxNodeDistance*flatAmp-nodeArray[0].distance)*nodeFalloff/nodeSpread));
-
 			nodeArray.forEach(function(n) {
 				phaseOff = Math.round((maxNodeDistance -n.distance+1)*nodeFalloff/nodeSpread);
 				n.updateNode(phaseOff, counter);

@@ -147,12 +147,10 @@ function processData(text, setName) {
 		data = jQuery.grep(data, function(d, i) {
 			return d.x > 1000;
 		});
-		console.log(data);
+		// console.log(data);
 		var title = "disco_bitch.mp3";
 		// var title = setName === "h1" ? "LIGO Hanford Observatory, Mon Sep 14 09:16:37 GMT 2015, 16384 Hz" : "Numerical Relativity Template";
 		datasets.push({name:setName,data:data,title:title});
-
-
 }
 
 function processAudioArray(array, setName, title) {
@@ -175,7 +173,7 @@ function retrieveDataset(name) {
 
 	for (i = 0; i < datasets.length; i++) {
 		if (datasets[i].name === name) {
-			console.log(name);
+			// console.log(name);
 			sendToSimulation(datasets[i].data, datasets[i].name);
 		}
 		else {

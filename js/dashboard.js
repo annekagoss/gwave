@@ -163,7 +163,7 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
 
 
 function renderDataDashboard(data, title, setName) {
-  console.log(setName + ": " + data);
+  // console.log(setName + ": " + data);
   if (setName === "h1") {
     dashboardH1 = new Dashboard(data, title, setName, 0);
   }

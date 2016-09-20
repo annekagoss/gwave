@@ -22,7 +22,7 @@ var MeshVertex = function(vertex, parent, index) {
 	}
 
 	this.checkForReset = function(phaseOffset, counter) {
-		console.log(currentDataset.length);
+		// console.log(currentDataset.length);
 		if (phaseOffset+counter >= currentDataset.length-counterStart) {
 			console.log('reset spacetime');
 			resetSpaceTime();

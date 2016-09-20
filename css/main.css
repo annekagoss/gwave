@@ -18,6 +18,24 @@ body {
     overflow: hidden;
 }
 
+/* Intro nav page */
+.nav-container {
+    width: 100%;
+    text-align: center;
+    top: 50%;
+    position: Absolute;
+}
+
+.nav-container a {
+    color: #fff;
+    opacity: 1;
+    text-decoration: none;
+}
+
+.nav-container a:hover {
+    text-decoration: underline;
+}
+
 .loading {
     position: fixed;
     top: 0;
