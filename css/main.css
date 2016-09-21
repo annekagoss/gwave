@@ -20,10 +20,16 @@ body {
 
 /* Intro nav page */
 .nav-container {
-    width: 100%;
-    text-align: center;
-    top: 50%;
-    position: Absolute;
+  width: 100%;
+  text-align: center;
+  top: 50%;
+  transform: translate(0,-50%);
+  position: absolute;
+}
+
+.nav-container .button {
+    display: block;
+    margin: 40px 0;
 }
 
 .nav-container a {
@@ -34,6 +40,52 @@ body {
 
 .nav-container a:hover {
     text-decoration: underline;
+}
+
+.about-container {
+  position: absolute;
+  max-width: 950px;
+  width: 100%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  top: 50%;
+  padding: 0 80px;
+  text-transform: none;
+  font-size: 1.5em;
+  line-height: 1.5em;
+  color: rgb(0, 79, 140);
+  text-align:center;
+}
+
+.about-container .column {
+  display: inline-block;
+  vertical-align: bottom;
+  width: 40%;
+  padding: 0 20px;
+  text-align: left;
+}
+
+.about-container .column:nth-child(2) {
+  border-left: solid 1px currentColor;
+}
+
+.about-container a {
+  color: #fff;
+  opacity: 1;
+  text-transform: uppercase;
+  text-decoration: none;
+  display: block;
+  /*display: none;*/
+  margin: 20px 0;
+  padding: 0;
+}
+
+.about-container a:hover {
+    text-decoration: underline;
+}
+
+sup {
+  line-height: 0;
 }
 
 .loading {
