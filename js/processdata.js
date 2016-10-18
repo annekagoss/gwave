@@ -17,7 +17,7 @@ function loadData() {
 					datasets.forEach(function(d){
 						renderDataDashboard(d.data, d.title, d.name);
 			 		});
-			 		retrieveDataset("h1")
+			 		retrieveDataset("template")
 				}
 	  });
 	}

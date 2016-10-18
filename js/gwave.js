@@ -15,8 +15,8 @@ var mousePos = {
 };
 var dataRendered = false;
 var dataSetH1, dataSetTemplate, data;
-var h1Enabled = true;
-var templateEnabled = false;
+var h1Enabled = false;
+var templateEnabled = true;
 var nodeArray = [];
 var running = true;
 var counterStart = 2; // Must be higher than 0
@@ -61,59 +61,63 @@ var cubeArray = [],
 
 var lerpDuration = 6;
 
+var effect;
+var clock = new THREE.Clock();
+var container, element;
+
 function createScene() {
-	// DOM setup
-	var container = document.createElement('div');
-	jQuery('body').prepend(container);
-	container.className = 'container';
-
-	// Camera setup
-	HEIGHT = window.innerHeight;
-	WIDTH = window.innerWidth;
-	aspectRatio = WIDTH / HEIGHT;
-	fieldOfView = 60;
-	nearPlane = 1;
-	farPlane = 10000;
-
-	camera = new THREE.PerspectiveCamera(
-		fieldOfView,
-		aspectRatio,
-		nearPlane,
-		farPlane
-	);
-	// camera.position.x = 0;
-	// camera.position.y = 0;
-	// camera.position.z = 20;
-	camera.position.x = 920;
-	camera.position.y = 692;
-	camera.position.z = 809;
-	camera.rotation = (-0.7076907934882674, 0.7128062225857894, 0.4640637998884659);
-
-	controls = new THREE.TrackballControls(camera);
-	controls.rotateSpeed = 1.0;
-	controls.zoomSpeed = 1.2;
-	controls.panSpeed = 0.8;
-	controls.staticMoving = true;
-	controls.dynamicDampingFactor = 0.3;
-	controls.keys = [65, 83, 68];
-	controls.addEventListener('change', render);
-
-	// Scene setup
-	scene = new THREE.Scene();
-	scene.fog = new THREE.Fog(Colors.black, 0, 3000);
-
-	// Renderer setup
 	renderer = new THREE.WebGLRenderer({
 		alpha: true,
 		antialias: true,
 	});
 
-	renderer.setPixelRatio(window.devicePixelRatio);
-	renderer.setSize(WIDTH, HEIGHT);
-	renderer.autoClear = false;
-	container.appendChild(renderer.domElement);
+	element = renderer.domElement;
+	container = document.createElement('div');
+	jQuery('body').prepend(container);
+	container.className = 'container';
+	container.appendChild(element);
 
-	window.addEventListener('resize', onWindowResize, false);
+	effect = new THREE.StereoEffect(renderer);
+
+	scene = new THREE.Scene();
+
+	camera = new THREE.PerspectiveCamera(90, 1, 0.001, 700);
+	camera.position.set(0, 10, 0);
+	scene.add(camera);
+
+	// Old camera setup
+	HEIGHT = window.innerHeight;
+	WIDTH = window.innerWidth;
+
+
+	controls = new THREE.OrbitControls(camera, element);
+	controls.rotateUp(Math.PI / 4);
+	controls.target.set(
+	  camera.position.x + 0.1,
+	  camera.position.y,
+	  camera.position.z
+	);
+	controls.noZoom = true;
+	controls.noPan = true;
+
+	function setOrientationControls(e) {
+	  if (!e.alpha) {
+		return;
+	  }
+
+	  controls = new THREE.DeviceOrientationControls(camera, true);
+	  controls.connect();
+	  controls.update();
+
+	  element.addEventListener('click', fullscreen, false);
+
+	  window.removeEventListener('deviceorientation', setOrientationControls, true);
+	}
+
+	window.addEventListener('deviceorientation', setOrientationControls, true);
+
+	scene.fog = new THREE.Fog(Colors.black, 0, 3000);
+
 	jQuery('.transform').on('click', function(){
 		friction = .25;
 		running = false;
@@ -168,12 +172,41 @@ function createScene() {
 	});
 
 	jQuery('.data-picker .button').on('click', function(){
-		currentDashboard = jQuery(this).attr('value') === "template" ? dashboardTemplate : dashboardH1;
-		jQuery('.graph-container').toggleClass('shown');
-		jQuery('.data-picker .button').toggleClass('selected');
-		retrieveDataset(jQuery(this).attr('value'));
-		resetSpaceTime();
+		setDataset(jQuery(this).attr('value'));
 	});
+
+	setTimeout(resize, 1);
+}
+
+function setDataset(name) {
+	currentDashboard = name === "template" ? dashboardTemplate : dashboardH1;
+	jQuery('.graph-container').toggleClass('shown');
+	jQuery('.data-picker .button').toggleClass('selected');
+	retrieveDataset(name);
+	resetSpaceTime();
+}
+
+function fullscreen() {
+  if (container.requestFullscreen) {
+	container.requestFullscreen();
+  } else if (container.msRequestFullscreen) {
+	container.msRequestFullscreen();
+  } else if (container.mozRequestFullScreen) {
+	container.mozRequestFullScreen();
+  } else if (container.webkitRequestFullscreen) {
+	container.webkitRequestFullscreen();
+  }
+}
+
+function resize() {
+  var width = container.offsetWidth;
+  var height = container.offsetHeight;
+
+  camera.aspect = width / height;
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(width, height);
+  effect.setSize(width, height);
 }
 
 function resetSpaceTime() {
@@ -200,19 +233,13 @@ function createLights() {
 	scene.add(hemisphereLight);
 }
 
-function onWindowResize() {
-	camera.aspect = window.innerWidth / window.innerHeight;
-	camera.updateProjectionMatrix();
-	renderer.setSize(window.innerWidth, window.innerHeight);
-	controls.handleResize();
-}
 var frame = 0;
 var posDataUpdated = false;
 var phaseOff;
 
 function loop() {
-	camera.lookAt(scene.position);
-	controls.update();
+	// camera.lookAt(scene.position);
+	// controls.update();
 
 	if (frame === lerpDuration) {
 		frame = 0;
@@ -248,12 +275,11 @@ function loop() {
 			currentDashboard.updatePosition(counter);
 		}
 	}
-	setTimeout(function(){
-		counter += speed;
-		frame++;
-		render();
-		if (running) {	requestAnimationFrame(loop);}
-	},1000/60);
+	counter += speed;
+	frame++;
+	update(clock.getDelta());
+	render(clock.getDelta());
+	if (running) {	requestAnimationFrame(loop); }
 }
 
 function getDist(x, y, z) {
@@ -268,10 +294,15 @@ function lerpPosition(posA, posB, duration, f) {
 	return newPos;
 }
 
-function render() {
-	renderer.render(scene, camera);
+function update(dt) {
+	resize();
+	camera.updateProjectionMatrix();
+	controls.update(dt);
 }
 
+function render(dt) {
+	effect.render(scene, camera);
+}
 
 function createNode(xVal, yVal, zVal, spread) {
 	this.mesh = new THREE.Object3D();
@@ -441,11 +472,6 @@ function transformSpaceTime(e) {
 	currentTransformation = value;
 }
 
-// function setCurrentDataset() {
-// 	currentDataset = h1Enabled === true ? dataSetH1 : dataSetTemplate;
-// 	console.log(currentDataset);
-// }
-
 function sendToSimulation (data, name) {
 	// console.log(name);
 	currentDataset = data;
@@ -483,6 +509,7 @@ function init() {
 	createScene();
 	createLights();
 	loadData();
+	setDataset("tempalte");
 	createSpaceTime();
 	setTimeout(function(){
 		loop();
