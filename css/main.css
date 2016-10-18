@@ -46,7 +46,7 @@ body {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    font-size: 2em;
+    font-size: 1.5em;
     letter-spacing: 0.125em;
     color: rgb(0, 79, 140);
 }
