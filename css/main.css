@@ -49,6 +49,8 @@ body {
     font-size: 1.5em;
     letter-spacing: 0.125em;
     color: rgb(0, 79, 140);
+    width: 100%;
+    text-align: Center;
 }
 
 .loading-icon {
@@ -304,4 +306,27 @@ input[type=range]:-moz-focusring{
 
 .graph-container.shown {
     display: inline-block;
+}
+
+@media (max-width:600px) {
+    .data-picker, .pause, .reset, .slider-container {
+        display: none;
+    }
+    .transform, .render-style {
+        padding: 0;
+        display: inline-block;
+        margin: 4px;
+        vertical-align: bottom;
+        transform: scale(.8);
+        margin-top: 4px;
+    }
+    .transform.flat, .render-style.mesh {
+        margin-top: 4px;
+    }
+    .graph-section .title {
+        display: none;
+    }
+    .graph {
+        transform: scale(.45) translate(-60%, 90%);
+    }
 }
