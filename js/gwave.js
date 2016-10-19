@@ -38,20 +38,20 @@ var friction = .25,
 	cubeHeight = 800,
 	cubeDepth = 800,
 	cubeRes = 0.075,
-	cubeSpread = 100,
+	cubeSpread = 200,
 	cubeSpeed = speed - 1,
-	nodeSpread = 50,
+	nodeSpread = 100,
 	nodeSize = 5,
 	nodeRes = 1,
 	nodeFalloff = 2, // Wiggliness.  Higher than 2 will make points erratic during peak.
-	meshFalloff = 2,
+	meshFalloff = 10,
 	flatAmp = 10,
 	distBoundary = 0,
 	maxMeshDistance = getDist(cubeWidth, cubeHeight, cubeDepth),
-	nodeWidth = cubeWidth/nodeSpread*1, // Rendering will be slow without the *0.1
-	nodeHeight = cubeHeight/nodeSpread*1,
-	nodeDepth = cubeDepth/nodeSpread*1,
-	maxNodeDistance = getDist(nodeWidth*1*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*1*nodeSpread);
+	nodeWidth = cubeWidth/nodeSpread*2, // Rendering will be slow without the *0.1
+	nodeHeight = cubeHeight/nodeSpread*2,
+	nodeDepth = cubeDepth/nodeSpread*2,
+	maxNodeDistance = getDist(nodeWidth*2*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*2*nodeSpread);
 
 	var expandedNodeWidth, expandedNodeHeight, expandedNodeDepth, expandedNodeSpread, expandedNodeFalloff;
 
@@ -110,7 +110,7 @@ function createScene() {
 
 	renderer.setPixelRatio(window.devicePixelRatio);
 	renderer.setSize(WIDTH, HEIGHT);
-	renderer.autoClear = false;
+	// renderer.autoClear = false;
 	container.appendChild(renderer.domElement);
 
 	window.addEventListener('resize', onWindowResize, false);
@@ -118,7 +118,14 @@ function createScene() {
 		friction = .25;
 		running = false;
 		jQuery('.transform').toggleClass('selected');
-		transformSpaceTime(jQuery(this));
+		// destroySpaceTime();
+		// currentTransformation = jQuery(this).attr('value');
+		// createSpaceTime();
+		var thisTransform = jQuery(this);
+
+		// setTimeout(function(){
+			transformSpaceTime(jQuery(this));
+		// },1);
 		setTimeout(function(){
 			running = true;
 			render();
@@ -137,15 +144,18 @@ function createScene() {
 	});
 	jQuery('.render-style').on('click', function(){
 		friction = .25;
-		currentTransformation = "3d";
 		var newStyle = jQuery(this).attr('value');
 		jQuery('.render-style').toggleClass('selected');
-		jQuery('.transform.expanded').addClass('selected');
-		jQuery('.transform.flat').removeClass('selected');
 		if (currentRenderStyle !== newStyle) {
 			destroySpaceTime();
 			currentRenderStyle = jQuery(this).attr('value');
 			createSpaceTime();
+
+			if (jQuery('.transform.selected').attr('value') !== '3d') {
+				setTimeout(function(){
+					transformSpaceTime(jQuery('.transform.selected'));
+				},0);
+			}
 		}
 	});
 	jQuery('.slider').on('mousedown', function() {
@@ -179,9 +189,9 @@ function createScene() {
 function resetSpaceTime() {
 	if (currentRenderStyle === "mesh") {
 		meshVertices.forEach(function(v) {
-			if (v.parentVisibility) {
+			// if (v.parentVisibility) {
 				v.reset();
-			}
+			// }
 		});
 	}
 	else if (currentRenderStyle === "nodes") {
@@ -328,6 +338,45 @@ function createNodePlane() {
 	maxNodeDistance = getDist(nodeWidth*1*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*1*nodeSpread);
 }
 
+function createPlaneMesh() {
+	console.log('creating plane mesh');
+	console.log(cubeArray);
+	// console.log('cube width: ' + cubeWidth);
+	createPlane(cubeWidth*3, cubeRes*.25);
+	setTimeout(function() {
+		// cubeArray.forEach(function(cube) {
+
+			var cube = cubeArray[0];
+			var vertices = cube.children[0].geometry.vertices;
+			vertices.forEach(function(v) {
+				var meshVertex = new MeshVertex(v, cube, vertices.indexOf(v));
+				meshVertices.push(meshVertex);
+			})
+		// });
+	}, 0);
+}
+
+function createPlane(size, res) {
+	console.log('creating plane');
+	this.mesh = new THREE.Object3D();
+	console.log('got here 1');
+	var geom = new THREE.CubeGeometry(size, 1, size, size*res, size*res, size*res);
+	console.log('got here 2');
+	var mat = new THREE.MeshPhongMaterial({
+		wireframe: true,
+		color: Colors.white
+	});
+	console.log('got here 3');
+	var n = new THREE.Mesh(geom, mat);
+	this.mesh.position.y = flatAmp;
+	this.mesh.add(n);
+	this.mesh.name = "cube plane " + size;
+	scene.add(this.mesh);
+
+	cubeArray.push(this.mesh);
+
+}
+
 function createCubeMesh() {
 	for (i = 0; i < cubeWidth; i += cubeSpread) {
 		var resolution = i < cubeRes ? i : cubeRes;
@@ -386,20 +435,24 @@ function createSpaceTime() {
 }
 
 function flattenSpaceTime(){
-	// console.log(currentRenderStyle);
 	friction = 6;
 	if (currentRenderStyle === "mesh") {
-
-		cubeArray.forEach(function(cube) {
-			if (cubeArray.indexOf(cube) !== cubeArray.length-1) {
-				cube.visible = false;
-			}
-		})
-		meshVertices.forEach(function(vertex) {
-			if (vertex.parentVisibility) {
-				vertex.flatten();
-			}
-		});
+		meshFalloff = 20;
+		// cubeArray.forEach(function(cube) {
+		// 	if (cubeArray.indexOf(cube) !== cubeArray.length-1) {
+		// 		cube.visible = false;
+		// 	}
+		// });
+		// meshVertices.forEach(function(vertex) {
+		// 	if (vertex.parentVisibility) {
+		// 		vertex.flatten();
+		// 	}
+		// });
+		destroySpaceTime();
+		cubeArray = [];
+		setTimeout( function() {
+			createPlaneMesh();
+		},10);
 		maxMeshDistance = getDist(cubeWidth, flatAmp, cubeDepth);
 	}
 	else if (currentRenderStyle === "nodes") {
@@ -411,17 +464,26 @@ function flattenSpaceTime(){
 
 function expandSpaceTime(){
 	if (currentRenderStyle === "mesh") {
-		meshVertices.forEach(function(vertex) {
-			if (vertex.parentVisibility) {
-				vertex.expand();
-			}
-		});
-		cubeArray.forEach(function(cube) {
-			if (!cube.visible) {
-				cube.visible = true;
-			}
-		});
-		maxMeshDistance = getDist(cubeWidth, cubeHeight, cubeDepth)
+		meshFalloff = 10;
+		// console.log(meshVertices);
+		// meshVertices.forEach(function(vertex) {
+		// 	if (vertex.parentVisibility) {
+		// 		console.log('vertex expand');
+		// 		vertex.expand();
+		// 	}
+		// });
+		// console.log(cubeArray);
+		// cubeArray.forEach(function(cube) {
+		// 	console.log(cube.visible);
+		// 	if (cube.visible = false) {
+		// 		console.log('set to visible');
+		// 		cube.visible = true;
+		// 	}
+		// });
+		destroySpaceTime();
+		cubeArray = [];
+		createCubeMesh();
+		maxMeshDistance = getDist(cubeWidth, cubeHeight, cubeDepth);
 	}
 	else if (currentRenderStyle === "nodes") {
 		destroySpaceTime();
@@ -432,22 +494,18 @@ function expandSpaceTime(){
 
 function transformSpaceTime(e) {
 	var value = jQuery(e).attr('value');
-	if (value === "2d" && currentTransformation !== value) {
+	console.log(value);
+	if (value === "2d") {
 		flattenSpaceTime();
 	}
-	else if (value === "3d" && !currentTransformation !== value) {
+	else if (value === "3d") {
 		expandSpaceTime();
 	}
 	currentTransformation = value;
+	// console.log(currentTransformation);
 }
 
-// function setCurrentDataset() {
-// 	currentDataset = h1Enabled === true ? dataSetH1 : dataSetTemplate;
-// 	console.log(currentDataset);
-// }
-
 function sendToSimulation (data, name) {
-	// console.log(name);
 	currentDataset = data;
 	currentDashboard = name === "template" ? dashboardTemplate : dashboardH1;
 	jQuery('.graph-container.'+name).addClass('shown');
@@ -455,7 +513,6 @@ function sendToSimulation (data, name) {
 }
 
 function renderDataPerspective(d) {
-	// renderDataSpline(d);
 	data = d;
 	dataRendered = true;
 	jQuery('.loading').addClass('done');

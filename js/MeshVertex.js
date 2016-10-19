@@ -1,4 +1,5 @@
 var MeshVertex = function(vertex, parent, index) {
+
 	this.initialX = vertex.x;
 	this.initialY = vertex.y;
 	this.initialZ = vertex.z;
@@ -7,6 +8,12 @@ var MeshVertex = function(vertex, parent, index) {
 	this.parentVisibility = parent.visible;
 	this.indexInParent = index;
 	this.dataPos;
+
+	if (currentTransformation === "2d") {
+		this.initialY = flatAmp;
+	}
+	// this.expandedY;
+	// this.expandedY = this.initialY;
 
 	this.reset = function() {
 		counter = counterStart;
@@ -37,6 +44,7 @@ var MeshVertex = function(vertex, parent, index) {
 	}
 
 	this.expand = function() {
+		// console.log('expanding');
 		this.parentCube.vertices[this.indexInParent].y = this.expandedY;
 		this.previousPositionY = this.expandedY;
 		this.initialY = this.expandedY;
@@ -54,6 +62,7 @@ var MeshVertex = function(vertex, parent, index) {
 			this.parentCube.vertices[this.indexInParent].z = this.initialZ + this.initialZ * friction * data[phaseOffset + counter].y;
 		}
 		this.dataPos = phaseOffset + counter;
+		// if ()
 		this.parentCube.vertices[this.indexInParent].y = this.initialY + this.initialY * friction * data[phaseOffset + counter].y;
 
 		this.distance = getDist(this.parentCube.vertices[this.indexInParent].x, this.parentCube.vertices[this.indexInParent].y, this.parentCube.vertices[this.indexInParent].z);
