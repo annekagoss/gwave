@@ -53,7 +53,7 @@ function processData(text, setName) {
     }
 		// Filter out noise data from before and after event
 		data = jQuery.grep(data, function(d, i) {
-			return d.x > -15 && d.x < 5;
+			return d.x > -5 && d.x < 2;
 		});
 		var title = setName === "h1" ? "LIGO Hanford Observatory, Mon Sep 14 09:16:37 GMT 2015, 16384 Hz" : "Numerical Relativity Template";
 		datasets.push({name:setName,data:data,title:title});

@@ -1,6 +1,6 @@
 var Node = function() {
 	this.mesh = new THREE.Object3D();
-	var geom = new THREE.SphereGeometry(nodeSize,nodeRes,nodeRes);
+	var geom = new THREE.SphereGeometry(nodeParticleSize,nodeRes,nodeRes);
 	var mat = new THREE.MeshPhongMaterial ({
 		wireframe: true,
 		color:Colors.white

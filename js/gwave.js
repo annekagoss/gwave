@@ -1,63 +1,70 @@
-// Config
+// GLOBAL
+
+// Scene variables
 var Colors = {
 	black: 0x000000,
-	blue: 0x0000FF,
-	blue2: 0x3E529F,
 	white: 0xFFFFFF,
+	blue: 0x0000FF,
 	green: 0x2ECC71
 };
+var container, controls, camera, fieldOfView, aspectRatio, nearPlane, farPlane, hemisphereLight, mesh, geometry, HEIGHT, WIDTH;
 
-var container, controls, camera, fieldOfView, aspectRatio, nearPlane, farPlane;
-var hemisphereLight, shadowLight, mesh, geometry, HEIGHT, WIDTH;
-var mousePos = {
-	x: 0,
-	y: 0
-};
+// Data
 var dataRendered = false;
 var dataSetH1, dataSetTemplate, data;
-var h1Enabled = true;
-var templateEnabled = false;
-var nodeArray = [];
-var running = true;
-var counterStart = 2; // Must be higher than 0
-var nodeParent;
-var counter = counterStart;
-var simulatedPhase;
+var h1Enabled = true, templateEnabled = false;
 
-var delay = 0;
-var newDataFrame;
+// Animation
+var counterStart = 1; // Must be higher than 0
+var running = true;
+var counter = counterStart;
+var speed = 2;
+var phaseOff;
+
+// Controls
 var currentTransformation = "3d";
 var currentRenderStyle = "nodes";
 var currentDataset;
 var currentDashboard = dashboardTemplate;
-var speed = 2;
 
-// 16384hz settings
-var friction = .25,
-	cubeWidth = 800,
-	cubeHeight = 800,
-	cubeDepth = 800,
-	cubeRes = 0.075,
-	cubeSpread = 200,
-	cubeSpeed = speed - 1,
-	nodeSpread = 100,
-	nodeSize = 5,
-	nodeRes = 1,
-	nodeFalloff = 2, // Wiggliness.  Higher than 2 will make points erratic during peak.
-	meshFalloff = 10,
-	flatAmp = 10,
-	distBoundary = 0,
-	maxMeshDistance = getDist(cubeWidth, cubeHeight, cubeDepth),
-	nodeWidth = cubeWidth/nodeSpread*2, // Rendering will be slow without the *0.1
-	nodeHeight = cubeHeight/nodeSpread*2,
-	nodeDepth = cubeDepth/nodeSpread*2,
-	maxNodeDistance = getDist(nodeWidth*2*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*2*nodeSpread);
-
-	var expandedNodeWidth, expandedNodeHeight, expandedNodeDepth, expandedNodeSpread, expandedNodeFalloff;
+// Space array rendering
+var nodeArray = [], nodeParent;
+var expandedNodeWidth,
+		expandedNodeHeight,
+		expandedNodeDepth,
+		expandedNodeSpread,
+		expandedNodeFalloff;
 
 var cubeArray = [],
-	cubeVertices = [],
-	meshVertices = [];
+		cubeVertices = [],
+		meshVertices = [];
+
+// Optimal settings for 16384hz resolution datasets
+var friction = .25,
+		cubeSize = 800,
+		cubeRes = 0.075,
+		cubeSpread = 100, // distance between cube layers
+		cubeSpeed = speed - 1,
+		nodeSpread = 100,
+		nodeParticleSize = 5,
+		nodeRes = 1,
+		nodeFalloff = 2, // Wiggliness.  Higher than 2 will make points erratic during peak.
+		meshFalloff = 10,
+		flatAmp = 10, // Extra kick multiplier for planar space wave rendering
+		maxMeshDistance = getDist(cubeSize, cubeSize, cubeSize),
+		nodeWidth = cubeSize/nodeSpread*2, // Rendering will be slow without the *0.1
+		nodeHeight = cubeSize/nodeSpread*2,
+		nodeDepth = cubeSize/nodeSpread*2,
+		maxNodeDistance = getDist(nodeWidth*2*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*2*nodeSpread);
+
+var planeCameraPos = { x: 1110.51380089235,
+											 y: 26.691407694486042,
+											 z: 863.5923035685921 },
+		cubeCameraPos = { x: 920,
+											y: 692,
+											z: 809 };
+
+
 
 var lerpDuration = 6;
 
@@ -81,12 +88,10 @@ function createScene() {
 		nearPlane,
 		farPlane
 	);
-	// camera.position.x = 0;
-	// camera.position.y = 0;
-	// camera.position.z = 20;
-	camera.position.x = 920;
-	camera.position.y = 692;
-	camera.position.z = 809;
+
+	camera.position.x = cubeCameraPos.x;
+	camera.position.y = cubeCameraPos.y;
+	camera.position.z = cubeCameraPos.z;
 	camera.rotation = (-0.7076907934882674, 0.7128062225857894, 0.4640637998884659);
 
 	controls = new THREE.TrackballControls(camera);
@@ -125,6 +130,7 @@ function createScene() {
 
 		// setTimeout(function(){
 			transformSpaceTime(jQuery(this));
+			// counter = counterStart
 		// },1);
 		setTimeout(function(){
 			running = true;
@@ -139,9 +145,11 @@ function createScene() {
 		}
 		jQuery(this).toggleClass('playing');
 	});
+
 	jQuery('.reset').on('click', function(){
 		resetSpaceTime();
 	});
+
 	jQuery('.render-style').on('click', function(){
 		friction = .25;
 		var newStyle = jQuery(this).attr('value');
@@ -157,7 +165,10 @@ function createScene() {
 				},0);
 			}
 		}
+		// resetSpaceTime();
+		// counter = counterStart;
 	});
+
 	jQuery('.slider').on('mousedown', function() {
 		controls.enabled = false;
 	});
@@ -199,6 +210,7 @@ function resetSpaceTime() {
 			n.reset();
 		});
 	}
+
 }
 
 function createLights() {
@@ -216,21 +228,11 @@ function onWindowResize() {
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	controls.handleResize();
 }
-var frame = 0;
-var posDataUpdated = false;
-var phaseOff;
+
 
 function loop() {
 	camera.lookAt(scene.position);
 	controls.update();
-
-	if (frame === lerpDuration) {
-		frame = 0;
-	}
-
-	if (frame / lerpDuration === 0) {
-		posDataUpdated = false;
-	}
 
 	if (dataRendered) {
 		if (currentRenderStyle === "mesh") {
@@ -260,7 +262,6 @@ function loop() {
 	}
 	setTimeout(function(){
 		counter += speed;
-		frame++;
 		render();
 		if (running) {	requestAnimationFrame(loop);}
 	},1000/60);
@@ -329,11 +330,11 @@ function createNodePlane() {
 	nodeFalloff = 2;
 
 	for (i=nodeWidth*-0.5; i<nodeWidth*0.5; i++) {
-		for (j=nodeHeight*-0.5; j<nodeHeight*0.5; j++) {
+		// for (j=nodeHeight*-0.5; j<nodeHeight*0.5; j++) {
 			for (k=nodeDepth*-0.5; k<nodeDepth*0.5; k++) {
-				createNode(i, j, k, nodeSpread);
+				createNode(i, 1, k, nodeSpread);
 			}
-		}
+		// }
 	}
 	maxNodeDistance = getDist(nodeWidth*1*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*1*nodeSpread);
 }
@@ -341,8 +342,8 @@ function createNodePlane() {
 function createPlaneMesh() {
 	console.log('creating plane mesh');
 	console.log(cubeArray);
-	// console.log('cube width: ' + cubeWidth);
-	createPlane(cubeWidth*3, cubeRes*.25);
+	// console.log('cube width: ' + cubeSize);
+	createPlane(cubeSize*3, cubeRes*.25);
 	setTimeout(function() {
 		// cubeArray.forEach(function(cube) {
 
@@ -378,7 +379,7 @@ function createPlane(size, res) {
 }
 
 function createCubeMesh() {
-	for (i = 0; i < cubeWidth; i += cubeSpread) {
+	for (i = 0; i < cubeSize; i += cubeSpread) {
 		var resolution = i < cubeRes ? i : cubeRes;
 		createCube(i, resolution);
 	}
@@ -453,13 +454,16 @@ function flattenSpaceTime(){
 		setTimeout( function() {
 			createPlaneMesh();
 		},10);
-		maxMeshDistance = getDist(cubeWidth, flatAmp, cubeDepth);
+		maxMeshDistance = getDist(cubeSize, flatAmp, cubeSize);
 	}
 	else if (currentRenderStyle === "nodes") {
 		destroySpaceTime();
 		nodeArray = [];
 		createNodePlane();
 	}
+	camera.position.x = planeCameraPos.x;
+	camera.position.y = planeCameraPos.y;
+	camera.position.z = planeCameraPos.z;
 }
 
 function expandSpaceTime(){
@@ -483,13 +487,16 @@ function expandSpaceTime(){
 		destroySpaceTime();
 		cubeArray = [];
 		createCubeMesh();
-		maxMeshDistance = getDist(cubeWidth, cubeHeight, cubeDepth);
+		maxMeshDistance = getDist(cubeSize, cubeSize, cubeSize);
 	}
 	else if (currentRenderStyle === "nodes") {
 		destroySpaceTime();
 		nodeArray = [];
 		createNodeArray();
 	}
+	// camera.position.x = cubeCameraPos.x;
+	// camera.position.y = cubeCameraPos.y;
+	// camera.position.z = cubeCameraPos.z;
 }
 
 function transformSpaceTime(e) {

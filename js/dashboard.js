@@ -5,7 +5,7 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
   this.name = setName;
 
   var margin = {top: 20, right: 60, bottom: 20, left: 60},
-      width = window.innerWidth*1 - margin.left - margin.right,
+      width = window.innerWidth*.5 - margin.left - margin.right,
       height = 150 - margin.top - margin.bottom,
       iconWidth = 100,
       iconHeight = 33;
@@ -118,11 +118,14 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
     .attr("y2",height)
 
     this.updatePosition = function(phase) {
+        if (currentTransformation === "2d") {
+          counterOffset = 275;
+        }
         if (currentRenderStyle === "nodes" && currentTransformation === "2d" && this.name === "template") {
-            counterOffset = 190;
+            counterOffset = 40;
         }
         else if (currentRenderStyle === "nodes" && currentTransformation === "3d" && this.name === "template") {
-            counterOffset = 40;
+            counterOffset = 100;
         }
         else if (currentRenderStyle === "mesh" && this.name === "template") {
             counterOffset = 20;
@@ -142,7 +145,7 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
 
 function renderDataDashboard(data, title, setName) {
   if (setName === "h1") {
-    dashboardH1 = new Dashboard(data, title, setName, 40);
+    dashboardH1 = new Dashboard(data, title, setName, 100);
   }
   else if (setName === "template") {
     dashboardTemplate = new Dashboard(data, title, setName, 40);
