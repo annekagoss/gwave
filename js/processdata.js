@@ -1,4 +1,8 @@
-var datasets = [];
+var datasets = [], blackHoleDatasets = [];
+
+var timeStretch = 100; //slow down data so effects can be seen
+var startTime = -5;
+var endTime = 2;
 
 function loadData() {
 
@@ -30,33 +34,107 @@ function loadData() {
 	         success: function() {
 	         		console.log("template success");
 	          },
-					error: function(req, status, err) {console.log(status, err);},
-					complete: function(data) {
-						console.log("template complete");
-						processData(data.responseText, "template");
-						loadH1Data();
-					}
+				error: function(req, status, err) {console.log(status, err);},
+				complete: function(data) {
+					console.log("template complete");
+					processData(data.responseText, "template");
+					loadH1Data();
+				}
 	    });
-		}
+	}
 
-		loadTemplateData();
+	function loadVelocityData() {
+		$.ajax({
+        type: "GET",
+        url: "data/postNewtonian-velocity.csv",
+        dataType: "text",
+        success: function() {
+        	console.log("black hole velocity data success");
+        },
+		error: function(req, status, err) {console.log(status, err);},
+		complete: function(data) {
+			console.log("black hole velocity data complete");
+			processVelocityData(data.responseText);
+		}
+	  });
+	}
+
+	function loadSeparationData() {
+		$.ajax({
+        type: "GET",
+        url: "data/keplerian-separation.csv",
+        dataType: "text",
+        success: function() {
+        	console.log("black hole separation data success");
+        },
+		error: function(req, status, err) {console.log(status, err);},
+		complete: function(data) {
+			console.log("black hole separation data complete");
+			processSeparationData(data.responseText);
+		}
+	  });
+	}
+
+	function simulateBlackHoles(){
+		sendBlackHolesToSimulation(blackHoleDatasets, function(){
+			setTimeout(function(){
+				simulateBlackHoles();
+			},10);
+		});
+	}
+
+	function loadBlackHoleData() {
+		loadSeparationData();
+		loadVelocityData();
+		// graphBlackHoles();
+		simulateBlackHoles();
+	}
+
+	loadTemplateData();
+	loadBlackHoleData();
+}
+
+function processSeparationData(text) {
+	var textLines = text.split(/\r\n|\n/);
+	var data = [];
+	for (var i=1; i<textLines.length-1; i++) {
+		var s = parseFloat(textLines[i].split(',')[0])*timeStretch;
+		var d = parseFloat(textLines[i].split(',')[1]);
+		data.push({'seconds':s,'distance':d});
+	}
+	var name = "separation", title = "separation";
+	blackHoleDatasets.push({name:name,data:data,title:title});
+}
+
+function processVelocityData(text) {
+	var textLines = text.split(/\r\n|\n/);
+	var data = [];
+	for (var i=1; i<textLines.length-1; i++) {
+		var s = parseFloat(textLines[i].split(',')[0])*timeStretch;
+		var v = parseFloat(textLines[i].split(',')[1]);
+		data.push({'seconds':s,'velocity':v});
+	}
+	var name = "velocity", title = "velocity";
+	blackHoleDatasets.push({name:name,data:data,title:title});
 }
 
 function processData(text, setName) {
     var textLines = text.split(/\r\n|\n/);
     var headers = textLines[0].split(',');
 		var data = [];
+
     for (var i=1; i<textLines.length-1; i++) {
-        var x = parseFloat(textLines[i].split(',')[0])*100;
+        var x = parseFloat(textLines[i].split(',')[0])*timeStretch;
 		var y = parseFloat(textLines[i].split(',')[1]);
         data.push({'x':x,'y':y});
     }
-		// Filter out noise data from before and after event
-		data = jQuery.grep(data, function(d, i) {
-			return d.x > -5 && d.x < 2;
-		});
-		var title = setName === "h1" ? "LIGO Hanford Observatory, Mon Sep 14 09:16:37 GMT 2015, 16384 Hz" : "Numerical Relativity Template";
-		datasets.push({name:setName,data:data,title:title});
+
+	data = jQuery.grep(data, function(d, i) {
+		return d.x > startTime && d.x < endTime;
+	});
+
+	var title = setName === "h1" ? "LIGO Hanford Observatory, Mon Sep 14 09:16:37 GMT 2015, 16384 Hz" : "Numerical Relativity Template";
+	datasets.push({name:setName,data:data,title:title});
 }
 
 function retrieveDataset(name) {

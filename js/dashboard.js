@@ -142,7 +142,6 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
     }
 }
 
-
 function renderDataDashboard(data, title, setName) {
   if (setName === "h1") {
     dashboardH1 = new Dashboard(data, title, setName, 100);

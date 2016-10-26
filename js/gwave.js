@@ -225,8 +225,6 @@ function loop() {
 	camera.lookAt(scene.position);
 	controls.update();
 
-	console.log('polarization: ' + polarization);
-
 	if (dataRendered) {
 		if (currentRenderStyle === "mesh") {
 			meshVertices.forEach(function(v) {
@@ -249,6 +247,10 @@ function loop() {
 
 		if (currentDashboard) {
 			currentDashboard.updatePosition(counter);
+		}
+
+		if (binary) {
+			binary.update(counter);
 		}
 	}
 
@@ -445,7 +447,6 @@ function createSpaceTime() {
 
 function flattenSpaceTime(){
 	if (currentRenderStyle === "mesh") {
-		// meshFalloff = 20;
 		destroySpaceTime();
 		cubeArray = [];
 		setTimeout( function() {
@@ -497,8 +498,28 @@ function sendToSimulation (data, name) {
 
 function renderDataPerspective(d) {
 	data = d;
+	createBlackHoles(d);
 	dataRendered = true;
 	jQuery('.loading').addClass('done');
+}
+
+function sendBlackHolesToSimulation (BHdataSets, callback) {
+	if (BHdataSets.length < 2) {
+		callback();
+	}
+	else {
+		BHdataSets.forEach(function(d) {
+			if (d.name === "separation") {
+				separationData = d.data;
+			}
+			else if (d.name === "velocity") {
+				velocityData = d.data;
+			}
+		});
+		// setTimeout(function(){
+		// 	createBlackHoles(currentDataset);
+		// },0);
+	}
 }
 
 function renderDataSpline(d) {
@@ -524,6 +545,7 @@ function init() {
 	createLights();
 	loadData();
 	createSpaceTime();
+	// createBlackHOles();
 	setTimeout(function(){
 		loop();
 	},10);
