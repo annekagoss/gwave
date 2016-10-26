@@ -1,3 +1,5 @@
+var counterStart = 1, polarization;
+
 var Node = function() {
 	this.mesh = new THREE.Object3D();
 	var geom = new THREE.SphereGeometry(nodeParticleSize,nodeRes,nodeRes);
@@ -19,7 +21,6 @@ var Node = function() {
 		}
 
 		this.dataPos = phaseOffset+counter;
-		// console.log(counter);
 		this.mesh.position.y = this.initialHeight + this.initialHeight * friction * data[phaseOffset+counter].y;
 
 		if (currentTransformation === "3d") {
@@ -38,9 +39,20 @@ var Node = function() {
 		this.distance = getDist(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
 	}
 
-	this.checkForReset = function(phaseOffset, counter) {
+	this.distort = function(phaseOffset, counter) {
 		if (phaseOffset+counter >= data.length-counterStart) {
-			resetSpaceTime();
+			return;
 		}
+		this.mesh.scale.y = this.initialScale + (this.initialScale *  data[phaseOffset+counter].y);
+		this.mesh.scale.x = this.initialScale + (this.initialScale * -1 * data[phaseOffset+counter].y);
+		this.mesh.scale.z = this.initialScale + (this.initialScale * -1 * data[phaseOffset+counter].y);
+		if (polarization === "cross") {
+			this.mesh.rotation.x = Math.PI / 4;
+		}
+		else {
+			this.mesh.rotation.x = 0;
+		}
+
 	}
+
 }

@@ -15,7 +15,7 @@ var dataSetH1, dataSetTemplate, data;
 var h1Enabled = true, templateEnabled = false;
 
 // Animation
-var counterStart = 1; // Must be higher than 0
+counterStart = 1; // Must be higher than 0
 var running = true;
 var counter = counterStart;
 var speed = 2;
@@ -26,6 +26,7 @@ var currentTransformation = "3d";
 var currentRenderStyle = "nodes";
 var currentDataset;
 var currentDashboard = dashboardTemplate;
+var polarization = "cross";
 
 // Space array rendering
 var nodeArray = [], nodeParent;
@@ -45,28 +46,23 @@ var friction = .25,
 		cubeRes = 0.075,
 		cubeSpread = 100, // distance between cube layers
 		cubeSpeed = speed - 1,
+		planeScale = 3,
 		nodeSpread = 100,
-		nodeParticleSize = 5,
+		nodeParticleSize = 2.5,
 		nodeRes = 1,
 		nodeFalloff = 2, // Wiggliness.  Higher than 2 will make points erratic during peak.
-		meshFalloff = 10,
+		meshCubeFalloff = 6/cubeSpread,
+		meshPlaneFalloff = 200/(cubeSize*planeScale),
 		flatAmp = 10, // Extra kick multiplier for planar space wave rendering
-		maxMeshDistance = getDist(cubeSize, cubeSize, cubeSize),
+		maxMeshCubeDistance = getDist(cubeSize, cubeSize, cubeSize),
+		maxMeshPlaneDistance = getDist(cubeSize*planeScale, 1, cubeSize*planeScale),
 		nodeWidth = cubeSize/nodeSpread*2, // Rendering will be slow without the *0.1
 		nodeHeight = cubeSize/nodeSpread*2,
 		nodeDepth = cubeSize/nodeSpread*2,
 		maxNodeDistance = getDist(nodeWidth*2*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*2*nodeSpread);
 
-var planeCameraPos = { x: 1110.51380089235,
-											 y: 26.691407694486042,
-											 z: 863.5923035685921 },
-		cubeCameraPos = { x: 920,
-											y: 692,
-											z: 809 };
-
-
-
-var lerpDuration = 6;
+var planeCameraPos = { x: 1110.51380089235, y: 26.691407694486042, z: 863.5923035685921 },
+	cubeCameraPos = { x: 920, y: 692, z: 809 };
 
 function createScene() {
 	// DOM setup
@@ -115,24 +111,16 @@ function createScene() {
 
 	renderer.setPixelRatio(window.devicePixelRatio);
 	renderer.setSize(WIDTH, HEIGHT);
-	// renderer.autoClear = false;
 	container.appendChild(renderer.domElement);
 
 	window.addEventListener('resize', onWindowResize, false);
+
 	jQuery('.transform').on('click', function(){
-		friction = .25;
 		running = false;
 		jQuery('.transform').toggleClass('selected');
-		// destroySpaceTime();
-		// currentTransformation = jQuery(this).attr('value');
-		// createSpaceTime();
-		var thisTransform = jQuery(this);
-
-		// setTimeout(function(){
-			transformSpaceTime(jQuery(this));
-			// counter = counterStart
-		// },1);
+		transformSpaceTime(jQuery(this));
 		setTimeout(function(){
+			adjustFriction();
 			running = true;
 			render();
 			loop();
@@ -151,7 +139,6 @@ function createScene() {
 	});
 
 	jQuery('.render-style').on('click', function(){
-		friction = .25;
 		var newStyle = jQuery(this).attr('value');
 		jQuery('.render-style').toggleClass('selected');
 		if (currentRenderStyle !== newStyle) {
@@ -165,8 +152,6 @@ function createScene() {
 				},0);
 			}
 		}
-		// resetSpaceTime();
-		// counter = counterStart;
 	});
 
 	jQuery('.slider').on('mousedown', function() {
@@ -190,33 +175,39 @@ function createScene() {
 
 	jQuery('.data-picker .button').on('click', function(){
 		currentDashboard = jQuery(this).attr('value') === "template" ? dashboardTemplate : dashboardH1;
+		adjustFriction();
 		jQuery('.graph-container').toggleClass('shown');
 		jQuery('.data-picker .button').toggleClass('selected');
 		retrieveDataset(jQuery(this).attr('value'));
 		resetSpaceTime();
 	});
+
+	jQuery('.polarization.button').on('click', function(){
+		jQuery('.polarization.button').toggleClass('selected');
+		polarization = jQuery(this).attr('value');
+	});
 }
 
-function resetSpaceTime() {
-	if (currentRenderStyle === "mesh") {
-		meshVertices.forEach(function(v) {
-			// if (v.parentVisibility) {
-				v.reset();
-			// }
-		});
+function adjustFriction() {
+	if (currentDashboard === dashboardTemplate) {
+		if (currentTransformation === "3d") {
+			friction = 0.05;
+		}
+		else {
+			friction = .05;
+		}
 	}
-	else if (currentRenderStyle === "nodes") {
-		nodeArray.forEach(function(n){
-			n.reset();
-		});
+	else {
+		if (currentTransformation === "3d") {
+			friction = 0.25;
+		}
+		else {
+			friction = 6;
+		}
 	}
-
 }
 
 function createLights() {
-	// A hemisphere light is a gradient colored light;
-	// the first parameter is the sky color, the second parameter is the ground color,
-	// the third parameter is the intensity of the light
 	hemisphereLight = new THREE.HemisphereLight(Colors.blue, Colors.green, 1);
 	hemisphereLight.position.set(0, 0, 0);
 	scene.add(hemisphereLight);
@@ -234,25 +225,25 @@ function loop() {
 	camera.lookAt(scene.position);
 	controls.update();
 
+	console.log('polarization: ' + polarization);
+
 	if (dataRendered) {
 		if (currentRenderStyle === "mesh") {
-
-			// Use this for 16384hz data
-			if (meshVertices[0]) {
-				meshVertices[0].checkForReset(phaseOff, counter+1);
-			}
 			meshVertices.forEach(function(v) {
-				if (v.parentVisibility) {
-					phaseOff = Math.round((maxMeshDistance - v.distance+1) * meshFalloff / cubeSpread);
-					v.updateMeshVertex(phaseOff, counter);
+				if (currentTransformation === "3d") {
+					phaseOff = Math.round((maxMeshCubeDistance - v.distance+1) * meshCubeFalloff);
 				}
+				else {
+					phaseOff = Math.round((maxMeshPlaneDistance - v.distance+1) * meshPlaneFalloff);
+				}
+				v.updateMeshVertex(phaseOff, counter);
 			});
-
 		}
 		else {
 			nodeArray.forEach(function(n) {
 				phaseOff = Math.round((maxNodeDistance -n.distance+1)*nodeFalloff/nodeSpread);
 				n.updateNode(phaseOff, counter);
+				n.distort(phaseOff, counter);
 			});
 		}
 
@@ -260,9 +251,14 @@ function loop() {
 			currentDashboard.updatePosition(counter);
 		}
 	}
+
+	render();
+
 	setTimeout(function(){
 		counter += speed;
-		render();
+		if (data) {
+			counter = counter >= data.length ? counterStart : counter;
+		}
 		if (running) {	requestAnimationFrame(loop);}
 	},1000/60);
 }
@@ -283,13 +279,16 @@ function render() {
 	renderer.render(scene, camera);
 }
 
-
 function createNode(xVal, yVal, zVal, spread) {
 	this.mesh = new THREE.Object3D();
 	var node = new Node();
 	node.mesh.position.x = xVal*spread;
 	node.mesh.position.y = yVal*spread;
 	node.mesh.position.z = zVal*spread;
+	node.mesh.scale.x = nodeParticleSize;
+	node.mesh.scale.y = nodeParticleSize;
+	node.mesh.scale.z = nodeParticleSize;
+	node.initialScale = nodeParticleSize;
 	node.initialWidth = xVal*spread;
 	node.initialHeight = yVal*spread;
 	node.initialDepth = zVal*spread;
@@ -330,52 +329,38 @@ function createNodePlane() {
 	nodeFalloff = 2;
 
 	for (i=nodeWidth*-0.5; i<nodeWidth*0.5; i++) {
-		// for (j=nodeHeight*-0.5; j<nodeHeight*0.5; j++) {
 			for (k=nodeDepth*-0.5; k<nodeDepth*0.5; k++) {
 				createNode(i, 1, k, nodeSpread);
 			}
-		// }
 	}
 	maxNodeDistance = getDist(nodeWidth*1*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*1*nodeSpread);
 }
 
 function createPlaneMesh() {
-	console.log('creating plane mesh');
-	console.log(cubeArray);
-	// console.log('cube width: ' + cubeSize);
-	createPlane(cubeSize*3, cubeRes*.25);
+	createPlane(cubeSize*planeScale, cubeRes*.5);
 	setTimeout(function() {
-		// cubeArray.forEach(function(cube) {
-
-			var cube = cubeArray[0];
-			var vertices = cube.children[0].geometry.vertices;
-			vertices.forEach(function(v) {
-				var meshVertex = new MeshVertex(v, cube, vertices.indexOf(v));
-				meshVertices.push(meshVertex);
-			})
-		// });
+		var cube = cubeArray[0];
+		var vertices = cube.children[0].geometry.vertices;
+		vertices.forEach(function(v) {
+			var meshVertex = new MeshVertex(v, cube, vertices.indexOf(v));
+			meshVertices.push(meshVertex);
+		})
 	}, 0);
 }
 
 function createPlane(size, res) {
-	console.log('creating plane');
 	this.mesh = new THREE.Object3D();
-	console.log('got here 1');
 	var geom = new THREE.CubeGeometry(size, 1, size, size*res, size*res, size*res);
-	console.log('got here 2');
 	var mat = new THREE.MeshPhongMaterial({
 		wireframe: true,
 		color: Colors.white
 	});
-	console.log('got here 3');
 	var n = new THREE.Mesh(geom, mat);
 	this.mesh.position.y = flatAmp;
 	this.mesh.add(n);
 	this.mesh.name = "cube plane " + size;
 	scene.add(this.mesh);
-
 	cubeArray.push(this.mesh);
-
 }
 
 function createCubeMesh() {
@@ -409,6 +394,19 @@ function createCube(size, res) {
 	cubeArray.push(this.mesh);
 }
 
+function resetSpaceTime() {
+	running = false;
+	counter = counterStart;
+	destroySpaceTime();
+	setTimeout(function(){
+		createSpaceTime();
+	},0);
+	setTimeout(function(){
+		running = true;
+		loop();
+	},10);
+}
+
 function destroySpaceTime() {
 	if (currentRenderStyle === "mesh") {
 		cubeArray.forEach(function(cube) {
@@ -428,27 +426,26 @@ function destroySpaceTime() {
 
 function createSpaceTime() {
 	if (currentRenderStyle === "mesh") {
-		createCubeMesh();
+		if (currentTransformation === "3d") {
+			createCubeMesh();
+		}
+		else {
+			createPlaneMesh();
+		}
 	}
 	else if (currentRenderStyle === "nodes") {
-		createNodeArray();
+		if (currentTransformation === "3d") {
+			createNodeArray();
+		}
+		else {
+			createNodePlane();
+		}
 	}
 }
 
 function flattenSpaceTime(){
-	friction = 6;
 	if (currentRenderStyle === "mesh") {
-		meshFalloff = 20;
-		// cubeArray.forEach(function(cube) {
-		// 	if (cubeArray.indexOf(cube) !== cubeArray.length-1) {
-		// 		cube.visible = false;
-		// 	}
-		// });
-		// meshVertices.forEach(function(vertex) {
-		// 	if (vertex.parentVisibility) {
-		// 		vertex.flatten();
-		// 	}
-		// });
+		// meshFalloff = 20;
 		destroySpaceTime();
 		cubeArray = [];
 		setTimeout( function() {
@@ -468,22 +465,6 @@ function flattenSpaceTime(){
 
 function expandSpaceTime(){
 	if (currentRenderStyle === "mesh") {
-		meshFalloff = 10;
-		// console.log(meshVertices);
-		// meshVertices.forEach(function(vertex) {
-		// 	if (vertex.parentVisibility) {
-		// 		console.log('vertex expand');
-		// 		vertex.expand();
-		// 	}
-		// });
-		// console.log(cubeArray);
-		// cubeArray.forEach(function(cube) {
-		// 	console.log(cube.visible);
-		// 	if (cube.visible = false) {
-		// 		console.log('set to visible');
-		// 		cube.visible = true;
-		// 	}
-		// });
 		destroySpaceTime();
 		cubeArray = [];
 		createCubeMesh();
@@ -494,14 +475,10 @@ function expandSpaceTime(){
 		nodeArray = [];
 		createNodeArray();
 	}
-	// camera.position.x = cubeCameraPos.x;
-	// camera.position.y = cubeCameraPos.y;
-	// camera.position.z = cubeCameraPos.z;
 }
 
 function transformSpaceTime(e) {
 	var value = jQuery(e).attr('value');
-	console.log(value);
 	if (value === "2d") {
 		flattenSpaceTime();
 	}
@@ -509,7 +486,6 @@ function transformSpaceTime(e) {
 		expandSpaceTime();
 	}
 	currentTransformation = value;
-	// console.log(currentTransformation);
 }
 
 function sendToSimulation (data, name) {

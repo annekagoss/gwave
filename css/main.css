@@ -256,15 +256,15 @@ input[type=range]:-moz-focusring{
     margin: 10px 0px 10px 10px;
 }
 
-.transform, .render-style {
+.transform, .render-style, .polarization {
     padding: 0;
 }
 
-.transform.flat, .render-style.mesh {
+.transform.flat, .render-style.mesh, .polarization.plus {
     margin-top: 25px;
 }
 
-.transform-icon, .render-icon {
+.transform-icon, .render-icon, .polarization-icon {
     width: 30px;
     height: 30px;
     display: inline-block;
@@ -272,6 +272,14 @@ input[type=range]:-moz-focusring{
     background-size: contain;
     margin-right: 6px;
     vertical-align: middle;
+}
+
+.polarization-icon.plus {
+    background-image: url(../images/plus-icon.svg);
+}
+
+.polarization-icon.cross {
+    background-image: url(../images/cross-icon.svg);
 }
 
 .transform-icon.flat {
