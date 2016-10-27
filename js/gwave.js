@@ -46,16 +46,17 @@ var friction = .25,
 		cubeSpread = 200, // distance between cube layers
 		cubeSpeed = speed - 1,
 		planeScale = 1,
+		meshPlaneScale = 3,
 		nodeSize = 800;
 		nodeSpread = 100,
 		nodeParticleSize = 2.5,
 		nodeRes = 1,
 		nodeFalloff = 2, // Wiggliness.  Higher than 2 will make points erratic during peak.
 		meshCubeFalloff = 6/cubeSpread,
-		meshPlaneFalloff = 200/(cubeSize*planeScale),
+		meshPlaneFalloff = 200/(cubeSize*meshPlaneScale),
 		flatAmp = 10, // Extra kick multiplier for planar space wave rendering
 		maxMeshCubeDistance = getDist(cubeSize, cubeSize, cubeSize),
-		maxMeshPlaneDistance = getDist(cubeSize*planeScale, 1, cubeSize*planeScale),
+		maxMeshPlaneDistance = getDist(cubeSize*meshPlaneScale, 1, cubeSize*meshPlaneScale),
 		nodeWidth = nodeSize/nodeSpread*2, // Rendering will be slow without the *0.1
 		nodeHeight = nodeSize/nodeSpread*2,
 		nodeDepth = nodeSize/nodeSpread*2,
@@ -359,7 +360,7 @@ function createNodePlane() {
 }
 
 function createPlaneMesh() {
-	createPlane(cubeSize*planeScale, cubeRes*.5);
+	createPlane(cubeSize*meshPlaneScale, cubeRes*.5);
 	setTimeout(function() {
 		var cube = cubeArray[0];
 		var vertices = cube.children[0].geometry.vertices;
