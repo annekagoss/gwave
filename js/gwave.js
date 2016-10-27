@@ -12,13 +12,12 @@ var container, controls, camera, fieldOfView, aspectRatio, nearPlane, farPlane, 
 // Data
 var dataRendered = false;
 var dataSetH1, dataSetTemplate, data;
-var h1Enabled = true, templateEnabled = false;
+
 
 // Animation
 counterStart = 1; // Must be higher than 0
 var running = true;
 var counter = counterStart;
-var speed = 2;
 var phaseOff;
 
 // Controls
@@ -42,11 +41,12 @@ var cubeArray = [],
 
 // Optimal settings for 16384hz resolution datasets
 var friction = .25,
-		cubeSize = 800,
-		cubeRes = 0.075,
-		cubeSpread = 100, // distance between cube layers
+		cubeSize = 1000,
+		cubeRes = 0.05,
+		cubeSpread = 200, // distance between cube layers
 		cubeSpeed = speed - 1,
 		planeScale = 3,
+		nodeSize = 800;
 		nodeSpread = 100,
 		nodeParticleSize = 2.5,
 		nodeRes = 1,
@@ -56,9 +56,9 @@ var friction = .25,
 		flatAmp = 10, // Extra kick multiplier for planar space wave rendering
 		maxMeshCubeDistance = getDist(cubeSize, cubeSize, cubeSize),
 		maxMeshPlaneDistance = getDist(cubeSize*planeScale, 1, cubeSize*planeScale),
-		nodeWidth = cubeSize/nodeSpread*2, // Rendering will be slow without the *0.1
-		nodeHeight = cubeSize/nodeSpread*2,
-		nodeDepth = cubeSize/nodeSpread*2,
+		nodeWidth = nodeSize/nodeSpread*2, // Rendering will be slow without the *0.1
+		nodeHeight = nodeSize/nodeSpread*2,
+		nodeDepth = nodeSize/nodeSpread*2,
 		maxNodeDistance = getDist(nodeWidth*2*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*2*nodeSpread);
 
 var planeCameraPos = { x: 1110.51380089235, y: 26.691407694486042, z: 863.5923035685921 },
@@ -101,7 +101,7 @@ function createScene() {
 
 	// Scene setup
 	scene = new THREE.Scene();
-	scene.fog = new THREE.Fog(Colors.black, 0, 3000);
+	scene.fog = new THREE.Fog(Colors.black, 0, 4500);
 
 	// Renderer setup
 	renderer = new THREE.WebGLRenderer({
@@ -266,7 +266,26 @@ function loop() {
 }
 
 function getDist(x, y, z) {
-	var dist = Math.sqrt((x * x) + (y * y) + (z * z));
+	if (blackHoleA && blackHoleB) {
+		vectorA.setFromMatrixPosition( blackHoleA.mesh.children[0].matrixWorld );
+		vectorB.setFromMatrixPosition( blackHoleB.mesh.children[0].matrixWorld );
+		// console.log('using black hole distance');
+		var bhaX = vectorA.x - x;
+		var bhaY = vectorA.y - y;
+		var bhaZ = vectorA.z - z;
+
+		var bhbX = vectorB.x - x;
+		var bhbY = vectorB.y - y;
+		var bhbZ = vectorB.z - z;
+		var distA = Math.sqrt((bhaX * bhaX) + (bhaY * bhaY) + (bhaZ * bhaZ));
+		var distB = Math.sqrt((bhbX * bhbX) + (bhbY * bhbY) + (bhbZ * bhbZ));
+		var dist = (distA < distB) ? distA : distB;
+	}
+	else {
+		var dist = Math.sqrt((x * x) + (y * y) + (z * z));
+	}
+
+	// var dist = Math.sqrt((x * x) + (y * y) + (z * z));
 	var nodeDist = dist ? dist : 0;
 	return nodeDist;
 }
