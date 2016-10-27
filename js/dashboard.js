@@ -122,7 +122,7 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
           counterOffset = 275;
         }
         if (currentRenderStyle === "nodes" && currentTransformation === "2d" && this.name === "template") {
-            counterOffset = 30;
+            counterOffset = -60;
         }
         else if (currentRenderStyle === "nodes" && currentTransformation === "3d" && this.name === "template") {
             counterOffset = 100;

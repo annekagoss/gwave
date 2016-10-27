@@ -43,9 +43,9 @@ var Node = function() {
 		if (phaseOffset+counter >= data.length-counterStart) {
 			return;
 		}
-		this.mesh.scale.y = this.initialScale + (this.initialScale *  data[phaseOffset+counter].y);
-		this.mesh.scale.x = this.initialScale + (this.initialScale * -1 * data[phaseOffset+counter].y);
-		this.mesh.scale.z = this.initialScale + (this.initialScale * -1 * data[phaseOffset+counter].y);
+		this.mesh.scale.y = this.initialScale + (this.initialScale * data[phaseOffset+counter].y) + 10/this.distance;
+		this.mesh.scale.x = this.initialScale + (this.initialScale * -1 * data[phaseOffset+counter].y) + 10/this.distance;
+		this.mesh.scale.z = this.initialScale + (this.initialScale * -1 * data[phaseOffset+counter].y) + 10/this.distance;
 		if (polarization === "cross") {
 			this.mesh.rotation.x = Math.PI / 4;
 		}

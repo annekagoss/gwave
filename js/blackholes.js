@@ -57,7 +57,7 @@ var Binary = function() {
             this.mesh.rotation.y -= thisRotationDegrees+(velocityData[mappedVelIndex].velocity*0.01);
         }
 
-        var mappedSepIndex = Math.floor(map(counter, minCounter, maxCounter, 0, separationData.length))+40;
+        var mappedSepIndex = Math.floor(map(counter, minCounter, maxCounter, 0, separationData.length));
 
         if (mappedSepIndex < separationData.length) {
             this.mesh.children[0].children[0].position.x = (separationData[mappedSepIndex].distance*radius) - radius;
@@ -117,7 +117,7 @@ function calibrateCounter(gwData) {
 		return d.x > 0;
 	});
     var max = positiveData[0];
-    maxCounter = gwData.indexOf(max);
+    maxCounter = gwData.indexOf(max)-20;
 }
 
 function createBlackHoles(currentData) {
