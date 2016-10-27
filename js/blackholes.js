@@ -120,6 +120,11 @@ function calibrateCounter(gwData) {
     maxCounter = gwData.indexOf(max)-20;
 }
 
+function destroyBlackHoles() {
+    gwData = [];
+    scene.remove(binary.mesh);
+}
+
 function createBlackHoles(currentData) {
     gwData = currentData;
     calibrateCounter(gwData);

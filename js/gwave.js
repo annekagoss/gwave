@@ -174,6 +174,7 @@ function createScene() {
 	});
 
 	jQuery('.data-picker .button').on('click', function(){
+		destroyBlackHoles();
 		currentDashboard = jQuery(this).attr('value') === "template" ? dashboardTemplate : dashboardH1;
 		adjustFriction();
 		jQuery('.graph-container').toggleClass('shown');
