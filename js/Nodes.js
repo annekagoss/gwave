@@ -1,4 +1,5 @@
 var counterStart = 1, polarization;
+var factor = 100;
 
 var Node = function() {
 	this.mesh = new THREE.Object3D();
@@ -14,21 +15,25 @@ var Node = function() {
 	this.mesh.add(n);
 	this.dataPos;
 
-	this.updateNode = function(phaseOffset, counter) {
-		if (phaseOffset+counter >= data.length-counterStart) {
-			this.reset();
-			return;
-		}
-
-		this.dataPos = phaseOffset+counter;
-		this.mesh.position.y = this.initialHeight + this.initialHeight * friction * data[phaseOffset+counter].y;
-
-		if (currentTransformation === "3d") {
-			this.mesh.position.x = this.initialWidth + this.initialWidth * friction * data[phaseOffset+counter].y;
-			this.mesh.position.z = this.initialDepth + this.initialDepth * friction * data[phaseOffset+counter].y;
-		}
-
+	// this.updateNode = function(phaseOffset, counter) {
+	this.updateNode = function() {
 		this.distance = getDist(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
+
+		if (currentTransformation === "2d") {
+			this.mesh.position.y = this.initialHeight + (factor * this.distance.y * friction * .25);
+			this.mesh.position.x = this.initialWidth + (factor * this.distance.x * friction  * .25);
+			this.mesh.position.z = this.initialDepth + (factor * this.distance.z * friction  * .25);
+		}
+		else {
+
+			this.mesh.position.y = this.initialHeight + (factor * this.distance.y * friction);
+			this.mesh.position.x = this.initialWidth + (factor * this.distance.x * friction);
+			this.mesh.position.z = this.initialDepth + (factor * this.distance.z * friction);
+
+
+		}
+
+
 	}
 
 	this.reset = function() {
@@ -39,13 +44,13 @@ var Node = function() {
 		this.distance = getDist(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
 	}
 
-	this.distort = function(phaseOffset, counter) {
-		if (phaseOffset+counter >= data.length-counterStart) {
-			return;
-		}
-		this.mesh.scale.y = this.initialScale + (this.initialScale * data[phaseOffset+counter].y) + 10/this.distance;
-		this.mesh.scale.x = this.initialScale + (this.initialScale * -1 * data[phaseOffset+counter].y) + 10/this.distance;
-		this.mesh.scale.z = this.initialScale + (this.initialScale * -1 * data[phaseOffset+counter].y) + 10/this.distance;
+	// this.distort = function(phaseOffset, counter) {
+		this.distort = function() {
+
+		// this.mesh.scale.y = this.initialScale * 1000/this.distance.y;
+		// this.mesh.scale.x = this.initialScale * this.distance.x * factor;
+		// this.mesh.scale.z = this.initialScale * this.distance.z * factor;
+
 		if (polarization === "cross") {
 			this.mesh.rotation.x = Math.PI / 4;
 		}

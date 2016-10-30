@@ -11,7 +11,8 @@ var AmplitudePeaks = {
 var nextPeak, lastPeak = 1;
 var oneDeg = Math.PI/180;
 var h1Enabled = true, templateEnabled = false;
-var speed = 2;
+var speed = 1;
+var currentTransformation = "3d";
 
 // The maximum sum of the Schwarzschild radii, kilometers converted to meters
 var maxRadius = 210*1000;
@@ -39,22 +40,32 @@ var Binary = function() {
 
     this.update = function(counter) {
         // Rotation speed is set on time until next amplitude peak
-        if (counter > peaks[0]) {
-            for(i=1;i<peaks.length;i++) {
-                if (counter < peaks[i]) {
-                    nextPeak = peaks[i];
-                    lastPeak = i > 0 ? peaks[i-1] : 1;
-                    var thisRotation = (nextPeak - lastPeak) / speed;
-                    thisRotationDegrees = (oneDeg*360)/thisRotation;
-                    break;
-                }
-            }
-        }
+        // if (counter > peaks[0]) {
+        //     for(i=1;i<peaks.length;i++) {
+        //         if (counter < peaks[i]) {
+        //             nextPeak = peaks[i];
+        //             lastPeak = i > 0 ? peaks[i-1] : 1;
+        //             var thisRotation = (nextPeak - lastPeak) / speed;
+        //             thisRotationDegrees = (oneDeg*360)/thisRotation;
+        //             break;
+        //         }
+        //     }
+        // }
 
         var mappedVelIndex = Math.floor(map(counter, minCounter, maxCounter, 0, velocityData.length));
 
         if (mappedVelIndex < velocityData.length) {
-            this.mesh.rotation.y -= thisRotationDegrees+(velocityData[mappedVelIndex].velocity*0.01);
+
+            this.mesh.rotation.y -= velocityData[mappedVelIndex].velocity;
+
+            if (currentTransformation === "3d") {
+              this.mesh.rotation.x -= velocityData[mappedVelIndex].velocity * 0.05;
+            }
+            else if (this.mesh.rotation.x !== 0){
+              this.mesh.rotation.x = 0;
+            }
+
+            // console.log(this.mesh.rotation.y);
         }
 
         var mappedSepIndex = Math.floor(map(counter, minCounter, maxCounter, 0, separationData.length));

@@ -21,7 +21,6 @@ var counter = counterStart;
 var phaseOff;
 
 // Controls
-var currentTransformation = "3d";
 var currentRenderStyle = "nodes";
 var currentDataset;
 var currentDashboard = dashboardTemplate;
@@ -204,7 +203,12 @@ function adjustFriction() {
 			friction = 0.25;
 		}
 		else {
-			friction = 6;
+			if (currentRenderStyle === "mesh") {
+				friction = 20;
+			}
+			else {
+				friction = 6;
+			}
 		}
 	}
 }
@@ -230,21 +234,25 @@ function loop() {
 	if (dataRendered) {
 		if (currentRenderStyle === "mesh") {
 			meshVertices.forEach(function(v) {
-				if (currentTransformation === "3d") {
-					phaseOff = Math.round((maxMeshCubeDistance - v.distance+1) * meshCubeFalloff);
-				}
-				else {
-					phaseOff = Math.round((maxMeshPlaneDistance - v.distance+1) * meshPlaneFalloff);
-				}
-				v.updateMeshVertex(phaseOff, counter);
+				// if (currentTransformation === "3d") {
+				// 	phaseOff = Math.round((maxMeshCubeDistance - v.distance+1) * meshCubeFalloff);
+				// }
+				// else {
+				// 	phaseOff = Math.round((maxMeshPlaneDistance - v.distance+1) * meshPlaneFalloff);
+				// }
+				// v.updateMeshVertex(phaseOff, counter);
+				v.updateMeshVertex();
 			});
 		}
 		else {
 			nodeArray.forEach(function(n) {
-				phaseOff = Math.round((maxNodeDistance -n.distance+1)*nodeFalloff/nodeSpread);
-				n.updateNode(phaseOff, counter);
-				n.distort(phaseOff, counter);
+				// phaseOff = Math.round((maxNodeDistance -n.distance+1)*nodeFalloff/nodeSpread);
+				// n.updateNode(phaseOff, counter);
+				// n.distort(phaseOff, counter);
+				n.updateNode();
+				n.distort();
 			});
+			// console.log(nodeArray[0].distance);
 		}
 
 		if (currentDashboard) {
@@ -264,32 +272,94 @@ function loop() {
 			counter = counter >= data.length ? counterStart : counter;
 		}
 		if (running) {	requestAnimationFrame(loop);}
-	},1000/60);
+	},0);
 }
 
 function getDist(x, y, z) {
 	if (blackHoleA && blackHoleB) {
-		vectorA.setFromMatrixPosition( blackHoleA.mesh.children[0].matrixWorld );
-		vectorB.setFromMatrixPosition( blackHoleB.mesh.children[0].matrixWorld );
-		// console.log('using black hole distance');
-		var bhaX = vectorA.x - x;
-		var bhaY = vectorA.y - y;
-		var bhaZ = vectorA.z - z;
 
-		var bhbX = vectorB.x - x;
-		var bhbY = vectorB.y - y;
-		var bhbZ = vectorB.z - z;
-		var distA = Math.sqrt((bhaX * bhaX) + (bhaY * bhaY) + (bhaZ * bhaZ));
-		var distB = Math.sqrt((bhbX * bhbX) + (bhbY * bhbY) + (bhbZ * bhbZ));
-		var dist = (distA < distB) ? distA : distB;
+		vectorA.setFromMatrixPosition( blackHoleA.mesh.children[0].matrixWorld );
+		var threeVectorA = new THREE.Vector3(vectorA.x, vectorA.y, vectorA.z);
+
+		vectorB.setFromMatrixPosition( blackHoleB.mesh.children[0].matrixWorld );
+		var threeVectorB = new THREE.Vector3(vectorB.x, vectorB.y, vectorB.z);
+
+		var threeVectorPoint = new THREE.Vector3(x,y,z);
+
+		var distanceA = threeVectorPoint.distanceTo(vectorA);
+		var distanceB = threeVectorPoint.distanceTo(vectorB);
+
+		var subvecA = new THREE.Vector3();
+	  subvecA = subvecA.subVectors(threeVectorA,threeVectorPoint);
+		var hypotenuseA = distanceA;
+		var subvecB = new THREE.Vector3();
+	  subvecB = subvecB.subVectors(threeVectorB,threeVectorPoint);
+		var hypotenuseB = distanceB;
+		//
+		// var combinedSubvecs = new THREE.Vector3();
+		// combinedSubvecs.subVectors(subvecA, subvecB);
+		//
+		// var combinedHypos = new THREE.Vector3();
+		// combinedHypos.subVectors(hypotenuseA, hypotenuseB);
+		//
+		// var newPos = {
+		// 	x: combinedSubvecs.x/combinedHypos,
+		// 	y: combinedSubvecs.y/combinedHypos,
+		// 	z: combinedSubvecs.z/combinedHypos
+		// }
+
+		// if (distanceA < distanceB) {
+			var subvecA = new THREE.Vector3();
+	     		subvecA = subvecA.subVectors(threeVectorA,threeVectorPoint);
+			var hypotenuseA = distanceA;
+			var newPosA = {
+				x: subvecA.x/hypotenuseA,
+				y: subvecA.y/hypotenuseA,
+				z: subvecA.z/hypotenuseA
+			}
+			// var newPos = newPosA ? newPosA : 0;
+		// }
+		// else {
+			var subvecB = new THREE.Vector3();
+	     		subvecB = subvecB.subVectors(threeVectorB,threeVectorPoint);
+
+			var hypotenuseB = distanceB;
+
+			var newPosB = {
+				x: subvecB.x/hypotenuseB,
+				y: subvecB.y/hypotenuseB,
+				z: subvecB.z/hypotenuseB
+			}
+			// var newPos = newPosB ? newPosB : 0;
+		// }
+			var combinedX = ((newPosA.x * distanceB/distanceA) + (newPosB.x * distanceA/distanceB))/2;
+			var combinedY = ((newPosA.y * distanceB/distanceA) + (newPosB.y * distanceA/distanceB))/2;
+			var combinedZ = ((newPosA.z * distanceB/distanceA) + (newPosB.z * distanceA/distanceB))/2;
+
+			var newPos = {
+				x: combinedX,
+				y: combinedY,
+				z: combinedZ
+			}
+
+		return newPos;
 	}
 	else {
-		var dist = Math.sqrt((x * x) + (y * y) + (z * z));
+		// console.log('no black holes');
+		// var dist = Math.sqrt((pos.x * pos.x) + (pos.y * pos.y) + (pos.z * pos.z));
+		// // var dist = Math.sqrt((x * x) + (y * y) + (z * z));
+		// var nodeDist = {
+		// 	x : dist,
+		// 	y : dist,
+		// 	z : dist
+		// }
+		// return nodeDist;
+		return 0;
 	}
 
 	// var dist = Math.sqrt((x * x) + (y * y) + (z * z));
-	var nodeDist = dist ? dist : 0;
-	return nodeDist;
+	// var nodeDist = dist ? dist : 0;
+
 }
 
 function lerpPosition(posA, posB, duration, f) {

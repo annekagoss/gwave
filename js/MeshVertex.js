@@ -1,4 +1,5 @@
 var counterStart = 1;
+var factor = 0.0005;
 
 var MeshVertex = function(vertex, parent, index) {
 
@@ -24,17 +25,23 @@ var MeshVertex = function(vertex, parent, index) {
 		this.parentCube.verticesNeedUpdate = true;
 	}
 
-	this.updateMeshVertex = function(phaseOffset, counter) {
-		if (phaseOffset+counter >= data.length-counterStart) {
-			this.reset();
-			return;
+	// this.updateMeshVertex = function(phaseOffset, counter) {
+	// 	if (phaseOffset+counter >= data.length-counterStart) {
+	// 		this.reset();
+	// 		return;
+	// 	}
+	this.updateMeshVertex = function(){
+
+		if (currentTransformation === "2d") {
+			this.parentCube.vertices[this.indexInParent].y = this.initialY + this.initialY * factor * friction * this.distance;
 		}
-		if (currentTransformation === "3d") {
-			this.parentCube.vertices[this.indexInParent].x = this.initialX + this.initialX * friction * data[phaseOffset + counter].y;
-			this.parentCube.vertices[this.indexInParent].z = this.initialZ + this.initialZ * friction * data[phaseOffset + counter].y;
+		else {
+			this.parentCube.vertices[this.indexInParent].x = this.initialX + this.initialX * factor * this.distance;
+			this.parentCube.vertices[this.indexInParent].y = this.initialY + this.initialY * factor * this.distance;
+			this.parentCube.vertices[this.indexInParent].z = this.initialZ + this.initialZ * factor * this.distance;
 		}
-		this.dataPos = phaseOffset + counter;
-		this.parentCube.vertices[this.indexInParent].y = this.initialY + this.initialY * friction * data[phaseOffset + counter].y;
+		// this.dataPos = phaseOffset + counter;
+
 
 		this.distance = getDist(this.parentCube.vertices[this.indexInParent].x, this.parentCube.vertices[this.indexInParent].y, this.parentCube.vertices[this.indexInParent].z);
 		this.parentCube.verticesNeedUpdate = true;
