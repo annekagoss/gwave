@@ -54,12 +54,12 @@ var friction = .25,
 		meshCubeFalloff = 6/cubeSpread,
 		meshPlaneFalloff = 200/(cubeSize*meshPlaneScale),
 		flatAmp = 10, // Extra kick multiplier for planar space wave rendering
-		maxMeshCubeDistance = getDist(cubeSize, cubeSize, cubeSize),
-		maxMeshPlaneDistance = getDist(cubeSize*meshPlaneScale, 1, cubeSize*meshPlaneScale),
+		maxMeshCubeDistance = getBHDist(cubeSize, cubeSize, cubeSize),
+		maxMeshPlaneDistance = getBHDist(cubeSize*meshPlaneScale, 1, cubeSize*meshPlaneScale),
 		nodeWidth = nodeSize/nodeSpread*2, // Rendering will be slow without the *0.1
 		nodeHeight = nodeSize/nodeSpread*2,
 		nodeDepth = nodeSize/nodeSpread*2,
-		maxNodeDistance = getDist(nodeWidth*2*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*2*nodeSpread);
+		maxNodeDistance = getBHDist(nodeWidth*2*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*2*nodeSpread);
 
 var planeCameraPos = { x: 1110.51380089235, y: 26.691407694486042, z: 863.5923035685921 },
 	cubeCameraPos = { x: 920, y: 692, z: 809 };
@@ -243,6 +243,10 @@ function loop() {
 				// v.updateMeshVertex(phaseOff, counter);
 				v.updateMeshVertex();
 			});
+			// if (meshVertices[100]) {
+			// 	console.log(meshVertices[100].initialVector[0]);
+			// }
+
 		}
 		else {
 			nodeArray.forEach(function(n) {
@@ -275,92 +279,25 @@ function loop() {
 	},0);
 }
 
-function getDist(x, y, z) {
-	if (blackHoleA && blackHoleB) {
+function getInitialDist(initX, initY, initZ, x, y, z) {
+		var initialVector = new THREE.Vector3(initX, initY, initZ);
+		var currentVector = new THREE.Vector3(x,y,z);
 
-		vectorA.setFromMatrixPosition( blackHoleA.mesh.children[0].matrixWorld );
-		var threeVectorA = new THREE.Vector3(vectorA.x, vectorA.y, vectorA.z);
+		var distance = currentVector.distanceTo(initialVector);
 
-		vectorB.setFromMatrixPosition( blackHoleB.mesh.children[0].matrixWorld );
-		var threeVectorB = new THREE.Vector3(vectorB.x, vectorB.y, vectorB.z);
+		var subvec = new THREE.Vector3();
+	  subvec = subvec.subVectors(initialVector,currentVector);
 
-		var threeVectorPoint = new THREE.Vector3(x,y,z);
+		var newPos = {
+			x: subvec.x/distance,
+			y: subvec.y/distance,
+			z: subvec.z/distance
+		}
 
-		var distanceA = threeVectorPoint.distanceTo(vectorA);
-		var distanceB = threeVectorPoint.distanceTo(vectorB);
-
-		var subvecA = new THREE.Vector3();
-	  subvecA = subvecA.subVectors(threeVectorA,threeVectorPoint);
-		var hypotenuseA = distanceA;
-		var subvecB = new THREE.Vector3();
-	  subvecB = subvecB.subVectors(threeVectorB,threeVectorPoint);
-		var hypotenuseB = distanceB;
-		//
-		// var combinedSubvecs = new THREE.Vector3();
-		// combinedSubvecs.subVectors(subvecA, subvecB);
-		//
-		// var combinedHypos = new THREE.Vector3();
-		// combinedHypos.subVectors(hypotenuseA, hypotenuseB);
-		//
-		// var newPos = {
-		// 	x: combinedSubvecs.x/combinedHypos,
-		// 	y: combinedSubvecs.y/combinedHypos,
-		// 	z: combinedSubvecs.z/combinedHypos
-		// }
-
-		// if (distanceA < distanceB) {
-			var subvecA = new THREE.Vector3();
-	     		subvecA = subvecA.subVectors(threeVectorA,threeVectorPoint);
-			var hypotenuseA = distanceA;
-			var newPosA = {
-				x: subvecA.x/hypotenuseA,
-				y: subvecA.y/hypotenuseA,
-				z: subvecA.z/hypotenuseA
-			}
-			// var newPos = newPosA ? newPosA : 0;
-		// }
-		// else {
-			var subvecB = new THREE.Vector3();
-	     		subvecB = subvecB.subVectors(threeVectorB,threeVectorPoint);
-
-			var hypotenuseB = distanceB;
-
-			var newPosB = {
-				x: subvecB.x/hypotenuseB,
-				y: subvecB.y/hypotenuseB,
-				z: subvecB.z/hypotenuseB
-			}
-			// var newPos = newPosB ? newPosB : 0;
-		// }
-			var combinedX = ((newPosA.x * distanceB/distanceA) + (newPosB.x * distanceA/distanceB))/2;
-			var combinedY = ((newPosA.y * distanceB/distanceA) + (newPosB.y * distanceA/distanceB))/2;
-			var combinedZ = ((newPosA.z * distanceB/distanceA) + (newPosB.z * distanceA/distanceB))/2;
-
-			var newPos = {
-				x: combinedX,
-				y: combinedY,
-				z: combinedZ
-			}
-
-		return newPos;
-	}
-	else {
-		// console.log('no black holes');
-		// var dist = Math.sqrt((pos.x * pos.x) + (pos.y * pos.y) + (pos.z * pos.z));
-		// // var dist = Math.sqrt((x * x) + (y * y) + (z * z));
-		// var nodeDist = {
-		// 	x : dist,
-		// 	y : dist,
-		// 	z : dist
-		// }
-		// return nodeDist;
-		return 0;
-	}
-
-	// var dist = Math.sqrt((x * x) + (y * y) + (z * z));
-	// var nodeDist = dist ? dist : 0;
-
+		return [distance,newPos];
 }
+
+
 
 function lerpPosition(posA, posB, duration, f) {
 	var t = f / duration;
@@ -385,7 +322,7 @@ function createNode(xVal, yVal, zVal, spread) {
 	node.initialWidth = xVal*spread;
 	node.initialHeight = yVal*spread;
 	node.initialDepth = zVal*spread;
-	node.distance = getDist(xVal*spread, yVal*spread, zVal*spread);
+	node.distance = getBHDist(xVal*spread, yVal*spread, zVal*spread);
 
 	this.mesh.add(node.mesh);
 	this.node = node;
@@ -426,7 +363,7 @@ function createNodePlane() {
 				createNode(i, 1, k, nodeSpread);
 			}
 	}
-	maxNodeDistance = getDist(nodeWidth*1*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*1*nodeSpread);
+	maxNodeDistance = getBHDist(nodeWidth*1*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*1*nodeSpread);
 }
 
 function createPlaneMesh() {
@@ -543,7 +480,7 @@ function flattenSpaceTime(){
 		setTimeout( function() {
 			createPlaneMesh();
 		},10);
-		maxMeshDistance = getDist(cubeSize, flatAmp, cubeSize);
+		maxMeshDistance = getBHDist(cubeSize, flatAmp, cubeSize);
 	}
 	else if (currentRenderStyle === "nodes") {
 		destroySpaceTime();

@@ -19,8 +19,11 @@ var maxRadius = 210*1000;
 var scaleFactor = 0.00125; // Keep things on the screen
 var radius = maxRadius*scaleFactor;  // Used for distance of binary system
 var c = 299792458;
+var rotationSpeed = 0.25;
 
 var gwData;
+
+var merged = false;
 
 function map (value, in_min, in_max, out_min, out_max) {
   return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
@@ -56,10 +59,10 @@ var Binary = function() {
 
         if (mappedVelIndex < velocityData.length) {
 
-            this.mesh.rotation.y -= velocityData[mappedVelIndex].velocity;
+            this.mesh.rotation.y -= velocityData[mappedVelIndex].velocity * rotationSpeed;
 
             if (currentTransformation === "3d") {
-              this.mesh.rotation.x -= velocityData[mappedVelIndex].velocity * 0.05;
+              this.mesh.rotation.x -= velocityData[mappedVelIndex].velocity * 0.5 * rotationSpeed;
             }
             else if (this.mesh.rotation.x !== 0){
               this.mesh.rotation.x = 0;
@@ -71,10 +74,12 @@ var Binary = function() {
         var mappedSepIndex = Math.floor(map(counter, minCounter, maxCounter, 0, separationData.length));
 
         if (mappedSepIndex < separationData.length) {
+            merged = false;
             this.mesh.children[0].children[0].position.x = (separationData[mappedSepIndex].distance*radius) - radius;
             this.mesh.children[1].children[0].position.x = (separationData[mappedSepIndex].distance*radius*-1) + radius;
         }
         else {
+            merged = true;
             this.mesh.children[0].children[0].position.x *= 0.1;
             this.mesh.children[1].children[0].position.x *= 0.1;
         }
