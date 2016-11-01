@@ -14,12 +14,14 @@ var h1Enabled = true, templateEnabled = false;
 var speed = 1;
 var currentTransformation = "3d";
 
+var currentSeparation = 1;
+
 // The maximum sum of the Schwarzschild radii, kilometers converted to meters
 var maxRadius = 210*1000;
 var scaleFactor = 0.00125; // Keep things on the screen
 var radius = maxRadius*scaleFactor;  // Used for distance of binary system
 var c = 299792458;
-var rotationSpeed = 0.25;
+var rotationSpeed = 0.04;
 
 var gwData;
 
@@ -58,11 +60,12 @@ var Binary = function() {
         var mappedVelIndex = Math.floor(map(counter, minCounter, maxCounter, 0, velocityData.length));
 
         if (mappedVelIndex < velocityData.length) {
+            // console.log(velocityData[mappedVelIndex].velocity);
 
             this.mesh.rotation.y -= velocityData[mappedVelIndex].velocity * rotationSpeed;
 
             if (currentTransformation === "3d") {
-              this.mesh.rotation.x -= velocityData[mappedVelIndex].velocity * 0.5 * rotationSpeed;
+              this.mesh.rotation.x -= velocityData[mappedVelIndex].velocity * 0.5 * rotationSpeed * speed;
             }
             else if (this.mesh.rotation.x !== 0){
               this.mesh.rotation.x = 0;
@@ -77,6 +80,8 @@ var Binary = function() {
             merged = false;
             this.mesh.children[0].children[0].position.x = (separationData[mappedSepIndex].distance*radius) - radius;
             this.mesh.children[1].children[0].position.x = (separationData[mappedSepIndex].distance*radius*-1) + radius;
+            currentSeparation = separationData[mappedSepIndex].distance*radius*10;
+            console.log(25000-currentSeparation);
         }
         else {
             merged = true;
@@ -133,7 +138,7 @@ function calibrateCounter(gwData) {
 		return d.x > 0;
 	});
     var max = positiveData[0];
-    maxCounter = gwData.indexOf(max)-20;
+    maxCounter = gwData.indexOf(max);
 }
 
 function destroyBlackHoles() {

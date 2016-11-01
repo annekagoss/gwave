@@ -125,7 +125,7 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
             counterOffset = -60;
         }
         else if (currentRenderStyle === "nodes" && currentTransformation === "3d" && this.name === "template") {
-            counterOffset = 100;
+            counterOffset = 0;
         }
         else if (currentRenderStyle === "mesh" && this.name === "template") {
             counterOffset = 20;
@@ -144,9 +144,9 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
 
 function renderDataDashboard(data, title, setName) {
   if (setName === "h1") {
-    dashboardH1 = new Dashboard(data, title, setName, 100);
+    dashboardH1 = new Dashboard(data, title, setName, 0);
   }
   else if (setName === "template") {
-    dashboardTemplate = new Dashboard(data, title, setName, 40);
+    dashboardTemplate = new Dashboard(data, title, setName, 0);
   }
 }

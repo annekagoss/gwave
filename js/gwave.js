@@ -54,12 +54,12 @@ var friction = .25,
 		meshCubeFalloff = 6/cubeSpread,
 		meshPlaneFalloff = 200/(cubeSize*meshPlaneScale),
 		flatAmp = 10, // Extra kick multiplier for planar space wave rendering
-		maxMeshCubeDistance = getBHDist(cubeSize, cubeSize, cubeSize),
-		maxMeshPlaneDistance = getBHDist(cubeSize*meshPlaneScale, 1, cubeSize*meshPlaneScale),
+		maxMeshCubeDistance = getBHDist(cubeSize, cubeSize, cubeSize)[0],
+		maxMeshPlaneDistance = getBHDist(cubeSize*meshPlaneScale, 1, cubeSize*meshPlaneScale)[0],
 		nodeWidth = nodeSize/nodeSpread*2, // Rendering will be slow without the *0.1
 		nodeHeight = nodeSize/nodeSpread*2,
 		nodeDepth = nodeSize/nodeSpread*2,
-		maxNodeDistance = getBHDist(nodeWidth*2*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*2*nodeSpread);
+		maxNodeDistance = getBHDist(nodeWidth*2*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*2*nodeSpread)[0];
 
 var planeCameraPos = { x: 1110.51380089235, y: 26.691407694486042, z: 863.5923035685921 },
 	cubeCameraPos = { x: 920, y: 692, z: 809 };
@@ -232,31 +232,47 @@ function loop() {
 	controls.update();
 
 	if (dataRendered) {
+
 		if (currentRenderStyle === "mesh") {
 			meshVertices.forEach(function(v) {
-				// if (currentTransformation === "3d") {
-				// 	phaseOff = Math.round((maxMeshCubeDistance - v.distance+1) * meshCubeFalloff);
-				// }
-				// else {
-				// 	phaseOff = Math.round((maxMeshPlaneDistance - v.distance+1) * meshPlaneFalloff);
-				// }
-				// v.updateMeshVertex(phaseOff, counter);
-				v.updateMeshVertex();
+				if (merged === true) {
+					if (currentTransformation === "3d") {
+						phaseOff = Math.round((maxMeshCubeDistance - v.bhVector[0]+1) * meshCubeFalloff);
+					}
+					else {
+						phaseOff = Math.round((maxMeshPlaneDistance - vbhVector[0]+1) * meshPlaneFalloff);
+					}
+					v.updateMeshVertex(phaseOff, counter);
+				}
+				else {
+					v.updateMeshVertex(null, null);
+				}
 			});
-			// if (meshVertices[100]) {
-			// 	console.log(meshVertices[100].initialVector[0]);
-			// }
-
 		}
 		else {
 			nodeArray.forEach(function(n) {
-				// phaseOff = Math.round((maxNodeDistance -n.distance+1)*nodeFalloff/nodeSpread);
-				// n.updateNode(phaseOff, counter);
-				// n.distort(phaseOff, counter);
-				n.updateNode();
-				n.distort();
+				if (merged === true) {
+					phaseOff = Math.round((maxNodeDistance -n.bhVector[0]+1)*nodeFalloff/nodeSpread);
+					n.updateNode(phaseOff, counter);
+					n.distort(phaseOff, counter);
+				}
+				else {
+					n.updateNode(null, null);
+					n.distort(null, null);
+				}
 			});
-			// console.log(nodeArray[0].distance);
+			// console.log(nodeArray[100].bhVector);
+			// console.log(nodeArray[100].initialVector[1].y);
+
+			// var springBackVector = (nodeArray[100].initialVector[0]+1)*nodeArray[100].initialVector[1].y;
+			//
+			// var gravityVector = 1/(nodeArray[100].initialVector[0]+1) * nodeArray[100].bhVector.y;
+			//
+			// console.log(springBackVector + gravityVector);
+			//
+			// console.log((nodeArray[100].initialVector[0]+1)*nodeArray[100].initialVector[1].y);
+			//
+			// console.log(1/(nodeArray[100].initialVector[0]+1) * nodeArray[100].bhVector.y);
 		}
 
 		if (currentDashboard) {
