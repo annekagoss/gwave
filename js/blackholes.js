@@ -81,7 +81,7 @@ var Binary = function() {
             this.mesh.children[0].children[0].position.x = (separationData[mappedSepIndex].distance*radius) - radius;
             this.mesh.children[1].children[0].position.x = (separationData[mappedSepIndex].distance*radius*-1) + radius;
             currentSeparation = separationData[mappedSepIndex].distance*radius*10;
-            console.log(25000-currentSeparation);
+            // console.log(25000-currentSeparation);
         }
         else {
             merged = true;

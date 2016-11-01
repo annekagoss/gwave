@@ -240,7 +240,7 @@ function loop() {
 						phaseOff = Math.round((maxMeshCubeDistance - v.bhVector[0]+1) * meshCubeFalloff);
 					}
 					else {
-						phaseOff = Math.round((maxMeshPlaneDistance - vbhVector[0]+1) * meshPlaneFalloff);
+						phaseOff = Math.round((maxMeshPlaneDistance - v.bhVector[0]+1) * meshPlaneFalloff);
 					}
 					v.updateMeshVertex(phaseOff, counter);
 				}

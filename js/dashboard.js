@@ -119,16 +119,16 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
 
     this.updatePosition = function(phase) {
         if (currentTransformation === "2d") {
-          counterOffset = 275;
+          counterOffset = 0;
         }
         if (currentRenderStyle === "nodes" && currentTransformation === "2d" && this.name === "template") {
-            counterOffset = -60;
+            counterOffset = 0;
         }
         else if (currentRenderStyle === "nodes" && currentTransformation === "3d" && this.name === "template") {
             counterOffset = 0;
         }
         else if (currentRenderStyle === "mesh" && this.name === "template") {
-            counterOffset = 20;
+            counterOffset = 0;
         }
       if ((phase+counterOffset-1) < data.length) {
           var posX = x(data[phase+counterOffset-1].x);
