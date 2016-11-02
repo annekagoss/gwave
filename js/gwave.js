@@ -1,11 +1,14 @@
 // GLOBAL
-
+var greenOffset = new THREE.Color(1, .5, 1);
+var blue = new THREE.Color(0x0000FF);
+var green = new THREE.Color(0x2ECC71);
 // Scene variables
 var Colors = {
 	black: 0x000000,
 	white: 0xFFFFFF,
-	blue: 0x0000FF,
-	green: 0x2ECC71
+	blue: blue,
+	green: green,
+	greenOffset: greenOffset
 };
 var container, controls, camera, fieldOfView, aspectRatio, nearPlane, farPlane, hemisphereLight, mesh, geometry, HEIGHT, WIDTH;
 
@@ -46,7 +49,7 @@ var friction = .25,
 		cubeSpeed = speed - 1,
 		planeScale = 1,
 		meshPlaneScale = 3,
-		nodeSize = 800;
+		nodeSize = 600;
 		nodeSpread = 100,
 		nodeParticleSize = 2.5,
 		nodeRes = 1,
@@ -116,6 +119,7 @@ function createScene() {
 	window.addEventListener('resize', onWindowResize, false);
 
 	jQuery('.transform').on('click', function(){
+		destroyBlackHoles();
 		running = false;
 		jQuery('.transform').toggleClass('selected');
 		transformSpaceTime(jQuery(this));
@@ -123,6 +127,7 @@ function createScene() {
 			adjustFriction();
 			running = true;
 			render();
+			createBlackHoles();
 			loop();
 		},0);
 	});
@@ -139,12 +144,15 @@ function createScene() {
 	});
 
 	jQuery('.render-style').on('click', function(){
+		destroyBlackHoles();
 		var newStyle = jQuery(this).attr('value');
 		jQuery('.render-style').toggleClass('selected');
 		if (currentRenderStyle !== newStyle) {
 			destroySpaceTime();
 			currentRenderStyle = jQuery(this).attr('value');
+			switchLighting(currentRenderStyle);
 			createSpaceTime();
+			createBlackHoles();
 
 			if (jQuery('.transform.selected').attr('value') !== '3d') {
 				setTimeout(function(){
@@ -214,9 +222,15 @@ function adjustFriction() {
 }
 
 function createLights() {
-	hemisphereLight = new THREE.HemisphereLight(Colors.blue, Colors.green, 1);
+	// hemisphereLight = new THREE.HemisphereLight(Colors.blue, Colors.green, 1);
+	hemisphereLight = new THREE.HemisphereLight(Colors.greenOffset, Colors.greenOffset, 1);
 	hemisphereLight.position.set(0, 0, 0);
 	scene.add(hemisphereLight);
+}
+
+function switchLighting(style) {
+	hemisphereLight.color = (style === "mesh") ? Colors.blue : Colors.greenOffset;
+	hemisphereLight.groundColor = (style === "mesh") ? Colors.green : Colors.greenOffset;
 }
 
 function onWindowResize() {
@@ -251,18 +265,18 @@ function loop() {
 		}
 		else {
 			nodeArray.forEach(function(n) {
-				if (merged === true) {
+				// if (merged === true) {
 					phaseOff = Math.round((maxNodeDistance -n.bhVector[0]+1)*nodeFalloff/nodeSpread);
 					n.updateNode(phaseOff, counter);
 					n.distort(phaseOff, counter);
-				}
-				else {
-					n.updateNode(null, null);
-					n.distort(null, null);
-				}
+				// }
+				// else {
+				// 	n.updateNode(null, null);
+				// 	n.distort(null, null);
+				// }
 			});
-			// console.log(nodeArray[100].bhVector);
-			// console.log(nodeArray[100].initialVector[1].y);
+
+			console.log(nodeArray[100].dataZ);
 
 			// var springBackVector = (nodeArray[100].initialVector[0]+1)*nodeArray[100].initialVector[1].y;
 			//
@@ -323,6 +337,10 @@ function lerpPosition(posA, posB, duration, f) {
 
 function render() {
 	renderer.render(scene, camera);
+	if (mirrorA && mirrorB) {
+		mirrorA.renderWithMirror(mirrorB);
+		mirrorB.renderWithMirror(mirrorA);
+	}
 }
 
 function createNode(xVal, yVal, zVal, spread) {
@@ -513,7 +531,7 @@ function expandSpaceTime(){
 		destroySpaceTime();
 		cubeArray = [];
 		createCubeMesh();
-		maxMeshDistance = getDist(cubeSize, cubeSize, cubeSize);
+		maxMeshDistance = Math.abs(getBHDist(cubeSize, cubeSize, cubeSize)[0]);
 	}
 	else if (currentRenderStyle === "nodes") {
 		destroySpaceTime();
@@ -542,9 +560,11 @@ function sendToSimulation (data, name) {
 
 function renderDataPerspective(d) {
 	data = d;
-	createBlackHoles(d);
 	dataRendered = true;
 	jQuery('.loading').addClass('done');
+	setTimeout(function(){
+		createBlackHoles(d);
+	},100);
 }
 
 function sendBlackHolesToSimulation (BHdataSets, callback) {

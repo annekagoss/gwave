@@ -1,4 +1,5 @@
 var binary;
+var mirrorA, mirrorB;
 var separationData, velocityData, minCounter, maxCounter;
 var bhRes = 20;
 var bhaSize = 29, bhbSize = 36, blackHoleA, blackHoleB;
@@ -16,16 +17,19 @@ var currentTransformation = "3d";
 
 var currentSeparation = 1;
 
+
 // The maximum sum of the Schwarzschild radii, kilometers converted to meters
 var maxRadius = 210*1000;
 var scaleFactor = 0.00125; // Keep things on the screen
 var radius = maxRadius*scaleFactor;  // Used for distance of binary system
 var c = 299792458;
-var rotationSpeed = 0.04;
+// var rotationSpeed = 0.04;
+var rotationSpeed = .1;
 
 var gwData;
 
 var merged = false;
+var blackHolesCreated = false;
 
 function map (value, in_min, in_max, out_min, out_max) {
   return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
@@ -34,10 +38,14 @@ function map (value, in_min, in_max, out_min, out_max) {
 var Binary = function() {
     this.mesh = new THREE.Object3D();
 
-    blackHoleA = new BlackHole(bhaSize, "a"); //Initial size in solar
+    mirrorA = new THREE.Mirror( renderer, camera, { clipBias: 0.003, textureWidth: WIDTH*2, textureHeight: HEIGHT*2, color: 0x777777 } );
+
+	mirrorB = new THREE.Mirror( renderer, camera, { clipBias: 0.003, textureWidth: WIDTH*2, textureHeight: HEIGHT*2, color: 0x777777 } );
+
+    blackHoleA = new BlackHole(bhaSize, "a", mirrorA); //Initial size in solar
     this.mesh.add(blackHoleA.mesh);
 
-    blackHoleB = new BlackHole(bhbSize, "b"); //Initial size in solar
+    blackHoleB = new BlackHole(bhbSize, "b", mirrorB); //Initial size in solar
     this.mesh.add(blackHoleB.mesh);
 
     var peaks = (h1Enabled === true) ? AmplitudePeaks.h1 : AmplitudePeaks.template;
@@ -91,14 +99,15 @@ var Binary = function() {
     }
 }
 
-var BlackHole = function(size, name) {
+var BlackHole = function(size, name, mat) {
     this.mesh = new THREE.Object3D();
 	var geom = new THREE.SphereGeometry(size,bhRes,bhRes);
-	var mat = new THREE.MeshPhongMaterial ({
-		wireframe: true,
-		color:Colors.white
-	});
-    var bh = new THREE.Mesh(geom, mat);
+	// var mat = new THREE.MeshPhongMaterial ({
+	// 	wireframe: true,
+	// 	color:Colors.white
+	// });
+    var bh = new THREE.Mesh(geom, mat.material);
+    bh.add(mat);
 
     bh.position.x = name === "a" ? (separationData[0].distance * radius) : (separationData[0].distance * radius *-1);
 
@@ -142,15 +151,19 @@ function calibrateCounter(gwData) {
 }
 
 function destroyBlackHoles() {
-    gwData = [];
+    blackHolesCreated = false;
+    // gwData = [];
     scene.remove(binary.mesh);
 }
 
 function createBlackHoles(currentData) {
-    gwData = currentData;
+    gwData = currentData ? currentData : gwData;
     calibrateCounter(gwData);
     parseDataTimes(gwData);
     binary = new Binary();
     binary.mesh.position.set(0,0,0);
     scene.add(binary.mesh);
+    setTimeout(function(){
+        blackHolesCreated = true;
+    },100);
 }

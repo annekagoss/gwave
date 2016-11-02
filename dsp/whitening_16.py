@@ -67,7 +67,7 @@ tevent = 1126259462.422         # Mon Sep 14 09:50:45 GMT 2015
 # plt.savefig('check3')
 
 # h1array = list(t) for t in zip(time-tevent, strain_H1_whitenbp) # H1 downsamples csv
-h1_16_array = [list(t) for t in zip(time-tevent, strain_16_whiten)] # Model template
+h1_16_array = [list(t) for t in zip(time-tevent, strain_16_whiten)] # H1 csv
 # template_array = [list(t) for t in zip(NRtime+0.002,NR_H1_whitenbp)] # Model template
 
 
