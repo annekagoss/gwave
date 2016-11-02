@@ -100,7 +100,7 @@ var Node = function() {
 
 		this.bhVector = getBHDist(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
 
-		if (!merged && blackHolesCreated) {
+		if (blackHolesCreated) {
 			if (currentTransformation==="3d") {
 				var maxNodeVec = 0.01;
 
@@ -145,28 +145,28 @@ var Node = function() {
 			}
 
 		}
-		else {
-			if (data[phaseOff+counter]){
-				// this.mesh.position.x = this.initialWidth + this.initialWidth * friction * data[phaseOff+counter].y;
-				// this.mesh.position.y = this.initialHeight + this.initialHeight * friction * data[phaseOff+counter].y;
-				// this.mesh.position.z = this.initialDepth + this.initialDepth * friction * data[phaseOff+counter].y;
-
-				this.dataX = counter * dataDampen * this.initialWidth * data[phaseOff+counter].y;
-
-				this.dataY = counter * dataDampen * this.initialHeight * data[phaseOff+counter].y;
-
-				this.dataZ = counter * dataDampen * this.initialDepth * data[phaseOff+counter].y;
-
-				this.mesh.position.x += this.dataX;
-				this.mesh.position.y += this.dataY;
-				this.mesh.position.z += this.dataZ;
-			}
-			else {
-				this.mesh.position.x += initVecX;
-				this.mesh.position.y += initVecY;
-				this.mesh.position.z += initVecZ;
-			}
-		}
+		// else {
+		// 	if (data[phaseOff+counter]){
+		// 		// this.mesh.position.x = this.initialWidth + this.initialWidth * friction * data[phaseOff+counter].y;
+		// 		// this.mesh.position.y = this.initialHeight + this.initialHeight * friction * data[phaseOff+counter].y;
+		// 		// this.mesh.position.z = this.initialDepth + this.initialDepth * friction * data[phaseOff+counter].y;
+		//
+		// 		this.dataX = counter * dataDampen * this.initialWidth * data[phaseOff+counter].y;
+		//
+		// 		this.dataY = counter * dataDampen * this.initialHeight * data[phaseOff+counter].y;
+		//
+		// 		this.dataZ = counter * dataDampen * this.initialDepth * data[phaseOff+counter].y;
+		//
+		// 		this.mesh.position.x += this.dataX;
+		// 		this.mesh.position.y += this.dataY;
+		// 		this.mesh.position.z += this.dataZ;
+		// 	}
+		// 	else {
+		// 		this.mesh.position.x += initVecX;
+		// 		this.mesh.position.y += initVecY;
+		// 		this.mesh.position.z += initVecZ;
+		// 	}
+		// }
 		this.g = Math.min(Math.abs((this.bhVector[0]*.02)/this.initialVector[0])/1,1);
 		this.b = Math.min(Math.abs((this.bhVector[0]*.05)/this.initialVector[0])/1, 1);
 		this.r = 1- ( Math.min(Math.abs((this.bhVector[0]*.02)/this.initialVector[0])/1, 1));
