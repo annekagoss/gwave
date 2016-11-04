@@ -12,18 +12,17 @@ var Node = function() {
 		color:this.color
 	});
 
-	var n = new THREE.Mesh(geom, this.mat);
-	n.castShadow = true;
-	n.receiveShadow = true;
+	n = new THREE.Mesh(geom, this.mat);
+
 	this.mesh.add(n);
 	this.dataPos;
-	this.initialVector = getInitialDist(this.initialWidth, this.initialHeight, this.initialDepth,this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
+	this.initialVector = getInitialDist(this.initialX, this.initialY, this.initialZ,this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
 	this.bhVector = [0,0];
 
 	// this.updateNode = function(phaseOffset, counter) {
 	this.updateNode = function(phaseOff, counter) {
 
-		this.initialVector = getInitialDist(this.initialWidth, this.initialHeight, this.initialDepth, this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
+		this.initialVector = getInitialDist(this.initialX, this.initialY, this.initialZ, this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
 
 		this.initVecX = this.initialVector[1].x ? this.initialVector[1].x : 0;
 		this.initVecY = this.initialVector[1].y ? this.initialVector[1].y : 0;
@@ -36,8 +35,7 @@ var Node = function() {
 		this.bhZ = (this.bhVector[1].z < maxNodeVec) ? this.bhVector[1].z : (this.bhVector[1].z < 0) ? -maxNodeVec : maxNodeVec;
 
 		dataDampen = (currentTransformation==="3d") ? .0001 : .01;
-
-		var planeFactor = (currentTransformation==="3d") ? 1 : 7;
+		planeFactor = (currentTransformation==="3d") ? 1 : 7;
 
 		this.dataMovement = (data[phaseOff+counter]) ? (counter * dataDampen  * data[phaseOff+counter].y) : 0;
 
@@ -58,11 +56,11 @@ var Node = function() {
 
 		// this.mesh.scale.y = this.initialScale + this.initialScale * this.r + Math.abs(this.dataMovement*100);
 
-		if (polarization === "cross") {
-			this.mesh.rotation.x = Math.PI / 4;
-		}
-		else {
-			this.mesh.rotation.x = 0;
-		}
+		// if (polarization === "cross") {
+		// 	this.mesh.rotation.x = Math.PI / 4;
+		// }
+		// else {
+		// 	this.mesh.rotation.x = 0;
+		// }
 	}
 }

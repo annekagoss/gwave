@@ -37,8 +37,8 @@ var cubeArray = [],
 
 // Optimal settings for 16384hz resolution datasets
 var friction = .25,
-		cubeSize = 1000,
-		cubeRes = 0.05,
+		cubeSize = 1200,
+		cubeRes = 0.02,
 		cubeSpread = 200, // distance between cube layers
 		cubeSpeed = speed - 1,
 		planeScale = 1,
@@ -56,9 +56,10 @@ var friction = .25,
 		nodeWidth = nodeSize/nodeSpread*2, // Rendering will be slow without the *0.1
 		nodeHeight = nodeSize/nodeSpread*2,
 		nodeDepth = nodeSize/nodeSpread*2,
-		maxNodeDistance,
 		maxNodeCubeDistance = getBHDist(nodeWidth*2*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*2*nodeSpread)[0];
 		maxNodePlaneDistance = getBHDist(nodeWidth*2*nodeSpread, flatAmp, nodeDepth*2*nodeSpread)[0];
+
+var maxNodeDistance;
 
 var planeCameraPos = { x: 1110.51380089235, y: 26.691407694486042, z: 863.5923035685921 },
 	cubeCameraPos = { x: 920, y: 692, z: 809 };
@@ -70,8 +71,7 @@ function createScene() {
 	container.className = 'container';
 
 	// Camera setup
-	HEIGHT = window.innerHeight;
-	WIDTH = window.innerWidth;
+
 	aspectRatio = WIDTH / HEIGHT;
 	fieldOfView = 60;
 	nearPlane = 1;
@@ -144,17 +144,23 @@ function createScene() {
 		var newStyle = jQuery(this).attr('value');
 		jQuery('.render-style').toggleClass('selected');
 		if (currentRenderStyle !== newStyle) {
+			running = false;
 			destroySpaceTime();
 			currentRenderStyle = jQuery(this).attr('value');
 			switchLighting(currentRenderStyle);
 			createSpaceTime();
 			createBlackHoles();
 
-			if (jQuery('.transform.selected').attr('value') !== '3d') {
-				setTimeout(function(){
-					transformSpaceTime(jQuery('.transform.selected'));
-				},0);
-			}
+			// if (jQuery('.transform.selected').attr('value') !== '3d') {
+			// 	setTimeout(function(){
+			// 		transformSpaceTime(jQuery('.transform.selected'));
+			// 	},0);
+			// }
+			setTimeout(function(){
+				running = true;
+				render();
+				loop();
+			},100);
 		}
 	});
 
@@ -246,25 +252,19 @@ function loop() {
 	if (dataRendered) {
 
 		if (currentRenderStyle === "mesh") {
+			maxMeshDistance = (currentTransformation === "3d") ? maxMeshCubeDistance : meshPlaneFalloff;
+
+			meshFalloff = (currentTransformation === "3d") ? meshCubeFalloff : meshPlaneFalloff;
+
 			meshVertices.forEach(function(v) {
-				if (merged === true) {
-					if (currentTransformation === "3d") {
-						phaseOff = Math.round((maxMeshCubeDistance - v.bhVector[0]+1) * meshCubeFalloff);
-					}
-					else {
-						phaseOff = Math.round((maxMeshPlaneDistance - v.bhVector[0]+1) * meshPlaneFalloff);
-					}
-					v.updateMeshVertex(phaseOff, counter);
-				}
-				else {
-					v.updateMeshVertex(null, null);
-				}
+				phaseOff = Math.round((maxMeshDistance - v.bhVector[0]+1) * meshFalloff);
+				v.updateMeshVertex(phaseOff, counter);
 			});
 		}
 		else {
-			nodeArray.forEach(function(n) {
-				maxNodeDistance = (currentTransformation === "3d") ? maxNodeCubeDistance : maxNodePlaneDistance;
+			maxNodeDistance = (currentTransformation === "3d") ? maxNodeCubeDistance : maxNodePlaneDistance;
 
+			nodeArray.forEach(function(n) {
 				phaseOff = Math.round((maxNodeDistance -n.bhVector[0]+1)*nodeFalloff/nodeSpread);
 				n.updateNode(phaseOff, counter);
 			});
@@ -334,10 +334,10 @@ function createNode(xVal, yVal, zVal, spread) {
 	node.mesh.scale.y = nodeParticleSize;
 	node.mesh.scale.z = nodeParticleSize;
 	node.initialScale = nodeParticleSize;
-	node.initialWidth = node.mesh.position.x;
-	node.initialHeight = node.mesh.position.y;
-	node.initialDepth = node.mesh.position.z;
-	node.distance = getBHDist(node.initialWidth, node.initialHeight, node.initialDepth);
+	node.initialX = node.mesh.position.x;
+	node.initialY = node.mesh.position.y;
+	node.initialZ = node.mesh.position.z;
+	node.distance = getBHDist(node.initialX, node.initialY, node.initialZ);
 
 	this.mesh.add(node.mesh);
 	this.node = node;
@@ -480,7 +480,6 @@ function flattenSpaceTime(){
 		setTimeout( function() {
 			createPlaneMesh();
 		},10);
-		maxMeshDistance = getBHDist(cubeSize, flatAmp, cubeSize);
 	}
 	else if (currentRenderStyle === "nodes") {
 		destroySpaceTime();
@@ -497,7 +496,6 @@ function expandSpaceTime(){
 		destroySpaceTime();
 		cubeArray = [];
 		createCubeMesh();
-		maxMeshDistance = Math.abs(getBHDist(cubeSize, cubeSize, cubeSize)[0]);
 	}
 	else if (currentRenderStyle === "nodes") {
 		destroySpaceTime();

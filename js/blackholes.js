@@ -2,7 +2,7 @@ var binary;
 var mirrorA, mirrorB;
 var separationData, velocityData, minCounter, maxCounter;
 var bhRes = 20;
-var bhaSize = 29, bhbSize = 36;
+var bhaSize = 29, bhbSize = 36, finalSize = 62;
 var vectorA = new THREE.Vector3();
 var vectorB = new THREE.Vector3();
 var AmplitudePeaks = {
@@ -38,9 +38,9 @@ function map (value, in_min, in_max, out_min, out_max) {
 var Binary = function() {
     this.mesh = new THREE.Object3D();
 
-    mirrorA = new THREE.Mirror( renderer, camera, { clipBias: 0.003, textureWidth: WIDTH*2, textureHeight: HEIGHT*2, color: 0x777777 } );
+    mirrorA = new THREE.Mirror( renderer, camera, { clipBias: 0.003, textureWidth: WIDTH, textureHeight: HEIGHT, color: 0x777777 } );
 
-	mirrorB = new THREE.Mirror( renderer, camera, { clipBias: 0.003, textureWidth: WIDTH*2, textureHeight: HEIGHT*2, color: 0x777777 } );
+	mirrorB = new THREE.Mirror( renderer, camera, { clipBias: 0.003, textureWidth: WIDTH, textureHeight: HEIGHT, color: 0x777777 } );
 
     blackHoleA = new BlackHole(bhaSize, "a", mirrorA); //Initial size in solar
     this.mesh.add(blackHoleA.mesh);
@@ -95,6 +95,13 @@ var Binary = function() {
             merged = true;
             this.mesh.children[0].children[0].position.x *= 0.1;
             this.mesh.children[1].children[0].position.x *= 0.1;
+            if (this.mesh.children[1].children[0].position.x < 0.01) {
+                scene.remove(this.mesh.children[0]);
+                // this.mesh.children[1].children[0].scale.set(finalSize,finalSize,finalSize);
+            }
+            // else {
+            //     this.mesh.children[1].children[0].scale.set(bhbSize,bhbSize,bhbSize);
+            // }
         }
     }
 }
@@ -102,10 +109,6 @@ var Binary = function() {
 var BlackHole = function(size, name, mat) {
     this.mesh = new THREE.Object3D();
 	var geom = new THREE.SphereGeometry(size,bhRes,bhRes);
-	// var mat = new THREE.MeshPhongMaterial ({
-	// 	wireframe: true,
-	// 	color:Colors.white
-	// });
     var bh = new THREE.Mesh(geom, mat.material);
     bh.add(mat);
 
@@ -153,6 +156,7 @@ function calibrateCounter(gwData) {
 
 function destroyBlackHoles() {
     blackHolesCreated = false;
+    blackHoleB.mesh.children[0].scale.set(bhbSize,bhbSize,bhbSize);
     // gwData = [];
     scene.remove(binary.mesh);
 }

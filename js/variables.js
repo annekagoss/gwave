@@ -2,19 +2,29 @@
 var counterStart = 1,
     polarization = "cross",
     blackHoleA,
-    blackHoleB;
+    blackHoleB,
+    HEIGHT = window.innerHeight,
+	WIDTH = window.innerWidth;
 
 // Node Space
 // Planar space wave y value needed for data multiplier
-var flatAmp = 10;
+var flatAmp = 10,
+    n;
 
 //====== Node and mesh movements ======//
-
+var maxMeshDistance,meshFalloff;
 //dampen movement from wave data
-var dataDampen = .0001;
+var dataDampen = .0001,
+    planeFactor = 1;
 // The maximum magnitude of movement vector
-var maxNodeVec = 0.01;
-var nodeGravityStrength = 100000;
+var maxNodeVec = 0.01,
+    maxMeshVec = 0.025;
+var initVecX, initVecY, initVecZ;
+var overVecX, overVecY, overVecZ;
+var bhX,bhY,bhZ;
+var nodeGravityStrength = 100000,
+    meshGravityStrength = 50000,
+    overshootDamping = 0.075;
 
 // getBHDist variables declared first for speed optimization.
 var threeVectorA, threeVectorB, threeVectorPoint, distanceA, distanceB, subVecA, subVecB, hypotenuseA, hypotenuseB, newPosA, newPosB, combinedX, combinedY, combinedZ, newPos, maxMag, dist, nodeDist;
@@ -22,7 +32,6 @@ var threeVectorA, threeVectorB, threeVectorPoint, distanceA, distanceB, subVecA,
 // Find the distance from the black holes
 function getBHDist(x, y, z) {
 	if (blackHoleA && blackHoleB) {
-
 		vectorA.setFromMatrixPosition( blackHoleA.mesh.children[0].matrixWorld );
 		threeVectorA = new THREE.Vector3(vectorA.x, vectorA.y, vectorA.z);
 
