@@ -2,7 +2,7 @@ var binary;
 var mirrorA, mirrorB;
 var separationData, velocityData, minCounter, maxCounter;
 var bhRes = 20;
-var bhaSize = 29, bhbSize = 36, blackHoleA, blackHoleB;
+var bhaSize = 29, bhbSize = 36;
 var vectorA = new THREE.Vector3();
 var vectorB = new THREE.Vector3();
 var AmplitudePeaks = {
@@ -110,6 +110,7 @@ var BlackHole = function(size, name, mat) {
     bh.add(mat);
 
     bh.position.x = name === "a" ? (separationData[0].distance * radius) : (separationData[0].distance * radius *-1);
+    bh.position.y = (currentTransformation === "3d") ? 0 : flatAmp;
 
     this.mesh.add(bh);
 }
@@ -165,5 +166,5 @@ function createBlackHoles(currentData) {
     scene.add(binary.mesh);
     setTimeout(function(){
         blackHolesCreated = true;
-    },100);
+    },200);
 }

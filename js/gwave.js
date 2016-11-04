@@ -18,7 +18,6 @@ var dataSetH1, dataSetTemplate, data;
 
 
 // Animation
-counterStart = 1; // Must be higher than 0
 var running = true;
 var counter = counterStart;
 var phaseOff;
@@ -27,15 +26,10 @@ var phaseOff;
 var currentRenderStyle = "nodes";
 var currentDataset;
 var currentDashboard = dashboardTemplate;
-var polarization = "cross";
+
 
 // Space array rendering
 var nodeArray = [], nodeParent;
-var expandedNodeWidth,
-		expandedNodeHeight,
-		expandedNodeDepth,
-		expandedNodeSpread,
-		expandedNodeFalloff;
 
 var cubeArray = [],
 		cubeVertices = [],
@@ -52,17 +46,19 @@ var friction = .25,
 		nodeSize = 600;
 		nodeSpread = 100,
 		nodeParticleSize = 2.5,
+		nodePlaneScale = 4,
 		nodeRes = 1,
 		nodeFalloff = 2, // Wiggliness.  Higher than 2 will make points erratic during peak.
 		meshCubeFalloff = 6/cubeSpread,
 		meshPlaneFalloff = 200/(cubeSize*meshPlaneScale),
-		flatAmp = 10, // Extra kick multiplier for planar space wave rendering
 		maxMeshCubeDistance = getBHDist(cubeSize, cubeSize, cubeSize)[0],
 		maxMeshPlaneDistance = getBHDist(cubeSize*meshPlaneScale, 1, cubeSize*meshPlaneScale)[0],
 		nodeWidth = nodeSize/nodeSpread*2, // Rendering will be slow without the *0.1
 		nodeHeight = nodeSize/nodeSpread*2,
 		nodeDepth = nodeSize/nodeSpread*2,
-		maxNodeDistance = getBHDist(nodeWidth*2*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*2*nodeSpread)[0];
+		maxNodeDistance,
+		maxNodeCubeDistance = getBHDist(nodeWidth*2*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*2*nodeSpread)[0];
+		maxNodePlaneDistance = getBHDist(nodeWidth*2*nodeSpread, flatAmp, nodeDepth*2*nodeSpread)[0];
 
 var planeCameraPos = { x: 1110.51380089235, y: 26.691407694486042, z: 863.5923035685921 },
 	cubeCameraPos = { x: 920, y: 692, z: 809 };
@@ -170,10 +166,12 @@ function createScene() {
 	jQuery('.slider').val(speed);
 	jQuery('.slider').on('mouseup', function(e) {
 		running = false;
+		destroyBlackHoles();
 		resetSpaceTime();
 		speed = e.target.valueAsNumber;
 		jQuery('.speed-val').text(speed);
 		controls.enabled = true;
+		createBlackHoles();
 		setTimeout(function() {
 			running = true;
 			render();
@@ -265,28 +263,11 @@ function loop() {
 		}
 		else {
 			nodeArray.forEach(function(n) {
-				// if (merged === true) {
-					phaseOff = Math.round((maxNodeDistance -n.bhVector[0]+1)*nodeFalloff/nodeSpread);
-					n.updateNode(phaseOff, counter);
-					n.distort(phaseOff, counter);
-				// }
-				// else {
-				// 	n.updateNode(null, null);
-				// 	n.distort(null, null);
-				// }
+				maxNodeDistance = (currentTransformation === "3d") ? maxNodeCubeDistance : maxNodePlaneDistance;
+
+				phaseOff = Math.round((maxNodeDistance -n.bhVector[0]+1)*nodeFalloff/nodeSpread);
+				n.updateNode(phaseOff, counter);
 			});
-
-			console.log(nodeArray[100].dataZ);
-
-			// var springBackVector = (nodeArray[100].initialVector[0]+1)*nodeArray[100].initialVector[1].y;
-			//
-			// var gravityVector = 1/(nodeArray[100].initialVector[0]+1) * nodeArray[100].bhVector.y;
-			//
-			// console.log(springBackVector + gravityVector);
-			//
-			// console.log((nodeArray[100].initialVector[0]+1)*nodeArray[100].initialVector[1].y);
-			//
-			// console.log(1/(nodeArray[100].initialVector[0]+1) * nodeArray[100].bhVector.y);
 		}
 
 		if (currentDashboard) {
@@ -347,16 +328,16 @@ function createNode(xVal, yVal, zVal, spread) {
 	this.mesh = new THREE.Object3D();
 	var node = new Node();
 	node.mesh.position.x = xVal*spread;
-	node.mesh.position.y = yVal*spread;
+	node.mesh.position.y = (currentTransformation === "3d") ? yVal*spread : flatAmp;
 	node.mesh.position.z = zVal*spread;
 	node.mesh.scale.x = nodeParticleSize;
 	node.mesh.scale.y = nodeParticleSize;
 	node.mesh.scale.z = nodeParticleSize;
 	node.initialScale = nodeParticleSize;
-	node.initialWidth = xVal*spread;
-	node.initialHeight = yVal*spread;
-	node.initialDepth = zVal*spread;
-	node.distance = getBHDist(xVal*spread, yVal*spread, zVal*spread);
+	node.initialWidth = node.mesh.position.x;
+	node.initialHeight = node.mesh.position.y;
+	node.initialDepth = node.mesh.position.z;
+	node.distance = getBHDist(node.initialWidth, node.initialHeight, node.initialDepth);
 
 	this.mesh.add(node.mesh);
 	this.node = node;
@@ -365,12 +346,6 @@ function createNode(xVal, yVal, zVal, spread) {
 }
 
 function createNodeArray() {
-	nodeSpread = expandedNodeSpread ? expandedNodeSpread : nodeSpread;
-	nodeWidth = expandedNodeWidth ? expandedNodeWidth : nodeWidth;
-	nodeHeight = expandedNodeHeight ? expandedNodeHeight : nodeHeight;
-	nodeDepth = expandedNodeDepth ? expandedNodeDepth : nodeDepth;
-	nodeFalloff = expandedNodeFalloff ? expandedNodeFalloff : nodeFalloff;
-
 	for (i=nodeWidth*-0.5; i<nodeWidth*0.5; i++) {
 		for (j=nodeHeight*-0.5; j<nodeHeight*0.5; j++) {
 			for (k=nodeDepth*-0.5; k<nodeDepth*0.5; k++) {
@@ -381,20 +356,9 @@ function createNodeArray() {
 }
 
 function createNodePlane() {
-	expandedNodeSpread = nodeSpread;
-	nodeSpread *= 0.5;
-	expandedNodeWidth = nodeWidth;
-	nodeWidth *= 5;
-	expandedNodeHeight = nodeHeight;
-	nodeHeight = 0.5;
-	expandedNodeDepth = nodeDepth;
-	nodeDepth *= 5;
-	expandedNodeFalloff = nodeFalloff;
-	nodeFalloff = 2;
-
-	for (i=nodeWidth*-0.5; i<nodeWidth*0.5; i++) {
-			for (k=nodeDepth*-0.5; k<nodeDepth*0.5; k++) {
-				createNode(i, 1, k, nodeSpread);
+	for (i=nodeWidth*-0.5*nodePlaneScale; i<nodeWidth*0.5*nodePlaneScale; i++) {
+			for (k=nodeDepth*-0.5*nodePlaneScale; k<nodeDepth*0.5*nodePlaneScale; k++) {
+				createNode(i, 1, k, nodeSpread*0.75);
 			}
 	}
 	maxNodeDistance = getBHDist(nodeWidth*1*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*1*nodeSpread);
@@ -460,15 +424,15 @@ function createCube(size, res) {
 
 function resetSpaceTime() {
 	running = false;
-	counter = counterStart;
 	destroySpaceTime();
 	setTimeout(function(){
 		createSpaceTime();
-	},0);
+	},10);
 	setTimeout(function(){
+		counter = counterStart;
 		running = true;
 		loop();
-	},10);
+	},20);
 }
 
 function destroySpaceTime() {
@@ -486,6 +450,7 @@ function destroySpaceTime() {
 		nodeArray = [];
 	}
 	currentDashboard.updatePosition(counter);
+	console.log('spacetime destroyed');
 }
 
 function createSpaceTime() {
@@ -505,6 +470,7 @@ function createSpaceTime() {
 			createNodePlane();
 		}
 	}
+	console.log('spacetime created');
 }
 
 function flattenSpaceTime(){
