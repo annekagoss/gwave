@@ -268,10 +268,10 @@ function loop() {
 			});
 			// console.log(nodeArray[100].dataMovement);
 		}
-
-		if (currentDashboard) {
-			currentDashboard.updatePosition(counter);
-		}
+		// console.log(currentDashboard);
+		// if (currentDashboard) {
+			dashboardCombined.updatePosition(counter);
+		// }
 
 		if (binary) {
 			binary.update(counter);

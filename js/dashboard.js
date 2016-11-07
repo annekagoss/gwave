@@ -1,7 +1,6 @@
-var dashboardH1, dashboardTemplate, dashboardCombined;
+
 
 var Dashboard =  function(data, graphTitle, setName, counterOffset) {
-  console.log(data);
   this.name = setName;
 
   var margin = {top: 20, right: 60, bottom: 20, left: 60},
@@ -149,24 +148,13 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
     .attr("y2",height)
 
     this.updatePosition = function(phase) {
-        if (currentTransformation === "2d") {
-          counterOffset = 0;
-        }
-        if (currentRenderStyle === "nodes" && currentTransformation === "2d" && this.name === "template") {
-            counterOffset = 0;
-        }
-        else if (currentRenderStyle === "nodes" && currentTransformation === "3d" && this.name === "template") {
-            counterOffset = 0;
-        }
-        else if (currentRenderStyle === "mesh" && this.name === "template") {
-            counterOffset = 0;
-        }
-      if ((phase+counterOffset-1) < data.length) {
-          var posX = x(data[phase+counterOffset-1].x);
+      if ((phase-1) < data.length) {
+          var posX = waveX(data[phase-1].waveSecs);
       }
       else {
-          var posX = x(data[0].x);
+          var posX = waveX(data[0].waveSecs);
       }
+      // console.log(posX);
       svg.select(".scrub-line")
         .attr("x1", posX)
         .attr("x2", posX);

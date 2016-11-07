@@ -4,7 +4,8 @@ var counterStart = 1,
     blackHoleA,
     blackHoleB,
     HEIGHT = window.innerHeight,
-	WIDTH = window.innerWidth;
+	  WIDTH = window.innerWidth;
+var dashboardH1, dashboardTemplate, dashboardCombined;
 
 // Node Space
 // Planar space wave y value needed for data multiplier

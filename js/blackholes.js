@@ -48,8 +48,8 @@ var Binary = function() {
     blackHoleB = new BlackHole(bhbSize, "b", mirrorB); //Initial size in solar
     this.mesh.add(blackHoleB.mesh);
 
-    var peaks = (h1Enabled === true) ? AmplitudePeaks.h1 : AmplitudePeaks.template;
-    var thisRotationDegrees = oneDeg*360/(300/speed);
+    // var peaks = (h1Enabled === true) ? AmplitudePeaks.h1 : AmplitudePeaks.template;
+    // var thisRotationDegrees = oneDeg*360/(300/speed);
 
     this.update = function(counter) {
         // Rotation speed is set on time until next amplitude peak
@@ -65,44 +65,41 @@ var Binary = function() {
         //     }
         // }
 
-        var mappedVelIndex = Math.floor(map(counter, minCounter, maxCounter, 0, velocityData.length));
+        // var mappedVelIndex = Math.floor(map(counter, minCounter, maxCounter, 0, velocityData.length));
 
-        if (mappedVelIndex < velocityData.length) {
+        // if (mappedVelIndex < velocityData.length) {
             // console.log(velocityData[mappedVelIndex].velocity);
 
-            this.mesh.rotation.y -= velocityData[mappedVelIndex].velocity * rotationSpeed;
+            this.mesh.rotation.y -= gwData[counter-1].holeVel * rotationSpeed;
 
             if (currentTransformation === "3d") {
-              this.mesh.rotation.x -= velocityData[mappedVelIndex].velocity * 0.5 * rotationSpeed * speed;
+              this.mesh.rotation.x -= gwData[counter-1].holeVel * 0.5 * rotationSpeed * speed;
             }
             else if (this.mesh.rotation.x !== 0){
               this.mesh.rotation.x = 0;
             }
 
             // console.log(this.mesh.rotation.y);
-        }
+        // }
 
-        var mappedSepIndex = Math.floor(map(counter, minCounter, maxCounter, 0, separationData.length));
+        // var mappedSepIndex = Math.floor(map(counter, minCounter, maxCounter, 0, separationData.length));
 
-        if (mappedSepIndex < separationData.length) {
-            merged = false;
-            this.mesh.children[0].children[0].position.x = (separationData[mappedSepIndex].distance*radius) - radius;
-            this.mesh.children[1].children[0].position.x = (separationData[mappedSepIndex].distance*radius*-1) + radius;
-            currentSeparation = separationData[mappedSepIndex].distance*radius*10;
+        // if (mappedSepIndex < separationData.length) {
+            // merged = false;
+        this.mesh.children[0].children[0].position.x = (gwData[counter-1].holeDist*radius) - radius;
+
+        this.mesh.children[1].children[0].position.x =  (gwData[counter-1].holeDist*radius*-1) + radius;
+
+            // currentSeparation =  gwData[counter-1].holeDist*radius*10;
             // console.log(25000-currentSeparation);
-        }
-        else {
-            merged = true;
-            this.mesh.children[0].children[0].position.x *= 0.1;
-            this.mesh.children[1].children[0].position.x *= 0.1;
-            if (this.mesh.children[1].children[0].position.x < 0.01) {
-                scene.remove(this.mesh.children[0]);
-                // this.mesh.children[1].children[0].scale.set(finalSize,finalSize,finalSize);
-            }
-            // else {
-            //     this.mesh.children[1].children[0].scale.set(bhbSize,bhbSize,bhbSize);
-            // }
-        }
+        // }
+        // else {
+        //     merged = true;
+        //     this.mesh.children[0].children[0].position.x *= 0.1;
+        //     this.mesh.children[1].children[0].position.x *= 0.1;
+        //     if (this.mesh.children[1].children[0].position.x < 0.01) {
+        //         scene.remove(this.mesh.children[0]);
+        //     }
     }
 }
 
@@ -117,33 +114,33 @@ var BlackHole = function(size, name, mat) {
 
     this.mesh.add(bh);
 }
-
-function parseDataTimes() {
-    // Match separation data start times with gw data start times
-    separationData = jQuery.grep(separationData, function(d, i) {
-		return d.seconds > separationData[separationData.length-1].seconds + startTime;
-	});
-
-    // Parse seconds to time until event, with 3 decimal places
-    separationData.forEach(function(s) {
-        s.seconds = parseFloat((separationData[separationData.length-1].seconds - s.seconds).toFixed(3))*-1;
-    });
-
-    // Match velocity data start times with gw data start times
-    velocityData = jQuery.grep(velocityData, function(d, i) {
-		return d.seconds > velocityData[separationData.length-1].seconds + startTime;
-	});
-
-    // Parse seconds to time until event, with 3 decimal places
-    velocityData.forEach(function(s) {
-        s.seconds = parseFloat((velocityData[velocityData.length-1].seconds - s.seconds).toFixed(3))*-1;
-    });
-
-    // Parse seconds to 3 decimal places
-    gwData.forEach(function(g) {
-        g.x = parseFloat((g.x).toFixed(3));
-    });
-}
+//
+// function parseDataTimes() {
+//     // Match separation data start times with gw data start times
+//     separationData = jQuery.grep(separationData, function(d, i) {
+// 		return d.seconds > separationData[separationData.length-1].seconds + startTime;
+// 	});
+//
+//     // Parse seconds to time until event, with 3 decimal places
+//     separationData.forEach(function(s) {
+//         s.seconds = parseFloat((separationData[separationData.length-1].seconds - s.seconds).toFixed(3))*-1;
+//     });
+//
+//     // Match velocity data start times with gw data start times
+//     velocityData = jQuery.grep(velocityData, function(d, i) {
+// 		return d.seconds > velocityData[separationData.length-1].seconds + startTime;
+// 	});
+//
+//     // Parse seconds to time until event, with 3 decimal places
+//     velocityData.forEach(function(s) {
+//         s.seconds = parseFloat((velocityData[velocityData.length-1].seconds - s.seconds).toFixed(3))*-1;
+//     });
+//
+//     // Parse seconds to 3 decimal places
+//     gwData.forEach(function(g) {
+//         g.x = parseFloat((g.x).toFixed(3));
+//     });
+// }
 
 function calibrateCounter(gwData) {
     minCounter = 1; // coutnerStart
@@ -164,7 +161,7 @@ function destroyBlackHoles() {
 function createBlackHoles(currentData) {
     gwData = currentData ? currentData : gwData;
     calibrateCounter(gwData);
-    parseDataTimes(gwData);
+    // parseDataTimes(gwData);
     binary = new Binary();
     binary.mesh.position.set(0,0,0);
     scene.add(binary.mesh);

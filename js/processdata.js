@@ -46,6 +46,7 @@ function combineData(waveData) {
 	});
 
 	renderDataDashboard(combinedData, 'combined', 'combined');
+	sendToSimulation(combinedData, 'combined');
 }
 
 function loadData() {
@@ -64,7 +65,7 @@ function loadData() {
 					// datasets.forEach(function(d){
 					// 	renderDataDashboard(d.data, d.title, d.name);
 					// 	});
-			 		retrieveDataset("h1")
+					// 	retrieveDataset("h1")
 				}
 	  });
 	}
