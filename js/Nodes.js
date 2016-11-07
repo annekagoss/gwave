@@ -34,7 +34,7 @@ var Node = function() {
 		this.bhY = (this.bhVector[1].y < maxNodeVec) ? this.bhVector[1].y : (this.bhVector[1].y < 0) ? -maxNodeVec : maxNodeVec;
 		this.bhZ = (this.bhVector[1].z < maxNodeVec) ? this.bhVector[1].z : (this.bhVector[1].z < 0) ? -maxNodeVec : maxNodeVec;
 
-		dataDampen = (currentTransformation==="3d") ? .0001 : .01;
+		dataDampen = (currentTransformation==="3d") ? .01 : .01;
 		planeFactor = (currentTransformation==="3d") ? 1 : 7;
 
 		this.dataMovement = (data[phaseOff+counter]) ? (counter * dataDampen  * data[phaseOff+counter].y) : 0;

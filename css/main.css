@@ -298,9 +298,9 @@ input[type=range]:-moz-focusring{
     background-image: url(../images/nodes-icon.svg);
 }
 
-.graph-container {
+/*.graph-container {
     display: none;
-}
+}*/
 
 .graph-container.shown {
     display: inline-block;

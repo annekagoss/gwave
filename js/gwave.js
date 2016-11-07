@@ -16,7 +16,6 @@ var container, controls, camera, fieldOfView, aspectRatio, nearPlane, farPlane, 
 var dataRendered = false;
 var dataSetH1, dataSetTemplate, data;
 
-
 // Animation
 var running = true;
 var counter = counterStart;
@@ -25,8 +24,7 @@ var phaseOff;
 // Controls
 var currentRenderStyle = "nodes";
 var currentDataset;
-var currentDashboard = dashboardTemplate;
-
+var currentDashboard = dashboardCombined;
 
 // Space array rendering
 var nodeArray = [], nodeParent;
@@ -185,15 +183,15 @@ function createScene() {
 		},0);
 	});
 
-	jQuery('.data-picker .button').on('click', function(){
-		destroyBlackHoles();
-		currentDashboard = jQuery(this).attr('value') === "template" ? dashboardTemplate : dashboardH1;
-		adjustFriction();
-		jQuery('.graph-container').toggleClass('shown');
-		jQuery('.data-picker .button').toggleClass('selected');
-		retrieveDataset(jQuery(this).attr('value'));
-		resetSpaceTime();
-	});
+	// jQuery('.data-picker .button').on('click', function(){
+	// 	destroyBlackHoles();
+	// 	currentDashboard = jQuery(this).attr('value') === "template" ? dashboardTemplate : dashboardH1;
+	// 	adjustFriction();
+	// 	jQuery('.graph-container').toggleClass('shown');
+	// 	jQuery('.data-picker .button').toggleClass('selected');
+	// 	retrieveDataset(jQuery(this).attr('value'));
+	// 	resetSpaceTime();
+	// });
 
 	jQuery('.polarization.button').on('click', function(){
 		jQuery('.polarization.button').toggleClass('selected');
@@ -268,6 +266,7 @@ function loop() {
 				phaseOff = Math.round((maxNodeDistance -n.bhVector[0]+1)*nodeFalloff/nodeSpread);
 				n.updateNode(phaseOff, counter);
 			});
+			// console.log(nodeArray[100].dataMovement);
 		}
 
 		if (currentDashboard) {
@@ -517,8 +516,9 @@ function transformSpaceTime(e) {
 
 function sendToSimulation (data, name) {
 	currentDataset = data;
-	currentDashboard = name === "template" ? dashboardTemplate : dashboardH1;
-	jQuery('.graph-container.'+name).addClass('shown');
+	// currentDashboard = name === "combined" ? dashboardCombined : dashboardH1;
+	currentDashbaord =  dashboardCombined;
+	// jQuery('.graph-container.'+name).addClass('shown');
 	renderDataPerspective(currentDataset);
 }
 

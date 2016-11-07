@@ -3,22 +3,49 @@ var datasets = [], blackHoleDatasets = [];
 var combinedData = [];
 
 var timeStretch = 100; //slow down data so effects can be seen
-var startTime = -5;
+var startTime = -10;
 var endTime = 2;
 
 function combineData(waveData) {
-	waveData = jQuery.grep(waveData, function(d, i) {
-		return i > waveData.length - blackHoleDatasets[0].data.length+1;
+	// waveData = jQuery.grep(waveData, function(d, i) {
+	// 	return i > waveData.length - blackHoleDatasets[0].data.length+1;
+	// });
+	var initialWaveSecs = parseFloat((waveData[0].x/timeStretch).toFixed(5));
+
+	var negWaveData = jQuery.grep(waveData, function(d, i) {
+		return d.x < 0;
 	});
+
+	var lengthDiff = negWaveData.length - blackHoleDatasets[0].data.length;
+
+	// console.log(initialWaveSecs);
+	// console.log()
+	// waveData = jQuery.grep(waveData, function(d, i) {
+	// 	return d.x;
+	// });
+	// console.log(initialWaveSecs);
+	// console.log((parseFloat((waveData[0].x/timeStretch).toFixed(5))));
+
 	waveData.forEach(function(w){
+
+		// If black hole data exists, use that.  Otherwise use it's last datapoint
+		var bhDataPointSeparation = blackHoleDatasets[0].data[waveData.indexOf(w)-lengthDiff] ? blackHoleDatasets[0].data[waveData.indexOf(w)-lengthDiff] : 0;
+
+		var bhDataPointVelocity = blackHoleDatasets[1].data[waveData.indexOf(w)-lengthDiff] ? blackHoleDatasets[1].data[waveData.indexOf(w)-lengthDiff] : 0;
+
+		var waveSecs = parseFloat((w.x/timeStretch).toFixed(5));
+
 		combinedData.push({
-			waveSecs:parseFloat((w.x/timeStretch).toFixed(5)),
-			holeSecs:parseFloat((blackHoleDatasets[0].data[waveData.indexOf(w)].seconds/timeStretch).toFixed(5)),
+			// waveSecs: parseFloat((waveSecs - initialWaveSecs).toFixed(5)),
+			waveSecs: parseFloat((waveSecs).toFixed(5)),
+			holeSecs:parseFloat((bhDataPointSeparation.seconds/timeStretch).toFixed(5)),
 			waveVal: w.y,
-			holeDist: blackHoleDatasets[0].data[waveData.indexOf(w)].distance,
-			holeVel: blackHoleDatasets[1].data[waveData.indexOf(w)].velocity
+			holeDist: bhDataPointSeparation.distance,
+			holeVel: bhDataPointVelocity.velocity
 		});
 	});
+
+	renderDataDashboard(combinedData, 'combined', 'combined');
 }
 
 function loadData() {
@@ -34,9 +61,9 @@ function loadData() {
 				complete: function(data) {
 					console.log("h1 complete");
 					processData(data.responseText, "h1");
-					datasets.forEach(function(d){
-						renderDataDashboard(d.data, d.title, d.name);
-			 		});
+					// datasets.forEach(function(d){
+					// 	renderDataDashboard(d.data, d.title, d.name);
+					// 	});
 			 		retrieveDataset("h1")
 				}
 	  });
@@ -135,26 +162,26 @@ function processVelocityData(text) {
 }
 
 function processData(text, setName) {
-    var textLines = text.split(/\r\n|\n/);
-    var headers = textLines[0].split(',');
-		var data = [];
+  var textLines = text.split(/\r\n|\n/);
+  var headers = textLines[0].split(',');
+	var data = [];
 
-    for (var i=1; i<textLines.length-1; i++) {
-        var x = parseFloat(textLines[i].split(',')[0])*timeStretch;
-		var y = parseFloat(textLines[i].split(',')[1]);
-        data.push({'x':x,'y':y});
-    }
-
-	if (setName === "h1") {
-		var waveData = jQuery.grep(data, function(d, i) {
-			return d.x < 0;
-		});
-		combineData(waveData);
-	}
+  for (var i=1; i<textLines.length-1; i++) {
+      var x = parseFloat(textLines[i].split(',')[0])*timeStretch;
+	var y = parseFloat(textLines[i].split(',')[1]);
+      data.push({'x':x,'y':y});
+  }
 
 	data = jQuery.grep(data, function(d, i) {
 		return d.x > startTime && d.x < endTime;
 	});
+
+	if (setName === "h1") {
+		// var waveData = jQuery.grep(data, function(d, i) {
+		// 	return d.x < 0;
+		// });
+		combineData(data);
+	}
 
 	var title = setName === "h1" ? "LIGO Hanford Observatory, Mon Sep 14 09:16:37 GMT 2015, 16384 Hz" : "Numerical Relativity Template";
 	datasets.push({name:setName,data:data,title:title});
