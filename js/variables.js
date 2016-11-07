@@ -6,6 +6,7 @@ var counterStart = 1,
     HEIGHT = window.innerHeight,
 	  WIDTH = window.innerWidth;
 var dashboardH1, dashboardTemplate, dashboardCombined;
+var currentDashboard = dashboardCombined;
 
 // Node Space
 // Planar space wave y value needed for data multiplier

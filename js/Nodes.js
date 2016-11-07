@@ -37,7 +37,7 @@ var Node = function() {
 		dataDampen = (currentTransformation==="3d") ? .01 : .01;
 		planeFactor = (currentTransformation==="3d") ? 1 : 7;
 
-		this.dataMovement = (data[phaseOff+counter]) ? (counter * dataDampen  * data[phaseOff+counter].y) : 0;
+		this.dataMovement = (data[phaseOff+counter]) ? (counter * dataDampen  * data[phaseOff+counter].waveVal) : 0;
 
 		if (blackHolesCreated) {
 			this.mesh.position.x += ((this.initialVector[0]+1)*this.initVecX*.1) + (1/(this.initialVector[0]+1) * this.bhX*nodeGravityStrength) + this.dataMovement;

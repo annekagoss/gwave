@@ -25,7 +25,7 @@ var MeshVertex = function(vertex, parent, index) {
 		dataDampen = (currentTransformation==="3d") ? .01 : .01;
 		planeFactor = (currentTransformation==="3d") ? 1 : 7;
 
-		this.dataMovement = (data[phaseOff+counter]) ? (counter * dataDampen  * data[phaseOff+counter].y) : 0;
+		this.dataMovement = (data[phaseOff+counter]) ? (counter * dataDampen  * data[phaseOff+counter].waveVal) : 0;
 
 		bhX = (Math.abs(this.bhVector[1].x) < maxMeshVec) ? this.bhVector[1].x : (this.bhVector[1].x < 0) ? -maxMeshVec : maxMeshVec;
 		bhY = (this.bhVector[1].y < maxMeshVec) ? this.bhVector[1].y : (this.bhVector[1].y < 0) ? -maxMeshVec : maxMeshVec;

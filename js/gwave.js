@@ -24,7 +24,6 @@ var phaseOff;
 // Controls
 var currentRenderStyle = "nodes";
 var currentDataset;
-var currentDashboard = dashboardCombined;
 
 // Space array rendering
 var nodeArray = [], nodeParent;
@@ -41,7 +40,7 @@ var friction = .25,
 		cubeSpeed = speed - 1,
 		planeScale = 1,
 		meshPlaneScale = 3,
-		nodeSize = 600;
+		nodeSize = 400;
 		nodeSpread = 100,
 		nodeParticleSize = 2.5,
 		nodePlaneScale = 4,
@@ -57,7 +56,18 @@ var friction = .25,
 		maxNodeCubeDistance = getBHDist(nodeWidth*2*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*2*nodeSpread)[0];
 		maxNodePlaneDistance = getBHDist(nodeWidth*2*nodeSpread, flatAmp, nodeDepth*2*nodeSpread)[0];
 
-var maxNodeDistance;
+// var maxNodeDistance;
+
+function updateMaxDistances() {
+	maxMeshDistance = (currentTransformation === "3d") ? maxMeshCubeDistance : meshPlaneFalloff;
+
+	meshFalloff = (currentTransformation === "3d") ? meshCubeFalloff : meshPlaneFalloff;
+
+	maxNodeDistance = (currentTransformation === "3d") ? maxNodeCubeDistance : maxNodePlaneDistance;
+}
+
+updateMaxDistances();
+
 
 var planeCameraPos = { x: 1110.51380089235, y: 26.691407694486042, z: 863.5923035685921 },
 	cubeCameraPos = { x: 920, y: 692, z: 809 };
@@ -112,6 +122,8 @@ function createScene() {
 
 	window.addEventListener('resize', onWindowResize, false);
 
+
+
 	jQuery('.transform').on('click', function(){
 		destroyBlackHoles();
 		running = false;
@@ -119,6 +131,7 @@ function createScene() {
 		transformSpaceTime(jQuery(this));
 		setTimeout(function(){
 			adjustFriction();
+			updateMaxDistances();
 			running = true;
 			render();
 			createBlackHoles();
@@ -248,20 +261,13 @@ function loop() {
 	controls.update();
 
 	if (dataRendered) {
-
 		if (currentRenderStyle === "mesh") {
-			maxMeshDistance = (currentTransformation === "3d") ? maxMeshCubeDistance : meshPlaneFalloff;
-
-			meshFalloff = (currentTransformation === "3d") ? meshCubeFalloff : meshPlaneFalloff;
-
 			meshVertices.forEach(function(v) {
 				phaseOff = Math.round((maxMeshDistance - v.bhVector[0]+1) * meshFalloff);
 				v.updateMeshVertex(phaseOff, counter);
 			});
 		}
 		else {
-			maxNodeDistance = (currentTransformation === "3d") ? maxNodeCubeDistance : maxNodePlaneDistance;
-
 			nodeArray.forEach(function(n) {
 				phaseOff = Math.round((maxNodeDistance -n.bhVector[0]+1)*nodeFalloff/nodeSpread);
 				n.updateNode(phaseOff, counter);
@@ -336,7 +342,7 @@ function createNode(xVal, yVal, zVal, spread) {
 	node.initialX = node.mesh.position.x;
 	node.initialY = node.mesh.position.y;
 	node.initialZ = node.mesh.position.z;
-	node.distance = getBHDist(node.initialX, node.initialY, node.initialZ);
+	// node.distance = getBHDist(node.initialX, node.initialY, node.initialZ);
 
 	this.mesh.add(node.mesh);
 	this.node = node;
@@ -517,7 +523,7 @@ function transformSpaceTime(e) {
 function sendToSimulation (data, name) {
 	currentDataset = data;
 	// currentDashboard = name === "combined" ? dashboardCombined : dashboardH1;
-	currentDashbaord =  dashboardCombined;
+	currentDashboard =  dashboardCombined;
 	// jQuery('.graph-container.'+name).addClass('shown');
 	renderDataPerspective(currentDataset);
 }
