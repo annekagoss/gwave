@@ -14,6 +14,14 @@ var speed = 2;
 var flatAmp = 10,
     n;
 
+//======  Data  ======//
+var timeStretch = 100; //slow down data so effects can be seen
+var dataScale = Math.pow(10,22);
+
+var startTime = -5;
+var extendedStartTime = -15;
+var endTime = 2;
+
 //====== Node and mesh movements ======//
 var maxMeshDistance,meshFalloff;
 //dampen movement from wave data
@@ -22,15 +30,22 @@ var dataDampen = .0001,
 // The maximum magnitude of movement vector
 var maxNodeVec = 0.01,
     maxMeshVec = 0.025;
+
 var initVecX, initVecY, initVecZ;
 var overVecX, overVecY, overVecZ;
 var bhX,bhY,bhZ;
 var nodeGravityStrength = 1000000,
-    meshGravityStrength = 50000,
-    overshootDamping = 0.075;
+    meshGravityStrength = 1000,
+    overshootCubeDamping = 0.00001,
+    overshootPlaneDamping = 0.0005,
+    overshootDamping = overshootCubeDamping;
 
 // getBHDist variables declared first for speed optimization.
 var threeVectorA, threeVectorB, threeVectorPoint, distanceA, distanceB, subVecA, subVecB, hypotenuseA, hypotenuseB, newPosA, newPosB, combinedX, combinedY, combinedZ, newPos, maxMag, dist, nodeDist;
+
+function map (value, in_min, in_max, out_min, out_max) {
+  return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
 
 // Find the distance from the black holes
 function getBHDist(x, y, z) {

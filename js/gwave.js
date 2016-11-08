@@ -40,12 +40,13 @@ var friction = .25,
 		cubeSpeed = speed - 1,
 		planeScale = 1,
 		meshPlaneScale = 3,
-		nodeSize = 1000;
-		nodeSpread = 175,
-		nodeParticleSize = 2,
+		nodeSize = 800;
+		nodeSpread = 200,
+		nodeParticleSize = 3,
 		nodePlaneScale = 4,
 		nodeRes = 1,
-		nodeFalloff = 2, // Wiggliness.  Higher than 2 will make points erratic during peak.
+		nodePlaneFalloff = 20/nodeSpread, // Wiggliness.  Higher than 2 will make points erratic during peak.
+		nodeCubeFalloff = 8/nodeSpread, // Wiggliness.  Higher than 2 will make points erratic during peak.
 		meshCubeFalloff = 6/cubeSpread,
 		meshPlaneFalloff = 200/(cubeSize*meshPlaneScale),
 		maxMeshCubeDistance = getBHDist(cubeSize, cubeSize, cubeSize)[0],
@@ -53,8 +54,8 @@ var friction = .25,
 		nodeWidth = nodeSize/nodeSpread*2, // Rendering will be slow without the *0.1
 		nodeHeight = nodeSize/nodeSpread*2,
 		nodeDepth = nodeSize/nodeSpread*2,
-		maxNodeCubeDistance = getBHDist(nodeWidth*2*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*2*nodeSpread)[0];
-		maxNodePlaneDistance = getBHDist(nodeWidth*2*nodeSpread, flatAmp, nodeDepth*2*nodeSpread)[0];
+		maxNodeCubeDistance = getInitialDist(0,0,0,nodeWidth*2*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*2*nodeSpread)[0];
+		maxNodePlaneDistance = getInitialDist(0,0,0,nodeWidth*2*nodeSpread, flatAmp, nodeDepth*2*nodeSpread)[0];
 
 		speed = 2;
 
@@ -65,6 +66,8 @@ function updateMaxDistances() {
 	meshFalloff = (currentTransformation === "3d") ? meshCubeFalloff : meshPlaneFalloff;
 
 	maxNodeDistance = (currentTransformation === "3d") ? maxNodeCubeDistance : maxNodePlaneDistance;
+
+	nodeFalloff = (currentTransformation === "3d") ? nodeCubeFalloff : nodePlaneFalloff;
 }
 
 updateMaxDistances();
@@ -267,13 +270,14 @@ function loop() {
 				phaseOff = Math.round((maxMeshDistance - v.bhVector[0]+1) * meshFalloff);
 				v.updateMeshVertex(phaseOff, counter);
 			});
+			// console.log(meshGravityStrength-currentSeparation);
 		}
 		else {
 			nodeArray.forEach(function(n) {
-				phaseOff = Math.round((maxNodeDistance -n.bhVector[0]+1)*nodeFalloff/nodeSpread);
+				phaseOff = Math.round((maxNodeDistance -n.bhVector[0]+1)*nodeFalloff);
 				n.updateNode(phaseOff, counter);
 			});
-			// console.log(nodeArray[100].dataMovement);
+			// console.log(nodeArray[100].initialVector[0]);
 		}
 		// console.log(currentDashboard);
 		// if (currentDashboard) {
@@ -313,8 +317,6 @@ function getInitialDist(initX, initY, initZ, x, y, z) {
 
 		return [distance,newPos];
 }
-
-
 
 function lerpPosition(posA, posB, duration, f) {
 	var t = f / duration;
@@ -551,9 +553,6 @@ function sendBlackHolesToSimulation (BHdataSets, callback) {
 				velocityData = d.data;
 			}
 		});
-		// setTimeout(function(){
-		// 	createBlackHoles(currentDataset);
-		// },0);
 	}
 }
 

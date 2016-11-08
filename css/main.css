@@ -183,7 +183,7 @@ input[type=range]:-moz-focusring{
 	margin: 20px 24px 0;
 }
 
-.data-picker {
+.button {
     margin-bottom: 10px;
 }
 
@@ -298,10 +298,17 @@ input[type=range]:-moz-focusring{
     background-image: url(../images/nodes-icon.svg);
 }
 
-/*.graph-container {
-    display: none;
-}*/
-
 .graph-container.shown {
     display: inline-block;
+}
+
+.mode-select {
+    width: 100%;
+    text-align: center;
+}
+
+.button.mode {
+    display: inline-block;
+    font-size: 1.2em;
+    opacity: 1;
 }

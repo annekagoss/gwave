@@ -1,7 +1,9 @@
 
 
-var Dashboard =  function(data, graphTitle, setName, counterOffset) {
+var Dashboard =  function(data, graphTitle, setName, counterOffset, zoomed) {
   this.name = setName;
+
+  // var zoomedData =
 
   var margin = {top: 20, right: 60, bottom: 20, left: 60},
       width = window.innerWidth*1 - margin.left - margin.right,
@@ -20,7 +22,6 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
   var holeX = d3.scaleLinear()
       .range([0, width])
       .domain(d3.extent(data, function(d) { return d.waveSecs; }));
-      // .domain([d3.min(data, function(d) { return     d.waveSecs; }), 0]);
 
   var holeDistY = d3.scaleLinear()
       .range([height, 0])
@@ -29,14 +30,6 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
   var holeVelY = d3.scaleLinear()
       .range([height, 0])
       .domain(d3.extent(data, function(d) { return d.holeVel; }));
-
-  // var iconX = d3.scaleLinear()
-  //     .range([0, iconWidth])
-  //     .domain(d3.extent(data, function(d) { return d.x; }));
-  //
-  // var iconY = d3.scaleLinear()
-  //     .range([iconHeight, 0])
-  //     .domain(d3.extent(data, function(d) { return d.y; }));
 
   var waveLine = d3.line()
     .x(function(d) { return waveX(d.waveSecs); })
@@ -50,65 +43,15 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
     .x(function(d) { return holeX(d.waveSecs); })
     .y(function(d) { return holeVelY(d.holeVel); });
 
-  // var iconLine = d3.line()
-  //     .x(function(d) { return iconX(d.x); })
-  //     .y(function(d) { return iconY(d.y); });
-
-  // if (this.name === "template") {
-  //
-  //   var graphContainer = d3.select(".graph-section").append("div")
-  //     .attr("class", "graph-container graph-container-1 "+this.name);
-  //
-  //   var title = d3.select(".graph-container-1").append("div")
-  //     .attr("class","title")
-  //     .html(graphTitle);
-  //
-  //   var svg = d3.select(".graph-container-1").append("svg")
-  //       .attr("class", "graph")
-  //       .attr("width", width + margin.left + margin.right)
-  //       .attr("height", height + margin.top + margin.bottom)
-  //     .append("g")
-  //       .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-      // .on("mouseover", function() { scrubGraph(); });
-
-    // var iconSvg = d3.select(".template-icon").append("svg")
-    //     .attr("class", "graph icon")
-    //     .attr("width", iconWidth)
-    //     .attr("height", iconHeight)
-    //     .append("g");
-    //
-    // iconSvg.append("path")
-    //   .datum(data)
-    //   .attr("class", "line")
-    //   .attr("d", iconLine);
-  // }
-  // else {
-    var graphContainer = d3.select(".graph-section").append("div")
-      .attr("class", "graph-container graph-container "+this.name);
-
-    // var title = d3.select(".graph-container").append("div")
-    //   .attr("class","title")
-    //   .html(graphTitle);
+var graphContainer = d3.select(".graph-section").append("div")
+  .attr("class", "graph-container graph-container "+this.name);
 
     var svg = d3.select(".graph-container").append("svg")
         .attr("class", "graph")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
       .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-      // .on("mouseover", function() { scrubGraph(); });
-
-      // var iconSvg = d3.select(".h1-icon").append("svg")
-      //     .attr("class", "graph icon")
-      //     .attr("width", iconWidth)
-      //     .attr("height", iconHeight)
-      //     .append("g");
-
-      // iconSvg.append("path")
-      //   .datum(data)
-      //   .attr("class", "line")
-      //   .attr("d", iconLine);
-  // }
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
   svg.append("g")
      .attr("class", "axis axis--x")
@@ -154,7 +97,6 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
       else {
           var posX = waveX(data[0].waveSecs);
       }
-      // console.log(posX);
       svg.select(".scrub-line")
         .attr("x1", posX)
         .attr("x2", posX);
@@ -162,13 +104,5 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset) {
 }
 
 function renderDataDashboard(data, title, setName) {
-  // if (setName === "h1") {
-  //   dashboardH1 = new Dashboard(data, title, setName, 0);
-  // }
-  // else if (setName === "template") {
-  //   dashboardTemplate = new Dashboard(data, title, setName, 0);
-  // }
-  // else if (setName === "combined") {
     dashboardCombined = new Dashboard(data, title, setName, 0);
-  // }
 }
