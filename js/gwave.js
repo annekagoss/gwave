@@ -40,9 +40,9 @@ var friction = .25,
 		cubeSpeed = speed - 1,
 		planeScale = 1,
 		meshPlaneScale = 3,
-		nodeSize = 400;
-		nodeSpread = 100,
-		nodeParticleSize = 2.5,
+		nodeSize = 1000;
+		nodeSpread = 175,
+		nodeParticleSize = 2,
 		nodePlaneScale = 4,
 		nodeRes = 1,
 		nodeFalloff = 2, // Wiggliness.  Higher than 2 will make points erratic during peak.
@@ -56,7 +56,8 @@ var friction = .25,
 		maxNodeCubeDistance = getBHDist(nodeWidth*2*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*2*nodeSpread)[0];
 		maxNodePlaneDistance = getBHDist(nodeWidth*2*nodeSpread, flatAmp, nodeDepth*2*nodeSpread)[0];
 
-// var maxNodeDistance;
+		speed = 2;
+
 
 function updateMaxDistances() {
 	maxMeshDistance = (currentTransformation === "3d") ? maxMeshCubeDistance : meshPlaneFalloff;
@@ -363,7 +364,7 @@ function createNodeArray() {
 function createNodePlane() {
 	for (i=nodeWidth*-0.5*nodePlaneScale; i<nodeWidth*0.5*nodePlaneScale; i++) {
 			for (k=nodeDepth*-0.5*nodePlaneScale; k<nodeDepth*0.5*nodePlaneScale; k++) {
-				createNode(i, 1, k, nodeSpread*0.75);
+				createNode(i, 1, k, nodeSpread*0.5);
 			}
 	}
 	maxNodeDistance = getBHDist(nodeWidth*1*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*1*nodeSpread);

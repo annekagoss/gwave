@@ -3,7 +3,7 @@ var datasets = [], blackHoleDatasets = [];
 var combinedData = [];
 
 var timeStretch = 100; //slow down data so effects can be seen
-var startTime = -10;
+var startTime = -5;
 var endTime = 2;
 
 function combineData(waveData) {
@@ -70,22 +70,22 @@ function loadData() {
 	  });
 	}
 
-	function loadTemplateData() {
-			$.ajax({
-	         type: "GET",
-	 				 url: "data/template_downsampled.csv",
-	         dataType: "text",
-	         success: function() {
-	         		console.log("template success");
-	          },
-				error: function(req, status, err) {console.log(status, err);},
-				complete: function(data) {
-					console.log("template complete");
-					processData(data.responseText, "template");
-					loadH1Data();
-				}
-	    });
-	}
+	// function loadTemplateData() {
+	// 		$.ajax({
+	//          type: "GET",
+	//  				 url: "data/template_downsampled.csv",
+	//          dataType: "text",
+	//          success: function() {
+	//          		console.log("template success");
+	//           },
+	// 			error: function(req, status, err) {console.log(status, err);},
+	// 			complete: function(data) {
+	// 				console.log("template complete");
+	// 				processData(data.responseText, "template");
+	// 				loadH1Data();
+	// 			}
+	//     });
+	// }
 
 	function loadVelocityData() {
 		$.ajax({
@@ -130,11 +130,9 @@ function loadData() {
 	function loadBlackHoleData() {
 		loadSeparationData();
 		loadVelocityData();
-		// graphBlackHoles();
+		loadH1Data();
 		simulateBlackHoles();
 	}
-
-	loadTemplateData();
 	loadBlackHoleData();
 }
 

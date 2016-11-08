@@ -5,14 +5,10 @@ var bhRes = 20;
 var bhaSize = 29, bhbSize = 36, finalSize = 62;
 var vectorA = new THREE.Vector3();
 var vectorB = new THREE.Vector3();
-var AmplitudePeaks = {
-    h1 : [100, 400, 600, 760],
-    template : [100, 400, 600, 640]
-}
-var nextPeak, lastPeak = 1;
+
 var oneDeg = Math.PI/180;
 var h1Enabled = true, templateEnabled = false;
-var speed = 1;
+
 var currentTransformation = "3d";
 var currentSeparation = 1;
 

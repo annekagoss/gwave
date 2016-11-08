@@ -7,6 +7,7 @@ var counterStart = 1,
 	  WIDTH = window.innerWidth;
 var dashboardH1, dashboardTemplate, dashboardCombined;
 var currentDashboard = dashboardCombined;
+var speed = 2;
 
 // Node Space
 // Planar space wave y value needed for data multiplier
@@ -24,7 +25,7 @@ var maxNodeVec = 0.01,
 var initVecX, initVecY, initVecZ;
 var overVecX, overVecY, overVecZ;
 var bhX,bhY,bhZ;
-var nodeGravityStrength = 100000,
+var nodeGravityStrength = 1000000,
     meshGravityStrength = 50000,
     overshootDamping = 0.075;
 
