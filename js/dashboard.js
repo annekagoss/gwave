@@ -3,9 +3,7 @@
 var Dashboard =  function(data, graphTitle, setName, counterOffset, zoomed) {
   this.name = setName;
 
-  // var zoomedData =
-
-  var margin = {top: 20, right: 60, bottom: 20, left: 60},
+  var margin = {top: 10, right: 60, bottom: 20, left: 50},
       width = window.innerWidth*1 - margin.left - margin.right,
       height = 150 - margin.top - margin.bottom,
       iconWidth = 100,
@@ -13,11 +11,13 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset, zoomed) {
 
   var waveX = d3.scaleLinear()
       .range([0, width])
-      .domain(d3.extent(data, function(d) { return d.waveSecs; }));
+      .domain(d3.extent(data, function(d) {
+          return d.waveSecs;
+      }));
 
   var waveY = d3.scaleLinear()
-      .range([height, 0])
-      .domain(d3.extent(data, function(d) { return d.waveVal; }));
+      .range([height+4, 0])
+      .domain(d3.extent(data, function(d) { return d.waveVal*1.1; }));
 
   var holeX = d3.scaleLinear()
       .range([0, width])
@@ -46,12 +46,12 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset, zoomed) {
 var graphContainer = d3.select(".graph-section").append("div")
   .attr("class", "graph-container graph-container "+this.name);
 
-    var svg = d3.select(".graph-container").append("svg")
-        .attr("class", "graph")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-      .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+var svg = d3.select(".graph-container").append("svg")
+    .attr("class", "graph")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
   svg.append("g")
      .attr("class", "axis axis--x")
@@ -90,9 +90,25 @@ var graphContainer = d3.select(".graph-section").append("div")
     .attr("y1","0")
     .attr("y2",height)
 
+    var timeText = d3.select(".time-data .value");
+    var waveText = d3.select(".wave-data .value");
+    var bhVelText = d3.select(".bh-velocity-data .value");
+    var bhSepText = d3.select(".bh-separation-data .value");
+
     this.updatePosition = function(phase) {
       if ((phase-1) < data.length) {
           var posX = waveX(data[phase-1].waveSecs);
+          timeText.text((data[phase-1].waveSecs*1000).toFixed(3));
+          waveValue = data[phase-1].waveVal/dataScale;
+          waveText.html(formatStrain(waveValue));
+          if (data[phase-1].holeVel) {
+            //   bhVelText.text(Math.round(toMetersPerSecond(data[phase-1].holeVel)));
+            //   bhVelText.text(data[phase-1].holeVel.toFixed(3));
+             bhVelText.html(toPercent(data[phase-1].holeVel));
+          }
+          if (data[phase-1].holeDist) {
+              bhSepText.html(data[phase-1].holeDist.toFixed(3));
+          }
       }
       else {
           var posX = waveX(data[0].waveSecs);

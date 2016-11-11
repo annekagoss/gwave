@@ -13,7 +13,7 @@
 	</head>
 	<body>
 		<div class="ui">
-			<div class="mode-select">
+			<!-- <div class="mode-select">
 				<div class="button mode" value="play-data">
 					<div class="icon-label">
 						Play Detected Gravitational Waves
@@ -23,6 +23,24 @@
 					<div class="icon-label">
 						Create Gravitational Waves
 					</div>
+				</div>
+			</div> -->
+
+			<div class="measurements">
+				<div class="item distance">
+					<div class="key">Distance from black holes: </div>
+					<div class="value"></div>
+					<div class="unit">meters</div>
+				</div>
+				<div class="item earth-force">
+					<div class="key">Force measured on Earth: </div>
+					<div class="value">waveValue</div>
+					<div class="unit">meters</div>
+				</div>
+				<div class="item force">
+					<div class="key">Force measured here: </div>
+					<div class="value"></div>
+					<div class="unit">meters</div>
 				</div>
 			</div>
 
@@ -36,13 +54,37 @@
 				<div class="slider-label">Speed: <span class="speed-val"></span></div>
 				<input class="slider" id="speed-slider" type="range" min="1" max="20" step="1" value="2"/>
 			</div>
-			<div class="button polarization plus selected" value="plus"><div class="polarization-icon plus"></div>Plus Polarization</div>
-			<div class="button polarization cross" value="cross"><div class="polarization-icon cross"></div>Cross Polarization</div>
-			<div class="button transform flat" value="2d"><div class="transform-icon flat"></div>Flatten to 2D Space</div>
-			<div class="button transform expanded selected" value="3d"><div class="transform-icon expanded"></div>Expand to 3D Space</div>
-			<div class="button render-style mesh" value="mesh"><div class="render-icon mesh"></div>Render as mesh</div>
-			<div class="button render-style nodes selected" value="nodes"><div class="render-icon nodes"></div>Render as nodes</div>
-			<div class="graph-section"></div>
+			<div class="button polarization plus selected shifted" value="plus"><div class="polarization-icon plus"></div>Plus Polarization</div>
+			<div class="button polarization cross shifted" value="cross"><div class="polarization-icon cross"></div>Cross Polarization</div>
+			<div class="button transform flat shifted" value="2d"><div class="transform-icon flat"></div>Flatten to 2D Space</div>
+			<div class="button transform expanded selected shifted" value="3d"><div class="transform-icon expanded"></div>Expand to 3D Space</div>
+			<div class="button render-style mesh shifted" value="mesh"><div class="render-icon mesh"></div>Render as mesh</div>
+			<div class="button render-style nodes selected shifted" value="nodes"><div class="render-icon nodes"></div>Render as nodes</div>
+			<div class="graph-section">
+				<div class="legend">
+					<div class="legend-item time-data">
+						<div class="key">Time: </div>
+						<div class="value"></div>
+						<div class="unit">MS</div>
+					</div>
+					<div class="legend-item wave-data">
+						<div class="key">Wave value: </div>
+						<div class="value"></div>
+						<div class="unit">meters</div>
+					</div>
+					<div class="legend-item bh-velocity-data">
+						<div class="key">Black Hole Velocity: </div>
+						<div class="value"></div>
+						<!-- <div class="unit">meters / second</div> -->
+						<div class="unit">of the speed of light</div>
+					</div>
+					<div class="legend-item bh-separation-data">
+						<div class="key">Black Hole Separation: </div>
+						<div class="value"></div>
+						<div class="unit">Schwarzschild radii</div>
+					</div>
+				</div>
+			</div>
 		</div>
 
 		<div class="loading">
@@ -54,6 +96,7 @@
 		<script src="js/dashboard.js"></script>
 		<script src="js/processdata.js"></script>
 		<script src="js/blackholes.js"></script>
+		<script src="js/measurements.js"></script>
 		<script src="js/Nodes.js"></script>
 		<script src="js/MeshVertex.js"></script>
 		<script src="js/gwave.js"></script>

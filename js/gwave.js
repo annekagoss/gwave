@@ -34,33 +34,32 @@ var cubeArray = [],
 
 // Optimal settings for 16384hz resolution datasets
 var friction = .25,
-		cubeSize = 2000,
-		cubeRes = 0.0125,
-		cubeSpread = 600, // distance between cube layers
-		cubeSpeed = speed - 1,
-		planeScale = 1,
-		meshPlaneScale = 2,
-		nodeSize = 1000;
-		nodeSpread = 200,
-		nodeParticleSize = 3,
-		nodePlaneScale = 3,
-		nodeRes = 1,
-		nodePlaneFalloff = 100000,
-		nodeCubeFalloff = 100000, // Wave propagation speed
-		// meshCubeFalloff = 6/cubeSpread,
-		// meshPlaneFalloff = 200/(cubeSize*meshPlaneScale),
-		meshPlaneFalloff = 300000,
-		meshCubeFalloff = 100000, // Wave propagation speed
-		maxMeshCubeDistance = getInitialDist(0,0,0,cubeSize, cubeSize, cubeSize)[0],
-		maxMeshPlaneDistance = getInitialDist(0,0,0,cubeSize*meshPlaneScale, 1, cubeSize*meshPlaneScale)[0],
-		nodeWidth = nodeSize/nodeSpread*2, // Rendering will be slow without the *0.1
-		nodeHeight = nodeSize/nodeSpread*2,
-		nodeDepth = nodeSize/nodeSpread*2,
-		maxNodeCubeDistance = getInitialDist(0,0,0,nodeWidth*2*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*2*nodeSpread)[0];
-		maxNodePlaneDistance = getInitialDist(0,0,0,nodeWidth*2*nodeSpread, flatAmp, nodeDepth*2*nodeSpread)[0];
+	cubeSize = 2000,
+	cubeRes = 0.0125,
+	cubeSpread = 600, // distance between cube layers
+	cubeSpeed = speed - 1,
+	planeScale = 1,
+	meshPlaneScale = 2,
+	nodeSize = 1000;
+	nodeSpread = 200,
+	nodeParticleSize = 3,
+	nodePlaneScale = 3,
+	nodeRes = 1,
+	nodePlaneFalloff = 100000,
+	nodeCubeFalloff = 100000, // Wave propagation speed
+	// meshCubeFalloff = 6/cubeSpread,
+	// meshPlaneFalloff = 200/(cubeSize*meshPlaneScale),
+	meshPlaneFalloff = 300000,
+	meshCubeFalloff = 100000, // Wave propagation speed
+	maxMeshCubeDistance = getInitialDist(0,0,0,cubeSize, cubeSize, cubeSize)[0],
+	maxMeshPlaneDistance = getInitialDist(0,0,0,cubeSize*meshPlaneScale, 1, cubeSize*meshPlaneScale)[0],
+	nodeWidth = nodeSize/nodeSpread*2, // Rendering will be slow without the *0.1
+	nodeHeight = nodeSize/nodeSpread*2,
+	nodeDepth = nodeSize/nodeSpread*2,
+	maxNodeCubeDistance = getInitialDist(0,0,0,nodeWidth*2*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*2*nodeSpread)[0];
+	maxNodePlaneDistance = getInitialDist(0,0,0,nodeWidth*2*nodeSpread, flatAmp, nodeDepth*2*nodeSpread)[0];
 
 		speed = 2;
-
 
 function updateMaxDistances() {
 	maxMeshDistance = (currentTransformation === "3d") ? maxMeshCubeDistance : meshPlaneFalloff;
@@ -127,8 +126,7 @@ function createScene() {
 	container.appendChild(renderer.domElement);
 
 	window.addEventListener('resize', onWindowResize, false);
-
-
+	window.addEventListener( 'mousemove', onMouseMove, false );
 
 	jQuery('.transform').on('click', function(){
 		destroyBlackHoles();
@@ -168,11 +166,10 @@ function createScene() {
 			createSpaceTime();
 			createBlackHoles();
 
-			// if (jQuery('.transform.selected').attr('value') !== '3d') {
-			// 	setTimeout(function(){
-			// 		transformSpaceTime(jQuery('.transform.selected'));
-			// 	},0);
-			// }
+			if (newStyle === "mesh") {
+				highlightSphere.visible = false;
+			}
+
 			setTimeout(function(){
 				running = true;
 				render();
@@ -201,16 +198,6 @@ function createScene() {
 			loop();
 		},0);
 	});
-
-	// jQuery('.data-picker .button').on('click', function(){
-	// 	destroyBlackHoles();
-	// 	currentDashboard = jQuery(this).attr('value') === "template" ? dashboardTemplate : dashboardH1;
-	// 	adjustFriction();
-	// 	jQuery('.graph-container').toggleClass('shown');
-	// 	jQuery('.data-picker .button').toggleClass('selected');
-	// 	retrieveDataset(jQuery(this).attr('value'));
-	// 	resetSpaceTime();
-	// });
 
 	jQuery('.polarization.button').on('click', function(){
 		jQuery('.polarization.button').toggleClass('selected');
@@ -243,7 +230,6 @@ function adjustFriction() {
 }
 
 function createLights() {
-	// hemisphereLight = new THREE.HemisphereLight(Colors.blue, Colors.green, 1);
 	hemisphereLight = new THREE.HemisphereLight(Colors.greenOffset, Colors.greenOffset, 1);
 	hemisphereLight.position.set(0, 0, 0);
 	scene.add(hemisphereLight);
@@ -269,36 +255,24 @@ function loop() {
 	if (dataRendered) {
 		if (currentRenderStyle === "mesh") {
 			meshVertices.forEach(function(v) {
-				// phaseOff = Math.round((maxMeshDistance - v.bhVector[0]+1) * meshFalloff);
 				phaseOff = Math.round(v.bhVector[0]*.1);
 				v.updateMeshVertex(phaseOff, counter);
 			});
-			if (meshVertices[100]){
-				console.log(phaseOff);
-			}
-
 		}
 		else {
 			nodeArray.forEach(function(n) {
 				phaseOff = Math.round(n.bhVector[0]*.05);
 				n.updateNode(phaseOff, counter);
 			});
-
-			// counterOffset = Math.round((maxNodeDistance-1)*nodeFalloff);
-			// console.log(nodeArray[100].initialVector[0]);
+			takeMeasurement();
 		}
-		// console.log(currentDashboard);
-		// if (currentDashboard) {
-			dashboardCombined.updatePosition(counter);
-		// }
-
+		dashboardCombined.updatePosition(counter);
 		if (binary) {
 			binary.update(counter);
 		}
 	}
 
 	render();
-
 	setTimeout(function(){
 		counter += speed;
 		if (data) {
@@ -308,29 +282,6 @@ function loop() {
 	},0);
 }
 
-function getInitialDist(initX, initY, initZ, x, y, z) {
-		var initialVector = new THREE.Vector3(initX, initY, initZ);
-		var currentVector = new THREE.Vector3(x,y,z);
-
-		var distance = currentVector.distanceTo(initialVector);
-
-		var subvec = new THREE.Vector3();
-	  subvec = subvec.subVectors(initialVector,currentVector);
-
-		var newPos = {
-			x: subvec.x/distance,
-			y: subvec.y/distance,
-			z: subvec.z/distance
-		}
-
-		return [distance,newPos];
-}
-
-function lerpPosition(posA, posB, duration, f) {
-	var t = f / duration;
-	var newPos = posA + t * (posB - posA);
-	return newPos;
-}
 
 function render() {
 	renderer.render(scene, camera);
@@ -340,9 +291,9 @@ function render() {
 	}
 }
 
-function createNode(xVal, yVal, zVal, spread) {
+function createNode(xVal, yVal, zVal, spread, num) {
 	this.mesh = new THREE.Object3D();
-	var node = new Node();
+	var node = new Node(num);
 	node.mesh.position.x = xVal*spread;
 	node.mesh.position.y = (currentTransformation === "3d") ? yVal*spread : flatAmp;
 	node.mesh.position.z = zVal*spread;
@@ -353,8 +304,6 @@ function createNode(xVal, yVal, zVal, spread) {
 	node.initialX = node.mesh.position.x;
 	node.initialY = node.mesh.position.y;
 	node.initialZ = node.mesh.position.z;
-	// node.distance = getBHDist(node.initialX, node.initialY, node.initialZ);
-
 	this.mesh.add(node.mesh);
 	this.node = node;
 	scene.add(node.mesh);
@@ -362,20 +311,24 @@ function createNode(xVal, yVal, zVal, spread) {
 }
 
 function createNodeArray() {
+	var nodeNum = 0;
 	for (i=nodeWidth*-0.5; i<nodeWidth*0.5; i++) {
 		for (j=nodeHeight*-0.5; j<nodeHeight*0.5; j++) {
 			for (k=nodeDepth*-0.5; k<nodeDepth*0.5; k++) {
-				createNode(i, j, k, nodeSpread);
+				createNode(i, j, k, nodeSpread, nodeNum);
+				nodeNum ++;
 			}
 		}
 	}
 }
 
 function createNodePlane() {
+	var nodeNum = 0;
 	for (i=nodeWidth*-0.5*nodePlaneScale; i<nodeWidth*0.5*nodePlaneScale; i++) {
-			for (k=nodeDepth*-0.5*nodePlaneScale; k<nodeDepth*0.5*nodePlaneScale; k++) {
-				createNode(i, 1, k, nodeSpread*0.5);
-			}
+		for (k=nodeDepth*-0.5*nodePlaneScale; k<nodeDepth*0.5*nodePlaneScale; k++) {
+			createNode(i, 1, k, nodeSpread*0.5, nodeNum);
+			nodeNum ++;
+		}
 	}
 	maxNodeDistance = getBHDist(nodeWidth*1*nodeSpread, nodeHeight*.5*nodeSpread, nodeDepth*1*nodeSpread);
 }
@@ -587,6 +540,7 @@ function init() {
 	createLights();
 	loadData();
 	createSpaceTime();
+	createHighlightSphere();
 	// createBlackHOles();
 	setTimeout(function(){
 		loop();

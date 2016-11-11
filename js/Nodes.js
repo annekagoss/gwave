@@ -1,5 +1,8 @@
-var Node = function() {
+var Node = function(name) {
 	this.mesh = new THREE.Object3D();
+
+	this.mesh.name = name;
+	this.name = name;
 
 	var geom = new THREE.SphereGeometry(nodeParticleSize,nodeRes,nodeRes);
 	this.r = 1;
@@ -11,9 +14,7 @@ var Node = function() {
 		wireframe: true,
 		color:this.color
 	});
-
 	n = new THREE.Mesh(geom, this.mat);
-
 	this.mesh.add(n);
 	this.dataPos;
 	this.initialVector = getInitialDist(this.initialX, this.initialY, this.initialZ,this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);

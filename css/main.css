@@ -18,6 +18,10 @@ body {
     overflow: hidden;
 }
 
+canvas {
+    cursor: crosshair;
+}
+
 .loading {
     position: fixed;
     top: 0;
@@ -53,7 +57,19 @@ body {
     background-size: contain;
     margin-right: 6px;
     vertical-align: middle;
+}
 
+.measurements {
+    min-width: 250px;
+    position: absolute;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    cursor: crosshair;
+    transform: translate(10%,-100%);
+}
+
+.full-opacity {
+    opacity: 1;
 }
 
 .ui {
@@ -69,7 +85,7 @@ body {
 
 .button {
   /*display: inline-block;*/
-  margin: 10px 32px 10px;
+  margin: 10px 45px 10px;
   padding: 4px;
   cursor: pointer;
   border: solid 1px rgba(255, 255, 255, 0);
@@ -184,8 +200,37 @@ input[type=range]:-moz-focusring{
 	margin: 20px 24px 0;
 }
 
+.legend {
+    margin-left: 44px;
+}
+
+.legend-item, .measurements .item {
+    margin: 2px 0;
+}
+
+.legend-item div,
+.measurements .item div {
+    display: inline-block;
+}
+
+.unit {
+    text-transform: lowercase;
+}
+
+.bh-velocity-data {
+    color: #ff334b;
+}
+
+.bh-separation-data {
+    color: #e2069c;
+}
+
 .button {
     margin-bottom: 10px;
+}
+
+.shifted {
+    margin-left: 38px;
 }
 
 .data-icon {
@@ -206,7 +251,7 @@ input[type=range]:-moz-focusring{
     width: auto;
     display: inline-block;
     border: none;
-    margin: 10px 0 10px 32px;
+    margin: 10px 0 10px 39px;
 }
 
 .pause-rect {

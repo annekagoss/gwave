@@ -25,7 +25,6 @@ function combineData(waveData) {
 
 		combinedData.push({
 			waveSecs: parseFloat((waveSecs).toFixed(5)),
-			holeSecs:parseFloat((bhDataPointSeparation.seconds/timeStretch).toFixed(5)),
 			waveVal: w.y,
 			holeDist: bhDataPointSeparation.distance,
 			holeVel: bhDataPointVelocity.velocity
@@ -122,6 +121,7 @@ function processVelocityData(text) {
 		var v = parseFloat(textLines[i].split(',')[1]);
 		data.push({'seconds':s,'velocity':v});
 	}
+
 	var name = "velocity", title = "velocity";
 	blackHoleDatasets.push({name:name,data:data,title:title});
 }

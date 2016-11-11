@@ -1,8 +1,6 @@
 var binary;
 var mirrorA, mirrorB;
 var separationData, velocityData, minCounter, maxCounter;
-var bhRes = 40;
-var bhaSize = 29, bhbSize = 36, finalSize = 62;
 var vectorA = new THREE.Vector3();
 var vectorB = new THREE.Vector3();
 
@@ -12,14 +10,6 @@ var h1Enabled = true, templateEnabled = false;
 var currentTransformation = "3d";
 var currentSeparation = 1;
 
-// The maximum sum of the Schwarzschild radii, kilometers converted to meters
-var maxRadius = 210*1000;
-var scaleFactor = 0.00125; // Keep things on the screen
-var radius = maxRadius*scaleFactor;  // Used for distance of binary system
-var c = 299792458;
-// var rotationSpeed = 0.04;
-var rotationSpeed = .075;
-
 var gwData;
 
 var merged = false;
@@ -28,43 +18,44 @@ var rotationReset = false;
 
 var blackHoleVertices = [];
 
-var BhVertex = function(vertex, parent, index) {
-	this.initialX = vertex.x;
-	this.initialY = vertex.y;
-	this.initialZ = vertex.z;
-	this.parentShape = parent.mesh.children[0].geometry;
-	this.indexInParent = index;
 
-    this.updateMeshVertex = function(counter){
-        this.initialVector = getInitialDist(this.initialX, this.initialY, this.initialZ, this.parentShape.vertices[this.indexInParent].x, this.parentShape.vertices[this.indexInParent].y, this.parentShape.vertices[this.indexInParent].z);
-
-        this.distance = getInitialDist(0, 0, 0, this.parentShape.vertices[this.indexInParent].x, this.parentShape.vertices[this.indexInParent].y, this.parentShape.vertices[this.indexInParent].z);
-
-        initVecX = this.initialVector[1].x ? this.initialVector[1].x : 0;
-		initVecY = this.initialVector[1].y ? this.initialVector[1].y : 0;
-		initVecZ = this.initialVector[1].z ? this.initialVector[1].z : 0;
-
-        var phaseOff = Math.round((62-this.distance[0]+1)*meshFalloff);
-        var bhDataDampen = -.01;
-
-        this.dataMovement = (data[phaseOff+counter]) ? (counter * dataDampen  * data[phaseOff+counter].waveVal) : 0;
-
-        this.parentShape.vertices[this.indexInParent].x +=
-        this.dataMovement * bhDataDampen * ((1-data.length/counter));
-
-        this.parentShape.vertices[this.indexInParent].y += this.dataMovement * bhDataDampen * ((1-data.length/counter));
-
-        this.parentShape.vertices[this.indexInParent].z += this.dataMovement * bhDataDampen * ((1-data.length/counter));
-
-        this.parentShape.verticesNeedUpdate = true;
-    }
-    this.reset = function(){
-        this.parentShape.vertices[this.indexInParent].x = this.initialX;
-        this.parentShape.vertices[this.indexInParent].y = this.initialY;
-        this.parentShape.vertices[this.indexInParent].z = this.initialZ;
-        this.parentShape.verticesNeedUpdate = true;
-    }
-}
+// var BhVertex = function(vertex, parent, index) {
+// 	this.initialX = vertex.x;
+// 	this.initialY = vertex.y;
+// 	this.initialZ = vertex.z;
+// 	this.parentShape = parent.mesh.children[0].geometry;
+// 	this.indexInParent = index;
+//
+//     this.updateMeshVertex = function(counter){
+//         this.initialVector = getInitialDist(this.initialX, this.initialY, this.initialZ, this.parentShape.vertices[this.indexInParent].x, this.parentShape.vertices[this.indexInParent].y, this.parentShape.vertices[this.indexInParent].z);
+//
+//         this.distance = getInitialDist(0, 0, 0, this.parentShape.vertices[this.indexInParent].x, this.parentShape.vertices[this.indexInParent].y, this.parentShape.vertices[this.indexInParent].z);
+//
+//         initVecX = this.initialVector[1].x ? this.initialVector[1].x : 0;
+// 		initVecY = this.initialVector[1].y ? this.initialVector[1].y : 0;
+// 		initVecZ = this.initialVector[1].z ? this.initialVector[1].z : 0;
+//
+//         var phaseOff = Math.round((62-this.distance[0]+1)*meshFalloff);
+//         var bhDataDampen = -.01;
+//
+//         this.dataMovement = (data[phaseOff+counter]) ? (counter * dataDampen  * data[phaseOff+counter].waveVal) : 0;
+//
+//         this.parentShape.vertices[this.indexInParent].x +=
+//         this.dataMovement * bhDataDampen * ((1-data.length/counter));
+//
+//         this.parentShape.vertices[this.indexInParent].y += this.dataMovement * bhDataDampen * ((1-data.length/counter));
+//
+//         this.parentShape.vertices[this.indexInParent].z += this.dataMovement * bhDataDampen * ((1-data.length/counter));
+//
+//         this.parentShape.verticesNeedUpdate = true;
+//     }
+//     this.reset = function(){
+//         this.parentShape.vertices[this.indexInParent].x = this.initialX;
+//         this.parentShape.vertices[this.indexInParent].y = this.initialY;
+//         this.parentShape.vertices[this.indexInParent].z = this.initialZ;
+//         this.parentShape.verticesNeedUpdate = true;
+//     }
+// }
 
 var Binary = function() {
     this.mesh = new THREE.Object3D();
@@ -79,11 +70,11 @@ var Binary = function() {
     blackHoleB = new BlackHole(bhbSize, "b", mirrorB); //Initial size in solar
     this.mesh.add(blackHoleB.mesh);
 
-    var bhVertices = blackHoleB.mesh.children[0].geometry.vertices;
-    bhVertices.forEach(function(v) {
-        var bhVertex = new BhVertex(v, blackHoleB, bhVertices.indexOf(v));
-        blackHoleVertices.push(bhVertex);
-    })
+    // var bhVertices = blackHoleB.mesh.children[0].geometry.vertices;
+    // bhVertices.forEach(function(v) {
+    //     var bhVertex = new BhVertex(v, blackHoleB, bhVertices.indexOf(v));
+    //     blackHoleVertices.push(bhVertex);
+    // })
 
     this.update = function(counter) {
         if (counter === 1) {
@@ -159,6 +150,8 @@ var BlackHole = function(size, name, mat) {
 
     this.mesh.add(bh);
 }
+
+
 
 function calibrateCounter(gwData) {
     minCounter = 1; // coutnerStart

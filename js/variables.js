@@ -9,6 +9,7 @@ var counterStart = 1,
 var dashboardH1, dashboardTemplate, dashboardCombined;
 var currentDashboard = dashboardCombined;
 var speed = 2;
+var intersects;
 
 // Node Space
 // Planar space wave y value needed for data multiplier
@@ -16,12 +17,12 @@ var flatAmp = 10,
     n;
 
 //======  Data  ======//
-var timeStretch = 100; //slow down data so effects can be seen
+var timeStretch = 1; //slow down data so effects can be seen
 var dataScale = Math.pow(10,22);
 
-var startTime = -5;
-var extendedStartTime = -15;
-var endTime = 2;
+var startTime = -.5;
+var extendedStartTime = -.12;
+var endTime = .02;
 
 //====== Node and mesh movements ======//
 var maxMeshDistance,meshFalloff;
@@ -37,7 +38,31 @@ var overVecX, overVecY, overVecZ;
 var bhX,bhY,bhZ;
 var nodeGravityStrength = 1000000,
     meshGravityStrength = 25000;
-var distortionFactor = 0.0005;
+var distortionFactor = 0.0001;
+
+//====== Black Holes ======//
+// The maximum sum of the Schwarzschild radii, kilometers converted to meters
+var maxRadius = 210*1000;
+var scaleFactor = 0.00125; // Keep things on the screen
+var radius = maxRadius*scaleFactor;  // Used for distance of binary system
+var bhRes = 40;
+var bhaSize = 29, bhbSize = 36, finalSize = 62;
+var c = 299792458;
+var rotationSpeed = .075;
+var amplitudeOnEarth = waveValue;
+//Range of ditances binary could have been from earth in megaparsecs
+var distanceRange = [230, 570];
+var averageDist = (distanceRange[0] + distanceRange[1])/2;
+var metersPerParsec = 3.086*Math.pow(10,22);
+var distFromEarth = averageDist*metersPerParsec;
+var waveValue; //Variable for sharing the current wave value across files
+var amplitudeAtCenter;
+
+// console.log(amplitudeAtCenter);
+
+// var G = 6.674*(Math.pow(10,−11)); // gravitational constant m^3 kg^-1 s^-2
+// var orbitalAngle = 1 + Math.pow(Math.cos(Math.PI/2),2); Equals Zero
+
 
 
 // getBHDist variables declared first for speed optimization.
@@ -45,6 +70,25 @@ var threeVectorA, threeVectorB, threeVectorPoint, distanceA, distanceB, subVecA,
 
 function map (value, in_min, in_max, out_min, out_max) {
   return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+var strainNums, strainMag, newStrain;
+
+function formatStrain(strain) {
+    strainNums = strain.toString().split('e',2)[0];
+    strainMag = strain.toString().split('e',2)[1];
+    strainNums = parseFloat(strainNums).toFixed(3);
+    strainMag = parseFloat(strainMag);
+    newStrain = strainNums + " x 10<sup>"+strainMag+"</sup>"
+    return newStrain;
+}
+
+function toMetersPerSecond(speed) {
+    return speed * c;
+}
+
+function toPercent(decimal) {
+    return (decimal*100).toFixed(1)+"<sup>%</sup>";
 }
 
 // Find the distance from the black holes
@@ -110,4 +154,22 @@ function getBHDist(x, y, z) {
 		}
 		return [dist, nodeDist];
 	}
+}
+
+function getInitialDist(initX, initY, initZ, x, y, z) {
+		var initialVector = new THREE.Vector3(initX, initY, initZ);
+		var currentVector = new THREE.Vector3(x,y,z);
+
+		var distance = currentVector.distanceTo(initialVector);
+
+		var subvec = new THREE.Vector3();
+	  subvec = subvec.subVectors(initialVector,currentVector);
+
+		var newPos = {
+			x: subvec.x/distance,
+			y: subvec.y/distance,
+			z: subvec.z/distance
+		}
+
+		return [distance,newPos];
 }
