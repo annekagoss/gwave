@@ -1,6 +1,7 @@
 //====== Globals ======//
 var counterStart = 1,
-    polarization = "cross",
+    counterOffset,
+    polarization = "plus",
     blackHoleA,
     blackHoleB,
     HEIGHT = window.innerHeight,
@@ -29,16 +30,15 @@ var dataDampen = .0001,
     planeFactor = 1;
 // The maximum magnitude of movement vector
 var maxNodeVec = 0.01,
-    maxMeshVec = 0.025;
+    maxMeshVec = 0.01;
 
 var initVecX, initVecY, initVecZ;
 var overVecX, overVecY, overVecZ;
 var bhX,bhY,bhZ;
 var nodeGravityStrength = 1000000,
-    meshGravityStrength = 1000,
-    overshootCubeDamping = 0.00001,
-    overshootPlaneDamping = 0.0005,
-    overshootDamping = overshootCubeDamping;
+    meshGravityStrength = 25000;
+var distortionFactor = 0.0005;
+
 
 // getBHDist variables declared first for speed optimization.
 var threeVectorA, threeVectorB, threeVectorPoint, distanceA, distanceB, subVecA, subVecB, hypotenuseA, hypotenuseB, newPosA, newPosB, combinedX, combinedY, combinedZ, newPos, maxMag, dist, nodeDist;

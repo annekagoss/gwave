@@ -40,7 +40,8 @@ body {
     transform: translate(-50%, -50%);
     font-size: 2em;
     letter-spacing: 0.125em;
-    color: rgb(0, 79, 140);
+    /*color: rgb(0, 79, 140);*/
+    color: #0078fb;
 }
 
 .loading-icon {
@@ -300,6 +301,14 @@ input[type=range]:-moz-focusring{
 
 .graph-container.shown {
     display: inline-block;
+}
+
+.line.hole-distance {
+  stroke: #e2069c;
+}
+
+.line.hole-velocity {
+  stroke: #ff334b;
 }
 
 .mode-select {

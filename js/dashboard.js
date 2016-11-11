@@ -69,18 +69,18 @@ var graphContainer = d3.select(".graph-section").append("div")
 
    svg.append("path")
      .datum(data)
-     .attr("class", "line")
-     .attr("d", waveLine);
-
-   svg.append("path")
-     .datum(data)
-     .attr("class", "line")
+     .attr("class", "line hole-distance")
      .attr("d", holeDistLine);
 
    svg.append("path")
      .datum(data)
-     .attr("class", "line")
+     .attr("class", "line hole-velocity")
      .attr("d", holeVelLine);
+
+   svg.append("path")
+     .datum(data)
+     .attr("class", "line")
+     .attr("d", waveLine);
 
    var scrubLine = svg.append("line")
     .datum(data)

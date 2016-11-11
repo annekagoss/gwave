@@ -34,23 +34,25 @@ var cubeArray = [],
 
 // Optimal settings for 16384hz resolution datasets
 var friction = .25,
-		cubeSize = 1200,
-		cubeRes = 0.02,
-		cubeSpread = 200, // distance between cube layers
+		cubeSize = 2000,
+		cubeRes = 0.0125,
+		cubeSpread = 600, // distance between cube layers
 		cubeSpeed = speed - 1,
 		planeScale = 1,
-		meshPlaneScale = 3,
-		nodeSize = 800;
+		meshPlaneScale = 2,
+		nodeSize = 1000;
 		nodeSpread = 200,
 		nodeParticleSize = 3,
-		nodePlaneScale = 4,
+		nodePlaneScale = 3,
 		nodeRes = 1,
-		nodePlaneFalloff = 20/nodeSpread, // Wiggliness.  Higher than 2 will make points erratic during peak.
-		nodeCubeFalloff = 8/nodeSpread, // Wiggliness.  Higher than 2 will make points erratic during peak.
-		meshCubeFalloff = 6/cubeSpread,
-		meshPlaneFalloff = 200/(cubeSize*meshPlaneScale),
-		maxMeshCubeDistance = getBHDist(cubeSize, cubeSize, cubeSize)[0],
-		maxMeshPlaneDistance = getBHDist(cubeSize*meshPlaneScale, 1, cubeSize*meshPlaneScale)[0],
+		nodePlaneFalloff = 100000,
+		nodeCubeFalloff = 100000, // Wave propagation speed
+		// meshCubeFalloff = 6/cubeSpread,
+		// meshPlaneFalloff = 200/(cubeSize*meshPlaneScale),
+		meshPlaneFalloff = 300000,
+		meshCubeFalloff = 100000, // Wave propagation speed
+		maxMeshCubeDistance = getInitialDist(0,0,0,cubeSize, cubeSize, cubeSize)[0],
+		maxMeshPlaneDistance = getInitialDist(0,0,0,cubeSize*meshPlaneScale, 1, cubeSize*meshPlaneScale)[0],
 		nodeWidth = nodeSize/nodeSpread*2, // Rendering will be slow without the *0.1
 		nodeHeight = nodeSize/nodeSpread*2,
 		nodeDepth = nodeSize/nodeSpread*2,
@@ -267,16 +269,22 @@ function loop() {
 	if (dataRendered) {
 		if (currentRenderStyle === "mesh") {
 			meshVertices.forEach(function(v) {
-				phaseOff = Math.round((maxMeshDistance - v.bhVector[0]+1) * meshFalloff);
+				// phaseOff = Math.round((maxMeshDistance - v.bhVector[0]+1) * meshFalloff);
+				phaseOff = Math.round(v.bhVector[0]*.1);
 				v.updateMeshVertex(phaseOff, counter);
 			});
-			// console.log(meshGravityStrength-currentSeparation);
+			if (meshVertices[100]){
+				console.log(phaseOff);
+			}
+
 		}
 		else {
 			nodeArray.forEach(function(n) {
-				phaseOff = Math.round((maxNodeDistance -n.bhVector[0]+1)*nodeFalloff);
+				phaseOff = Math.round(n.bhVector[0]*.05);
 				n.updateNode(phaseOff, counter);
 			});
+
+			// counterOffset = Math.round((maxNodeDistance-1)*nodeFalloff);
 			// console.log(nodeArray[100].initialVector[0]);
 		}
 		// console.log(currentDashboard);
