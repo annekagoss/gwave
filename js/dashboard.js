@@ -102,8 +102,6 @@ var svg = d3.select(".graph-container").append("svg")
           waveValue = data[phase-1].waveVal/dataScale;
           waveText.html(formatStrain(waveValue));
           if (data[phase-1].holeVel) {
-            //   bhVelText.text(Math.round(toMetersPerSecond(data[phase-1].holeVel)));
-            //   bhVelText.text(data[phase-1].holeVel.toFixed(3));
              bhVelText.html(toPercent(data[phase-1].holeVel));
           }
           if (data[phase-1].holeDist) {

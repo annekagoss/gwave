@@ -63,9 +63,14 @@ canvas {
     min-width: 250px;
     position: absolute;
     opacity: 0;
-    transition: opacity 0.5s ease;
+    transition: opacity 0.25s ease;
     cursor: crosshair;
     transform: translate(10%,-100%);
+}
+
+.flipped {
+  transform: translate(-110%, -100%);
+  text-align: right;
 }
 
 .full-opacity {

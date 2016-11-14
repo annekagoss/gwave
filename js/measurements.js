@@ -3,13 +3,23 @@ var pointColor = new THREE.Color(1,1,1);
 var highlightSphere, selectedPoint;
 var raycaster = new THREE.Raycaster();
 var mouse = new THREE.Vector2();
-var metersAway;
+var metersAway, offScreen;
 
 function repositionMeasurements(newX, newY) {
     jQuery('.measurements').css({
         left:newX,
         top:newY
     });
+
+    offScreen = (jQuery('.measurements').offset().left) + (jQuery('.measurements').width()) + (jQuery('.flipped').width()) - window.innerWidth; 
+
+    if (offScreen > 0) {
+      jQuery('.measurements').addClass('flipped');
+    }
+    else if (jQuery('.flipped')) {
+      jQuery('.flipped').removeClass('flipped');
+    }
+
     if (jQuery('.full-opacity').length === 0) {
         jQuery('.measurements').addClass('full-opacity');
     }
@@ -33,21 +43,23 @@ function createHighlightSphere(){
 		wireframe: true,
 		color: pointColor,
 		transparent: true,
-		opacity: 0.25
+		opacity: 0
 	});
 	var mesh = new THREE.Mesh(geom, mat);
-    mesh.name="highlightSphere";
+  mesh.name="highlightSphere";
 	highlightSphere.add(mesh);
-	highlightSphere.visible = false;
-    highlightSphere.name="highlightSphere";
-
+	// highlightSphere.visible = false;
+  highlightSphere.name="highlightSphere";
 	scene.add(highlightSphere);
+}
+
+function animateOpacity(object){
+  object.opacity = jQuery('.measurements').css('opacity')*0.25;
 }
 
 function takeMeasurement(){
     raycaster.setFromCamera( mouse, camera );
     intersects = raycaster.intersectObjects( scene.children, true);
-
     highlightSphere.visible = intersects.length > 0 ? true : false;
 
     for ( var i = 0; i < intersects.length; i++ ) {

@@ -73,9 +73,8 @@ function updateMaxDistances() {
 
 updateMaxDistances();
 
-
 var planeCameraPos = { x: 1110.51380089235, y: 26.691407694486042, z: 863.5923035685921 },
-	cubeCameraPos = { x: 920, y: 692, z: 809 };
+cubeCameraPos = { x: 920, y: 692, z: 809 };
 
 function createScene() {
 	// DOM setup
@@ -84,7 +83,6 @@ function createScene() {
 	container.className = 'container';
 
 	// Camera setup
-
 	aspectRatio = WIDTH / HEIGHT;
 	fieldOfView = 60;
 	nearPlane = 1;
@@ -97,19 +95,8 @@ function createScene() {
 		farPlane
 	);
 
-	camera.position.x = cubeCameraPos.x;
-	camera.position.y = cubeCameraPos.y;
-	camera.position.z = cubeCameraPos.z;
+	setCameraPosition();
 	camera.rotation = (-0.7076907934882674, 0.7128062225857894, 0.4640637998884659);
-
-	controls = new THREE.TrackballControls(camera);
-	controls.rotateSpeed = 1.0;
-	controls.zoomSpeed = 1.2;
-	controls.panSpeed = 0.8;
-	controls.staticMoving = true;
-	controls.dynamicDampingFactor = 0.3;
-	controls.keys = [65, 83, 68];
-	controls.addEventListener('change', render);
 
 	// Scene setup
 	scene = new THREE.Scene();
@@ -120,6 +107,17 @@ function createScene() {
 		alpha: true,
 		antialias: true,
 	});
+
+	controls = new THREE.OrbitControls(camera, renderer.domElement);
+	controls.rotateSpeed = 1.0;
+	controls.zoomSpeed = 1.2;
+	controls.panSpeed = 0.8;
+	controls.staticMoving = true;
+	controls.dynamicDampingFactor = 0.3;
+	controls.keys = [65, 83, 68];
+	controls.addEventListener('change', render);
+
+
 
 	renderer.setPixelRatio(window.devicePixelRatio);
 	renderer.setSize(WIDTH, HEIGHT);
@@ -247,7 +245,6 @@ function onWindowResize() {
 	controls.handleResize();
 }
 
-
 function loop() {
 	camera.lookAt(scene.position);
 	controls.update();
@@ -271,6 +268,9 @@ function loop() {
 			binary.update(counter);
 		}
 	}
+	if (highlightSphere.visible) {
+		animateOpacity(highlightSphere.children[0].material);
+	}
 
 	render();
 	setTimeout(function(){
@@ -284,6 +284,9 @@ function loop() {
 
 
 function render() {
+	if (Math.abs(camera.position.x > 3000) || Math.abs(camera.position.y > 3000) || Math.abs(camera.position.z > 3000)) {
+		setCameraPosition();
+	}
 	renderer.render(scene, camera);
 	if (mirrorA && mirrorB) {
 		mirrorA.renderWithMirror(mirrorB);
@@ -391,6 +394,11 @@ function createCube(size, res) {
 	cubeArray.push(this.mesh);
 }
 
+function setCameraPosition() {
+	var newPos = currentTransformation === "3d" ? cubeCameraPos : planeCameraPos;
+	camera.position.set(newPos.x, newPos.y, newPos.z);
+}
+
 function resetSpaceTime() {
 	running = false;
 	destroySpaceTime();
@@ -455,9 +463,7 @@ function flattenSpaceTime(){
 		nodeArray = [];
 		createNodePlane();
 	}
-	camera.position.x = planeCameraPos.x;
-	camera.position.y = planeCameraPos.y;
-	camera.position.z = planeCameraPos.z;
+	setCameraPosition();
 }
 
 function expandSpaceTime(){
@@ -484,15 +490,9 @@ function transformSpaceTime(e) {
 	currentTransformation = value;
 }
 
-function sendToSimulation (data, name) {
-	currentDataset = data;
-	// currentDashboard = name === "combined" ? dashboardCombined : dashboardH1;
-	currentDashboard =  dashboardCombined;
-	// jQuery('.graph-container.'+name).addClass('shown');
-	renderDataPerspective(currentDataset);
-}
-
-function renderDataPerspective(d) {
+function sendToSimulation (d, name) {
+	currentDataset = d;
+	currentDashboard = dashboardCombined;
 	data = d;
 	dataRendered = true;
 	jQuery('.loading').addClass('done');
@@ -517,31 +517,12 @@ function sendBlackHolesToSimulation (BHdataSets, callback) {
 	}
 }
 
-function renderDataSpline(d) {
-	var mat = new THREE.LineBasicMaterial({
-		color: Colors.white
-	});
-	var geom = new THREE.Geometry();
-	var line = new THREE.Line(geom, mat);
-	for (vector in d) {
-		geom.vertices.push(
-			new THREE.Vector3(
-				d[vector].x,
-				d[vector].y,
-				0
-			)
-		);
-	}
-	scene.add(line);
-}
-
 function init() {
 	createScene();
 	createLights();
 	loadData();
 	createSpaceTime();
 	createHighlightSphere();
-	// createBlackHOles();
 	setTimeout(function(){
 		loop();
 	},10);

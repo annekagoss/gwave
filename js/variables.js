@@ -75,12 +75,17 @@ function map (value, in_min, in_max, out_min, out_max) {
 var strainNums, strainMag, newStrain;
 
 function formatStrain(strain) {
+  if (strain) {
     strainNums = strain.toString().split('e',2)[0];
     strainMag = strain.toString().split('e',2)[1];
     strainNums = parseFloat(strainNums).toFixed(3);
     strainMag = parseFloat(strainMag);
     newStrain = strainNums + " x 10<sup>"+strainMag+"</sup>"
     return newStrain;
+  }
+  else {
+    return "0"
+  }
 }
 
 function toMetersPerSecond(speed) {

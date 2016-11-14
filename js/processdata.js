@@ -2,6 +2,17 @@ var datasets = [], blackHoleDatasets = [];
 
 var combinedData = [];
 
+function exportData(dataToExport) {
+	if (!dataToExport) {
+		setTimeout(function(){
+			exportData(dataToExport)
+		},10);
+	}
+	else {
+		renderDataDashboard(dataToExport, 'combined', 'combined');
+		sendToSimulation(dataToExport, 'combined');
+	}
+}
 
 
 function combineData(waveData) {
@@ -15,7 +26,6 @@ function combineData(waveData) {
 	console.log(lengthDiff);
 
 	waveData.forEach(function(w){
-
 		// If black hole data exists, use that.  Otherwise use it's last datapoint
 		var bhDataPointSeparation = blackHoleDatasets[0].data[waveData.indexOf(w)-lengthDiff] ? blackHoleDatasets[0].data[waveData.indexOf(w)-lengthDiff] : 0;
 
@@ -31,8 +41,7 @@ function combineData(waveData) {
 		});
 	});
 
-	renderDataDashboard(combinedData, 'combined', 'combined');
-	sendToSimulation(combinedData, 'combined');
+	exportData(combinedData);
 }
 
 function loadData() {
@@ -91,7 +100,6 @@ function loadData() {
 			},10);
 		});
 	}
-
 	function loadBlackHoleData() {
 		loadSeparationData();
 		loadVelocityData();
