@@ -20,9 +20,7 @@ var Node = function(name) {
 	this.initialVector = getInitialDist(this.initialX, this.initialY, this.initialZ,this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
 	this.bhVector = [0,0];
 
-	// this.updateNode = function(phaseOffset, counter) {
 	this.updateNode = function(phaseOff, counter) {
-
 		this.initialVector = getInitialDist(this.initialX, this.initialY, this.initialZ, this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
 
 		this.initVecX = this.initialVector[1].x ? this.initialVector[1].x : 0;
@@ -31,25 +29,21 @@ var Node = function(name) {
 
 		this.bhVector = getBHDist(this.mesh.position.x, this.mesh.position.y, this.mesh.position.z);
 
-		// this.bhX = (Math.abs(this.bhVector[1].x) < maxNodeVec) ? this.bhVector[1].x : (this.bhVector[1].x < 0) ? -maxNodeVec : maxNodeVec;
-		// this.bhY = (Math.abs(this.bhVector[1].y) < maxNodeVec) ? this.bhVector[1].y : (this.bhVector[1].y < 0) ? -maxNodeVec : maxNodeVec;
-		// this.bhZ = (Math.abs(this.bhVector[1].z) < maxNodeVec) ? this.bhVector[1].z : (this.bhVector[1].z < 0) ? -maxNodeVec : maxNodeVec;
-
 		this.bhX = this.bhVector[1].x;
 		this.bhY = this.bhVector[1].y;
 		this.bhZ = this.bhVector[1].z;
 
-		dataDampen = (currentTransformation==="3d") ? .001 : .0001;
-		planeFactor = (currentTransformation==="3d") ? 1 : 10;
+		dataDampen = (currentTransformation==="3d") ? 1 : 1;
+		planeFactor = (currentTransformation==="3d") ? 1 : 1;
 
-		this.dataMovement = (data[counter-phaseOff]) ? (counter * dataDampen * data[counter-phaseOff].waveVal) : 0;
+		this.dataMovement = (data[counter-phaseOff]) ? (dataDampen * data[counter-phaseOff].waveVal) : 0;
 
 		if (blackHolesCreated) {
-			this.mesh.position.x += ((this.initialVector[0]+1)*this.initVecX*.1) + (1/(this.bhVector[0]+1) * this.bhX*nodeGravityStrength) * this.dataMovement;
+			this.mesh.position.x += ((this.initialVector[0]+1)*this.initVecX*.1) + (1/(this.bhVector[0]+1) * this.bhX*nodeGravityStrength*massForGravity) * this.dataMovement;
 
-			this.mesh.position.y += ((this.initialVector[0]+1)*this.initVecY*.1) + (1/(this.bhVector[0]+1) * this.bhY*nodeGravityStrength) * this.dataMovement;
+			this.mesh.position.y += ((this.initialVector[0]+1)*this.initVecY*.1) + (1/(this.bhVector[0]+1) * this.bhY*nodeGravityStrength*massForGravity) * this.dataMovement;
 
-			this.mesh.position.z += ((this.initialVector[0]+1)*this.initVecZ*.1) + (1/(this.bhVector[0]+1) * this.bhZ*nodeGravityStrength) * this.dataMovement;
+			this.mesh.position.z += ((this.initialVector[0]+1)*this.initVecZ*.1) + (1/(this.bhVector[0]+1) * this.bhZ*nodeGravityStrength*massForGravity) * this.dataMovement;
 		}
 
 		this.g = Math.min(Math.abs((this.bhVector[0]*.02)/this.initialVector[0]),1);
@@ -60,16 +54,15 @@ var Node = function(name) {
 		this.mat.color = this.color;
 
 		if (this.dataMovement < 0) {
-			this.mesh.scale.y = nodeParticleSize * (Math.abs(this.dataMovement*this.initialVector[0]*distortionFactor*planeFactor)+1);
-
-			this.mesh.scale.x = nodeParticleSize * 1/(Math.abs(this.dataMovement*this.initialVector[0]*distortionFactor*planeFactor)+1);
-			this.mesh.scale.z = nodeParticleSize * 1/(Math.abs(this.dataMovement*this.initialVector[0]*distortionFactor*planeFactor)+1);
+			this.mesh.scale.y = nodeParticleSize * 1/(Math.abs(this.dataMovement*(1/(this.bhVector[0]+1))*distortionFactor*planeFactor)+1);
+			this.mesh.scale.x = nodeParticleSize * (Math.abs(this.dataMovement*(1/(this.bhVector[0]+1))*distortionFactor*planeFactor)+1);
+			this.mesh.scale.z = nodeParticleSize * (Math.abs(this.dataMovement*(1/(this.bhVector[0]+1))*distortionFactor*planeFactor)+1);
 		}
 		else {
-			this.mesh.scale.x = nodeParticleSize * (Math.abs(this.dataMovement*this.initialVector[0]*distortionFactor*planeFactor)+1);
-			this.mesh.scale.z = nodeParticleSize * (Math.abs(this.dataMovement*this.initialVector[0]*distortionFactor*planeFactor)+1);
+			this.mesh.scale.x = nodeParticleSize * 1/(Math.abs(this.dataMovement*(1/(this.bhVector[0]+1))*distortionFactor*planeFactor)+1);
+			this.mesh.scale.z = nodeParticleSize * 1/(Math.abs(this.dataMovement*(1/(this.bhVector[0]+1))*distortionFactor*planeFactor)+1);
 
-			this.mesh.scale.y = nodeParticleSize * 1/(Math.abs(this.dataMovement*this.initialVector[0]*distortionFactor*planeFactor)+1);
+			this.mesh.scale.y = nodeParticleSize * (Math.abs(this.dataMovement*(1/(this.bhVector[0]+1))*distortionFactor*planeFactor)+1);
 		}
 
 		if (polarization === "cross") {

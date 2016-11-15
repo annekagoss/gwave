@@ -14,19 +14,16 @@ function exportData(dataToExport) {
 	}
 }
 
-
 function combineData(waveData) {
 	var initialWaveSecs = parseFloat((waveData[0].x/timeStretch).toFixed(5));
 
 	var negWaveData = jQuery.grep(waveData, function(d, i) {
 		return d.x < 0;
 	});
-
 	var lengthDiff = negWaveData.length - blackHoleDatasets[0].data.length;
-	console.log(lengthDiff);
 
 	waveData.forEach(function(w){
-		// If black hole data exists, use that.  Otherwise use it's last datapoint
+		// If black hole data exists, use that.  Otherwise use 0
 		var bhDataPointSeparation = blackHoleDatasets[0].data[waveData.indexOf(w)-lengthDiff] ? blackHoleDatasets[0].data[waveData.indexOf(w)-lengthDiff] : 0;
 
 		var bhDataPointVelocity = blackHoleDatasets[1].data[waveData.indexOf(w)-lengthDiff] ? blackHoleDatasets[1].data[waveData.indexOf(w)-lengthDiff] : 0;
@@ -40,7 +37,6 @@ function combineData(waveData) {
 			holeVel: bhDataPointVelocity.velocity
 		});
 	});
-
 	exportData(combinedData);
 }
 

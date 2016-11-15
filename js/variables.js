@@ -19,6 +19,7 @@ var flatAmp = 10,
 //======  Data  ======//
 var timeStretch = 1; //slow down data so effects can be seen
 var dataScale = Math.pow(10,22);
+var sampleRate = 16384;
 
 var startTime = -.5;
 var extendedStartTime = -.12;
@@ -33,12 +34,13 @@ var dataDampen = .0001,
 var maxNodeVec = 0.01,
     maxMeshVec = 0.01;
 
+
 var initVecX, initVecY, initVecZ;
 var overVecX, overVecY, overVecZ;
 var bhX,bhY,bhZ;
-var nodeGravityStrength = 1000000,
-    meshGravityStrength = 25000;
-var distortionFactor = 0.0001;
+var nodeGravityStrength = 100000,
+    meshGravityStrength = 1000;
+var distortionFactor = 100;
 
 //====== Black Holes ======//
 // The maximum sum of the Schwarzschild radii, kilometers converted to meters
@@ -48,7 +50,7 @@ var radius = maxRadius*scaleFactor;  // Used for distance of binary system
 var bhRes = 40;
 var bhaSize = 29, bhbSize = 36, finalSize = 62;
 var c = 299792458;
-var rotationSpeed = .075;
+var rotationSpeed = .001;
 var amplitudeOnEarth = waveValue;
 //Range of ditances binary could have been from earth in megaparsecs
 var distanceRange = [230, 570];
@@ -57,6 +59,10 @@ var metersPerParsec = 3.086*Math.pow(10,22);
 var distFromEarth = averageDist*metersPerParsec;
 var waveValue; //Variable for sharing the current wave value across files
 var amplitudeAtCenter;
+
+var smallMass = bhaSize;
+var largeMass = finalSize;
+var massForGravity = smallMass;
 
 // console.log(amplitudeAtCenter);
 
@@ -96,6 +102,10 @@ function toPercent(decimal) {
     return (decimal*100).toFixed(1)+"<sup>%</sup>";
 }
 
+function angularVelToDegrees(speed,radius){
+    return speed/sampleRate/radius;
+}
+
 // Find the distance from the black holes
 function getBHDist(x, y, z) {
 	if (blackHoleA && blackHoleB) {
@@ -118,7 +128,7 @@ function getBHDist(x, y, z) {
 		hypotenuseB = distanceB;
 
 			subvecA = new THREE.Vector3();
-	     		subvecA = subvecA.subVectors(threeVectorA,threeVectorPoint);
+	     	subvecA = subvecA.subVectors(threeVectorA,threeVectorPoint);
 			hypotenuseA = distanceA;
 			newPosA = {
 				x: subvecA.x/hypotenuseA,
@@ -147,7 +157,10 @@ function getBHDist(x, y, z) {
 				z: combinedZ
 			}
 
-			maxMag = (Math.max(Math.abs(distanceA), Math.abs(distanceB)) === Math.abs(distanceA)) ? distanceA : distanceB;
+			maxMag = (Math.min(Math.abs(distanceA), Math.abs(distanceB)) === Math.abs(distanceA)) ? distanceA : distanceB;
+
+            maxMag = (distanceA+distanceB)/2;
+
 		return [maxMag,newPos];
 	}
 	else {

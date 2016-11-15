@@ -258,7 +258,7 @@ function loop() {
 		}
 		else {
 			nodeArray.forEach(function(n) {
-				phaseOff = Math.round(n.bhVector[0]*.05);
+				phaseOff = Math.round(n.bhVector[0]*.1);
 				n.updateNode(phaseOff, counter);
 			});
 			takeMeasurement();

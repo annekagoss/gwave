@@ -60,12 +60,11 @@ var svg = d3.select(".graph-container").append("svg")
 
    svg.append("g")
        .attr("class", "axis axis--y")
-       .call(d3.axisLeft(waveY).ticks(6))
-     .append("text")
-       .attr("class", "axis-title")
-       .attr("transform", "rotate(-90)")
-       .attr("y", 6)
-       .attr("dy", ".71em");
+       .call(d3.axisLeft(waveY).ticks(6));
+
+    jQuery('.axis--y .tick text').text(function(){
+        return jQuery(this).text()*0.1;
+    });
 
    svg.append("path")
      .datum(data)
