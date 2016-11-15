@@ -101,8 +101,6 @@ var BlackHole = function(size, name, mat) {
     this.mesh.add(bh);
 }
 
-
-
 function calibrateCounter(gwData) {
     minCounter = 1; // coutnerStart
     var positiveData = jQuery.grep(gwData, function(d, i) {
