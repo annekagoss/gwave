@@ -11,7 +11,7 @@ function repositionMeasurements(newX, newY) {
         top:newY
     });
 
-    offScreen = (jQuery('.measurements').offset().left) + (jQuery('.measurements').width()) + (jQuery('.flipped').width()) - window.innerWidth; 
+    offScreen = (jQuery('.measurements').offset().left) + (jQuery('.measurements').width()) + (jQuery('.flipped').width()) - window.innerWidth;
 
     if (offScreen > 0) {
       jQuery('.measurements').addClass('flipped');
@@ -82,15 +82,6 @@ function intersectCoordinate(point){
     setMeasurements();
 }
 
-function convertToMeters(distance) {
-    // return distance;
-    return maxRadius*(distance-finalSize)/(separationData[0].distance*radius);
-}
-
-// function getDistfromCenterofGravity() {
-//     return getInitialDist(0,0,0, selectedPoint.position.x, selectedPoint.position.y, selectedPoint.position.z);
-// }
-
 function getAmplitude(distance) {
     inverseDistance = 1/distance;
     amplitudeAtCenter = waveValue * distFromEarth;
@@ -100,9 +91,9 @@ function getAmplitude(distance) {
 function setMeasurements(){
     if (selectedPoint) {
         // Use the ditance form the center of gravity
-        metersAway = convertToMeters(selectedPoint.bhVector[0]);
-        jQuery('.measurements .distance .value').text(Math.round(metersAway));
+        metersAway = selectedPoint.bhVector[2];
+        jQuery('.measurements .distance .value').text((metersAway*10).toFixed(3));
         jQuery('.measurements .earth-force .value').html(formatStrain(waveValue));
-        jQuery('.measurements .force .value').html(getAmplitude(metersAway).toFixed(5));
+        jQuery('.measurements .force .value').html(getAmplitude(metersAway).toFixed(3));
     }
 }

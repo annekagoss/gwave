@@ -34,23 +34,23 @@ var cubeArray = [],
 
 // Optimal settings for 16384hz resolution datasets
 var friction = .25,
-	cubeSize = 2000,
-	cubeRes = 0.0125,
-	cubeSpread = 600, // distance between cube layers
+	cubeSize = 4000,
+	cubeRes = 0.00525,
+	cubeSpread = 800, // distance between cube layers
 	cubeSpeed = speed - 1,
 	planeScale = 1,
-	meshPlaneScale = 2,
-	nodeSize = 1000;
-	nodeSpread = 200,
-	nodeParticleSize = 3,
+	meshPlaneScale = 3,
+	nodeSize = 2000;
+	nodeSpread = 400,
+	nodeParticleSize = 4,
 	nodePlaneScale = 3,
 	nodeRes = 1,
-	nodePlaneFalloff = 100000,
-	nodeCubeFalloff = 100000, // Wave propagation speed
+	nodePlaneFalloff = 200000,
+	nodeCubeFalloff = 200000, // Wave propagation speed
 	// meshCubeFalloff = 6/cubeSpread,
 	// meshPlaneFalloff = 200/(cubeSize*meshPlaneScale),
-	meshPlaneFalloff = 300000,
-	meshCubeFalloff = 100000, // Wave propagation speed
+	meshPlaneFalloff = 600000,
+	meshCubeFalloff = 200000, // Wave propagation speed
 	maxMeshCubeDistance = getInitialDist(0,0,0,cubeSize, cubeSize, cubeSize)[0],
 	maxMeshPlaneDistance = getInitialDist(0,0,0,cubeSize*meshPlaneScale, 1, cubeSize*meshPlaneScale)[0],
 	nodeWidth = nodeSize/nodeSpread*2, // Rendering will be slow without the *0.1
@@ -73,8 +73,9 @@ function updateMaxDistances() {
 
 updateMaxDistances();
 
-var planeCameraPos = { x: 1110.51380089235, y: 26.691407694486042, z: 863.5923035685921 },
-cubeCameraPos = { x: 920, y: 692, z: 809 };
+var planeCameraPos = {x: 4270.017332860309, y: 2453.7250126443605, z: 4934.4123701978},
+cubeCameraPos = {x:2177.8665193949255, y:1638.1343819796614, z:1915.1021893374948}
+
 
 function createScene() {
 	// DOM setup
@@ -100,7 +101,7 @@ function createScene() {
 
 	// Scene setup
 	scene = new THREE.Scene();
-	scene.fog = new THREE.Fog(Colors.black, 0, 4500);
+	scene.fog = new THREE.Fog(Colors.black, 5000, 9000);
 
 	// Renderer setup
 	renderer = new THREE.WebGLRenderer({
@@ -116,7 +117,6 @@ function createScene() {
 	controls.dynamicDampingFactor = 0.3;
 	controls.keys = [65, 83, 68];
 	controls.addEventListener('change', render);
-
 
 
 	renderer.setPixelRatio(window.devicePixelRatio);
@@ -284,7 +284,7 @@ function loop() {
 
 
 function render() {
-	if (Math.abs(camera.position.x > 3000) || Math.abs(camera.position.y > 3000) || Math.abs(camera.position.z > 3000)) {
+	if (Math.abs(camera.position.x > 6000) || Math.abs(camera.position.y > 6000) || Math.abs(camera.position.z > 6000)) {
 		setCameraPosition();
 	}
 	renderer.render(scene, camera);

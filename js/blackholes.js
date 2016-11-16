@@ -15,9 +15,8 @@ var gwData;
 var merged = false;
 var blackHolesCreated = false;
 var rotationReset = false;
-
 var blackHoleVertices = [];
-
+var newRotation;
 
 var Binary = function() {
     this.mesh = new THREE.Object3D();
@@ -26,15 +25,14 @@ var Binary = function() {
 
   	mirrorB = new THREE.Mirror( renderer, camera, { clipBias: 0.003, textureWidth: WIDTH, textureHeight: HEIGHT, color: 0x777777 } );
 
-    blackHoleA = new BlackHole(bhaSize, "a", mirrorA); //Initial size in solar
+    blackHoleA = new BlackHole(bhaRadius, "a", mirrorA); //Initial size in solar
     this.mesh.add(blackHoleA.mesh);
 
-    blackHoleB = new BlackHole(bhbSize, "b", mirrorB); //Initial size in solar
+    blackHoleB = new BlackHole(bhbRadius, "b", mirrorB); //Initial size in solar
     this.mesh.add(blackHoleB.mesh);
 
     this.update = function(counter) {
         if (counter === 1) {
-            // rotationReset = false;
             console.log('reset');
             blackHoleVertices.forEach(function(v){
                v.reset();
@@ -49,7 +47,7 @@ var Binary = function() {
           if (this.mesh.children[1].children[0].scale.x !== 1) {
               this.mesh.children[1].children[0].scale.set(1,1,1);
           }
-          var newRotation = angularVelToDegrees(gwData[counter-1].holeVel,gwData[counter-1].holeDist)*5000;
+          newRotation = angularVelToDegrees(gwData[counter-1].holeVel,gwData[counter-1].holeDist)*360*orbitalFreq/sampleRate*.25;
 
           this.mesh.rotation.y -= newRotation;
 
@@ -59,11 +57,8 @@ var Binary = function() {
           else if (this.mesh.rotation.x !== 0){
             this.mesh.rotation.x = 0;
           }
-
-          this.mesh.children[0].children[0].position.x = (gwData[counter-1].holeDist*radius) - radius;
-
-          this.mesh.children[1].children[0].position.x =  (gwData[counter-1].holeDist*radius*-1) + radius;
-		  currentSeparation = (gwData[counter-1].holeDist*radius)*2;
+            this.mesh.children[0].children[0].position.x = kmToM(gwData[counter-1].holeDist*systemRadius)*scaleFactor;
+            this.mesh.children[1].children[0].position.x = kmToM(gwData[counter-1].holeDist*systemRadius*-1)*scaleFactor;
         }
         else {
             merged = true;
@@ -79,23 +74,22 @@ var Binary = function() {
             this.mesh.children[1].children[0].position.z = 0;
 
             if (this.mesh.children[1].children[0].scale.x === 1) {
-              this.mesh.children[1].children[0].scale.set(finalSize/bhaSize,finalSize/bhaSize,finalSize/bhaSize);
+              this.mesh.children[1].children[0].scale.set(finalRadiusRatio, finalRadiusRatio, finalRadiusRatio);
             }
             blackHoleVertices.forEach(function(v){
             v.updateMeshVertex(counter);
             });
-
         }
     }
 }
 
 var BlackHole = function(size, name, mat) {
     this.mesh = new THREE.Object3D();
-	var geom = new THREE.SphereGeometry(size,bhRes,bhRes);
+	var geom = new THREE.SphereGeometry(schwarzRadius(size),bhRes,bhRes);
     var bh = new THREE.Mesh(geom, mat.material);
     bh.add(mat);
 
-    bh.position.x = name === "a" ? (separationData[0].distance * radius) : (separationData[0].distance * radius *-1);
+    bh.position.x = name === "a" ? (kmToM(gwData[0].holeDist*systemRadius)*scaleFactor) : (kmToM(gwData[0].holeDist*systemRadius*-1)*scaleFactor);
     bh.position.y = (currentTransformation === "3d") ? 0 : flatAmp;
 
     this.mesh.add(bh);
@@ -112,14 +106,19 @@ function calibrateCounter(gwData) {
 
 function destroyBlackHoles() {
     blackHolesCreated = false;
-    blackHoleB.mesh.children[0].scale.set(bhbSize,bhbSize,bhbSize);
+    // blackHoleB.mesh.children[0].scale.set(bhbRadius,bhbRadius,bhbRadius);
     scene.remove(binary.mesh);
 }
 
 function createBlackHoles(currentData) {
     gwData = currentData ? currentData : gwData;
-    calibrateCounter(gwData);
-    // parseDataTimes(gwData);
+
+    bhaRadius = schwarzRadius(bhaMass);
+    bhbRadius = schwarzRadius(bhbMass);
+    finalRadius = schwarzRadius(finalMass);
+    finalRadiusRatio = finalRadius/bhbRadius;
+    systemRadius = schwarzRadius((bhaMass+bhbMass));
+
     binary = new Binary();
     binary.mesh.position.set(0,0,0);
     scene.add(binary.mesh);

@@ -6,7 +6,7 @@ var MeshVertex = function(vertex, parent, index) {
 	this.indexInParent = index;
 	this.bhVector = [0,0];
 
-	dataDampen = (currentTransformation==="3d") ? 20 : 10;
+	dataDampen = (currentTransformation==="3d") ? 20 : 30;
 	planeFactor = (currentTransformation==="3d") ? 1 : 1;
 
 	this.updateMeshVertex = function(phaseOff, counter){

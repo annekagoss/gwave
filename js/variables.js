@@ -38,20 +38,25 @@ var maxNodeVec = 0.01,
 var initVecX, initVecY, initVecZ;
 var overVecX, overVecY, overVecZ;
 var bhX,bhY,bhZ;
-var nodeGravityStrength = 100000,
-    meshGravityStrength = 1000;
-var distortionFactor = 100;
+var nodeGravityStrength = 200000,
+    meshGravityStrength = 10000;
+var distortionFactor = 300;
 
 //====== Black Holes ======//
 // The maximum sum of the Schwarzschild radii, kilometers converted to meters
-var maxRadius = 210*1000;
-var scaleFactor = 0.00125; // Keep things on the screen
-var radius = maxRadius*scaleFactor;  // Used for distance of binary system
+var maxDiameter = 210*1000;
+var scaleFactor = 0.001; // Keep things on the screen
+var radius = maxDiameter*scaleFactor;  // Used for distance of binary system
 var bhRes = 40;
-var bhaSize = 29, bhbSize = 36, finalSize = 62;
+// Schwarzchild radii from http://hyperphysics.phy-astr.gsu.edu/hbase/Astro/blkhol.html
+var bhaRadius, bhbRadius, finalRadius, finalRadiusRatio, systemRadius;
+var bhaMass = 29, bhbMass = 36, finalMass = 62;
 var c = 299792458;
+var gravConst = 6.67408* Math.pow(10,-11); //m^3 kg^-1 s^-2
 var rotationSpeed = .001;
+var orbitalFreq = 75; //Hz
 var amplitudeOnEarth = waveValue;
+var solarMass = 1.99*Math.pow(10,30); //kg
 //Range of ditances binary could have been from earth in megaparsecs
 var distanceRange = [230, 570];
 var averageDist = (distanceRange[0] + distanceRange[1])/2;
@@ -60,15 +65,9 @@ var distFromEarth = averageDist*metersPerParsec;
 var waveValue; //Variable for sharing the current wave value across files
 var amplitudeAtCenter;
 
-var smallMass = bhaSize;
-var largeMass = finalSize;
+var smallMass = bhaMass;
+var largeMass = finalMass;
 var massForGravity = smallMass;
-
-// console.log(amplitudeAtCenter);
-
-// var G = 6.674*(Math.pow(10,−11)); // gravitational constant m^3 kg^-1 s^-2
-// var orbitalAngle = 1 + Math.pow(Math.cos(Math.PI/2),2); Equals Zero
-
 
 
 // getBHDist variables declared first for speed optimization.
@@ -102,8 +101,20 @@ function toPercent(decimal) {
     return (decimal*100).toFixed(1)+"<sup>%</sup>";
 }
 
-function angularVelToDegrees(speed,radius){
-    return speed/sampleRate/radius;
+function angularVelToDegrees(velocity,radius){
+    return velocity/radius;
+}
+
+function solarMassesToKilograms(mass) {
+    return (mass * solarMass);
+}
+
+function schwarzRadius(mass){
+ return (2 * gravConst * solarMassesToKilograms(mass)) / Math.pow(c,2)*scaleFactor;
+}
+
+function kmToM(km){
+    return km*1000;
 }
 
 // Find the distance from the black holes
@@ -157,11 +168,11 @@ function getBHDist(x, y, z) {
 				z: combinedZ
 			}
 
-			maxMag = (Math.min(Math.abs(distanceA), Math.abs(distanceB)) === Math.abs(distanceA)) ? distanceA : distanceB;
+            var maxMag = ((distanceA-bhaRadius)+(distanceB-bhbRadius))/2;
 
-            maxMag = (distanceA+distanceB)/2;
+            var minDist = Math.min(Math.abs(distanceA)-bhaRadius, Math.abs(distanceB)-bhbRadius);
 
-		return [maxMag,newPos];
+		return [maxMag,newPos,minDist];
 	}
 	else {
 		dist = Math.sqrt((x * x) + (y * y) + (z * z));
@@ -170,7 +181,8 @@ function getBHDist(x, y, z) {
 			y : dist,
 			z : dist
 		}
-		return [dist, nodeDist];
+
+		return [dist, nodeDist, dist];
 	}
 }
 
