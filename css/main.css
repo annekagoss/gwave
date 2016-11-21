@@ -77,6 +77,12 @@ canvas {
     opacity: 1;
 }
 
+.measurements.full-opacity.point-locked {
+  top: 50px;
+  left: 100%;
+  transform: translate(60%, -100%);
+}
+
 .ui {
 	position: absolute;
     top: 0;
@@ -89,7 +95,6 @@ canvas {
 }
 
 .button {
-  /*display: inline-block;*/
   margin: 10px 45px 10px;
   padding: 4px;
   cursor: pointer;

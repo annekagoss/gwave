@@ -125,6 +125,7 @@ function createScene() {
 
 	window.addEventListener('resize', onWindowResize, false);
 	window.addEventListener( 'mousemove', onMouseMove, false );
+	window.addEventListener( 'click', setPointLock, false );
 
 	jQuery('.transform').on('click', function(){
 		destroyBlackHoles();
@@ -281,7 +282,6 @@ function loop() {
 		if (running) {	requestAnimationFrame(loop);}
 	},0);
 }
-
 
 function render() {
 	if (Math.abs(camera.position.x > 6000) || Math.abs(camera.position.y > 6000) || Math.abs(camera.position.z > 6000)) {
