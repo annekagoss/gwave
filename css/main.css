@@ -22,7 +22,7 @@ canvas {
     cursor: crosshair;
 }
 
-.loading {
+.loading, .shroud, .nav-instructions {
     position: fixed;
     top: 0;
     left: 0;
@@ -44,7 +44,6 @@ canvas {
     transform: translate(-50%, -50%);
     font-size: 2em;
     letter-spacing: 0.125em;
-    /*color: rgb(0, 79, 140);*/
     color: #0078fb;
 }
 
@@ -57,6 +56,120 @@ canvas {
     background-size: contain;
     margin-right: 6px;
     vertical-align: middle;
+}
+
+.shroud {
+  pointer-events: none;
+  opacity: 0;
+  display: none;
+  transition: opacity 0.25 ease;
+}
+
+.shroud.shown {
+  opacity: .6;
+  display: block;
+}
+
+.nav-instructions {
+  display: none;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25 ease;
+}
+
+.nav-instructions.shown {
+  display: block;
+  pointer-events: all;
+  background: transparent;
+  opacity: 1;
+}
+
+.panel {
+  width: auto;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  text-transform: none;
+  font-size: 13px;
+  line-height: 1.6em;
+  opacity: 0;
+  transition: opacity .25s ease;
+  pointer-events: none;
+}
+
+.panel-shown {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.column {
+    width: 47%;
+    display: inline-block;
+    margin: 0 20px 0 0;
+    vertical-align: top;
+    text-align: left;
+}
+
+.panel .header {
+  font-size: 1.75em;
+  line-height: normal;
+}
+
+.panel.intro {
+  width: 70vw;
+}
+
+.panel.camera-controls .column {
+  width: auto;
+}
+
+.next-button, .start-button {
+  margin: 40px 0 0;
+  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-color: white;
+  color: rgba(255,255,255,0);
+  transition: color .25s ease;
+  font-size: 56px;
+  cursor: pointer;
+}
+
+.next-button:hover, .start-button:hover {
+  color: white;
+}
+
+.animation-controls .next-button, .polarization-controls .next-button, .transform-controls .next-button, .render-controls .next-button {
+  right: -70px;
+  position: absolute;
+  top: 50%;
+  margin: 0;
+}
+
+.panel .icon {
+  width: 50px;
+  height: 50px;
+}
+
+.arrow-icon {
+  width: 100px !important;
+  position: absolute;
+  left: -70px;
+  top: -10px;
+  margin: 0;
+  background-image: url(../images/arrow.svg);
+}
+
+.scroll-icon {
+    background-image: url(../images/scroll-icon.svg);
+    width: 30px !important;
+}
+
+.drag-icon {
+    background-image: url(../images/drag-icon.svg);
+}
+
+.measure-icon {
+    background-image: url(../images/measure-icon.svg);
 }
 
 .measurements {
@@ -85,7 +198,7 @@ canvas {
 
 .ui {
 	position: absolute;
-    top: 0;
+  top: 30px;
 }
 
 .picker-label {
@@ -320,7 +433,7 @@ input[type=range]:-moz-focusring{
     margin-top: 25px;
 }
 
-.transform-icon, .render-icon, .polarization-icon {
+.icon {
     width: 30px;
     height: 30px;
     display: inline-block;

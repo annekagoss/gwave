@@ -45,7 +45,7 @@ var distortionFactor = 300;
 //====== Black Holes ======//
 // The maximum sum of the Schwarzschild radii, kilometers converted to meters
 var maxDiameter = 210*1000;
-var scaleFactor = 0.001; // Keep things on the screen
+var scaleFactor = 0.0005; // Keep things on the screen
 var radius = maxDiameter*scaleFactor;  // Used for distance of binary system
 var bhRes = 40;
 // Schwarzchild radii from http://hyperphysics.phy-astr.gsu.edu/hbase/Astro/blkhol.html

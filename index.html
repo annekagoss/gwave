@@ -42,12 +42,12 @@
 				<div class="slider-label">Speed: <span class="speed-val"></span></div>
 				<input class="slider" id="speed-slider" type="range" min="1" max="20" step="1" value="2"/>
 			</div>
-			<div class="button polarization plus selected shifted" value="plus"><div class="polarization-icon plus"></div>Plus Polarization</div>
-			<div class="button polarization cross shifted" value="cross"><div class="polarization-icon cross"></div>Cross Polarization</div>
-			<div class="button transform flat shifted" value="2d"><div class="transform-icon flat"></div>Flatten to 2D Space</div>
-			<div class="button transform expanded selected shifted" value="3d"><div class="transform-icon expanded"></div>Expand to 3D Space</div>
-			<div class="button render-style mesh shifted" value="mesh"><div class="render-icon mesh"></div>Render as mesh</div>
-			<div class="button render-style nodes selected shifted" value="nodes"><div class="render-icon nodes"></div>Render as nodes</div>
+			<div class="button polarization plus selected shifted" value="plus"><div class="icon polarization-icon plus"></div>Plus Polarization</div>
+			<div class="button polarization cross shifted" value="cross"><div class="icon polarization-icon cross"></div>Cross Polarization</div>
+			<div class="button transform flat shifted" value="2d"><div class="icon transform-icon flat"></div>Flatten to 2D Space</div>
+			<div class="button transform expanded selected shifted" value="3d"><div class="icon transform-icon expanded"></div>Expand to 3D Space</div>
+			<div class="button render-style mesh shifted" value="mesh"><div class="icon render-icon mesh"></div>Render as mesh</div>
+			<div class="button render-style nodes selected shifted" value="nodes"><div class="icon render-icon nodes"></div>Render as nodes</div>
 			<div class="graph-section">
 				<div class="legend">
 					<div class="legend-item time-data">
@@ -63,7 +63,6 @@
 					<div class="legend-item bh-velocity-data">
 						<div class="key">Black Hole Velocity: </div>
 						<div class="value"></div>
-						<!-- <div class="unit">meters / second</div> -->
 						<div class="unit">of the speed of light</div>
 					</div>
 					<div class="legend-item bh-separation-data">
@@ -84,6 +83,86 @@
 			<div class="loading-text">(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;&nbsp;&nbsp;LOADING&nbsp;&nbsp;&nbsp;)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)</div>
 		</div>
 
+		<div class="shroud"></div>
+		<div class="nav-instructions">
+			<div class="panel intro panel-shown" id="1">
+				<div class="header">Gravitational waves were detected for the first time on September 14th, 2015.  </br>This is a visualization of that signal, named GW150914.</div>
+				<br><br>
+				<div class="column">
+				 Gravitational waves are oscillations in spacetime curvature that originate from accelerating objects whose motion is not spherically or rotationally symmetrical.
+				 In this case, two mutually orbiting black holes with masses of 29 and 36 solar masses gradually lost gravitational energy.  Their mutual orbital diameter decreased and they coalesced into a single black hole with a mass of 62 solar masses.  The lost gravitational energy and remainding 3 solar masses were radiated in these gravitational waves.
+				</div>
+				<div class="column">
+					As the resulting ripples propagated through spacetime, they expanded and contracted detectors on Earth by a factor of 10<sup>-21</sup>, or about 10 times the size of an atomic nucleus, but objects closer to the source were distorted much more.</br></br>
+
+				 The gravitational wave data was made public by the LIGO Scientific Collaboration (LSC) and the Virgo Collaboration. It signals mark the beginning of a new era of gravitational wave physics and provide previously undetectable information about the origins of the universe.
+			 </div>
+			 <div class="next-button 1">&#9658;</div>
+			</div>
+
+			<div class="panel camera-controls" id="2">
+				<div class="header">Navigating the 3D scene:</div>
+				</br>
+				<div class="column">
+					<div class="icon scroll-icon"></div>Scroll to zoom.
+				</div>
+				<div class="column">
+					<div class="icon drag-icon"></div>Click and drag to rotate the view.
+				</div>
+				<div class="column"></div>
+				<div class="next-button 2">&#9658;</div>
+ 			</div>
+
+			<div class="panel waveform" id="3">
+				<div class="header">The Wave Signal</div>
+				</br>
+				Below is the signal detected with LIGO's interferometers, along with the calculated speed of the black holes in red, and their separation in purple.  The displayed section lasts for only 140 milliseconds.
+				<div class="next-button 3">&#9658;</div>
+ 			</div>
+
+			<div class="panel animation-controls" id="4">
+				<div class="icon arrow-icon"></div>
+				<div class="header">Animation Controls</div>
+				<div class="next-button 4">&#9658;</div>
+ 			</div>
+
+			<div class="panel polarization-controls" id="5">
+				<div class="icon arrow-icon"></div>
+				<div class="header">Polarization</div>
+				</br>
+				Gravitational waves distort matter differently depending on the wave polarization.</br>
+				Here you can switch between "plus" and "cross" polarization.
+				<div class="next-button 5">&#9658;</div>
+ 			</div>
+
+			<div class="panel transform-controls" id="6">
+				<div class="icon arrow-icon"></div>
+				<div class="header">Spacetime Transformations</div>
+				</br>
+				Many visualizations of relativity show spacetime as a flat plane, </br>but this one shows it volumetrically too.</br>
+				Here you can swtich between planar and volumetric spacetime.
+				<div class="next-button 6">&#9658;</div>
+ 			</div>
+
+			<div class="panel render-controls" id="7">
+				<div class="icon arrow-icon"></div>
+				<div class="header">Rendering Style</div>
+				</br>
+				Here you can choose between two 3D rendering styles, "nodes" or "mesh".
+				<div class="next-button 7">&#9658;</div>
+ 			</div>
+
+			<div class="panel measure-controls" id="8">
+				<div class="header"><div class="icon measure-icon"></div>Take Measurements</div>
+				</br>
+				In the "nodes" view, hover over a node to measure the amount of distortion from the gravitational wave.
+				Click on the node to lock onto it and keep measuring.
+				</br></br>
+				The strength of distortion and the amplitude of gravitational waves are inversely related to distance from the source.  See how the waves get stronger closer to the black holes.
+				<div class="start-button 8">&#9658;</div>
+			</div>
+		</div>
+
 		<script type="text/javascript" src="js/lib/d3.v4.0.0-alpha.15.min.js"></script>
 		<script src="js/variables.js"></script>
 		<script src="js/dashboard.js"></script>
@@ -93,5 +172,6 @@
 		<script src="js/Nodes.js"></script>
 		<script src="js/MeshVertex.js"></script>
 		<script src="js/gwave.js"></script>
+		<script src="js/nav.js"></script>
 	</body>
 </html>

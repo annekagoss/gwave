@@ -40,15 +40,13 @@ var friction = .25,
 	cubeSpeed = speed - 1,
 	planeScale = 1,
 	meshPlaneScale = 3,
-	nodeSize = 2000;
-	nodeSpread = 400,
+	nodeSize = 1500;
+	nodeSpread = 300,
 	nodeParticleSize = 4,
 	nodePlaneScale = 3,
 	nodeRes = 1,
 	nodePlaneFalloff = 200000,
 	nodeCubeFalloff = 200000, // Wave propagation speed
-	// meshCubeFalloff = 6/cubeSpread,
-	// meshPlaneFalloff = 200/(cubeSize*meshPlaneScale),
 	meshPlaneFalloff = 600000,
 	meshCubeFalloff = 200000, // Wave propagation speed
 	maxMeshCubeDistance = getInitialDist(0,0,0,cubeSize, cubeSize, cubeSize)[0],
@@ -74,8 +72,8 @@ function updateMaxDistances() {
 updateMaxDistances();
 
 var planeCameraPos = {x: 4270.017332860309, y: 2453.7250126443605, z: 4934.4123701978},
-cubeCameraPos = {x:2177.8665193949255, y:1638.1343819796614, z:1915.1021893374948}
-
+// cubeCameraPos = {x:2177.8665193949255, y:1638.1343819796614, z:1915.1021893374948}
+cubeCameraPos = {x: 1415.4989218799606, y: 1064.701362979274, z: 1244.7158997835743};
 
 function createScene() {
 	// DOM setup
@@ -150,6 +148,7 @@ function createScene() {
 	});
 
 	jQuery('.reset').on('click', function(){
+		jQuery('.pause').addClass('playing');
 		resetSpaceTime();
 	});
 
@@ -167,6 +166,10 @@ function createScene() {
 
 			if (newStyle === "mesh") {
 				highlightSphere.visible = false;
+				jQuery('.measurements').hide();
+			}
+			else {
+				jQuery('.measurements').show();
 			}
 
 			setTimeout(function(){
@@ -243,7 +246,7 @@ function onWindowResize() {
 	camera.aspect = window.innerWidth / window.innerHeight;
 	camera.updateProjectionMatrix();
 	renderer.setSize(window.innerWidth, window.innerHeight);
-	controls.handleResize();
+	// controls.handleResize();
 }
 
 function loop() {
@@ -427,7 +430,6 @@ function destroySpaceTime() {
 		nodeArray = [];
 	}
 	currentDashboard.updatePosition(counter);
-	console.log('spacetime destroyed');
 }
 
 function createSpaceTime() {
@@ -447,7 +449,6 @@ function createSpaceTime() {
 			createNodePlane();
 		}
 	}
-	console.log('spacetime created');
 }
 
 function flattenSpaceTime(){
@@ -475,7 +476,9 @@ function expandSpaceTime(){
 	else if (currentRenderStyle === "nodes") {
 		destroySpaceTime();
 		nodeArray = [];
-		createNodeArray();
+		setTimeout(function(){
+			createNodeArray();
+		},0);
 	}
 }
 
@@ -523,9 +526,8 @@ function init() {
 	loadData();
 	createSpaceTime();
 	createHighlightSphere();
-	setTimeout(function(){
-		loop();
-	},10);
+	render();
+	// setTimeout(function(){
+	// 	loop();
+	// },10);
 }
-
-init();

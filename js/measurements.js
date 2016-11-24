@@ -1,6 +1,6 @@
 var cloneVec = new THREE.Vector3();
 var pointColor = new THREE.Color(1,1,1);
-var intersects, highlightSphere, selectedPoint, pointLocked = false, lockedPoint;
+var intersects, highlightSphere, selectedPoint, pointLocked = false, lockedPoint, tempPoint;
 var raycaster = new THREE.Raycaster();
 var mouse = new THREE.Vector2();
 var metersAway, offScreen;
@@ -27,14 +27,15 @@ function repositionMeasurements(newX, newY) {
 }
 
 function onMouseMove( event ) {
-	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
-	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
-    console.log('pointLocked: '+pointLocked);
-    if (highlightSphere.visible && !pointLocked) {
-        repositionMeasurements(event.clientX, event.clientY);
-    }
-    else if ( (jQuery('.full-opacity').length > 0) && !pointLocked ) {
-        jQuery('.measurements').removeClass('full-opacity');
+  if (playing && currentRenderStyle === "nodes") {
+  	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+  	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+      if (highlightSphere.visible && !pointLocked) {
+          repositionMeasurements(event.clientX, event.clientY);
+      }
+      else if ( (jQuery('.full-opacity').length > 0) && !pointLocked ) {
+          jQuery('.measurements').removeClass('full-opacity');
+      }
     }
 }
 
@@ -63,20 +64,27 @@ function takeMeasurement(){
     intersects = raycaster.intersectObjects( scene.children, true);
     highlightSphere.visible = (intersects.length <= 0 && !pointLocked) ? false : true;
 
-    for ( var i = 0; i < intersects.length; i++ ) {
-        if (intersects[i].object.name !== "highlightSphere") {
-            if(intersects[i].object.material.wireframe === true){
-                intersectCoordinate(intersects[i].object);
-            }
-        }
+    if (!pointLocked) {
+      for ( var i = 0; i < intersects.length; i++ ) {
+          if (intersects[i].object.name !== "highlightSphere") {
+              if(intersects[i].object.material.wireframe === true){
+                  intersectCoordinate(intersects[i].object);
+                  tempPoint = intersects[i].object;
+              }
+          }
+       }
     }
+    else {
+      intersectCoordinate(tempPoint);
+    }
+
     highlightSphere.rotation.x+= 0.01;
     jQuery('.measurements .click-instructions').text(pointLocked ? unlockText : lockText);
     setMeasurements();
 }
 
 function intersectCoordinate(point){
-	cloneVec.setFromMatrixPosition(point.matrixWorld );
+	cloneVec.setFromMatrixPosition(point.matrixWorld);
   highlightSphere.position.set(cloneVec.x, cloneVec.y, cloneVec.z);
 	pointColor = point.material.color;
 	highlightSphere.children[0].material.color.set(pointColor);
@@ -99,17 +107,19 @@ function setMeasurements(){
 }
 
 function setPointLock(e) {
-  if (e.target.localName = 'canvas') {
-    pointLocked = false;
-    repositionMeasurements(e.clientX, e.clientY);
-    highlightSphere.visible = false;
-
-    if (intersects.length > 0 && !pointLocked) {
-      pointLocked = true;
-      lockedPoint = selectedPoint;
-    }
-    else {
+  if (playing) {
+    if (e.target.localName = 'canvas') {
       pointLocked = false;
+      repositionMeasurements(e.clientX, e.clientY);
+      highlightSphere.visible = false;
+
+      if (intersects.length > 0 && !pointLocked) {
+        pointLocked = true;
+        lockedPoint = selectedPoint;
+      }
+      else {
+        pointLocked = false;
+      }
     }
   }
 };
