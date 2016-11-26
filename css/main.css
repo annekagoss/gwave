@@ -6,16 +6,38 @@
     font-style: normal;
 }
 
+@font-face {
+    font-family: 'trade_gothic';
+    src:
+    url('../fonts/TradeGothicLTPro-BdCn20-2398aeccf6aac8e2f2c0e2bcda9dc7d3.woff') format('woff'), url('../fonts/TradeGothicLTPro-BdCn20-2398aeccf6aac8e2f2c0e2bcda9dc7d3.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'proxima_nova';
+    src:
+    url('../fonts/ProximaNova-Reg-webfont.woff') format('woff'); url('../fonts/TradeGothicLTPro-BdCn20-2398aeccf6aac8e2f2c0e2bcda9dc7d3.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
 body {
 	margin: 0;
     background-color: #000;
     color: #fff;
-    font-family: 'din_alternatebold';
+    font-family: 'trade_gothic';
     font-size: 8px;
-    letter-spacing: 1px;
+    letter-spacing: .1em;
     text-transform: uppercase;
     text-align: left;
     overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.break-span {
+  white-space: nowrap;
 }
 
 canvas {
@@ -35,6 +57,15 @@ canvas {
 
 .loading.done {
     opacity: 0;
+}
+
+.solar {
+    line-height: 0;
+    letter-spacing: -3px;
+}
+
+.solar sub {
+    font-size: 16px;
 }
 
 .loading-text {
@@ -91,11 +122,12 @@ canvas {
   transform: translate(-50%, -50%);
   position: absolute;
   text-transform: none;
-  font-size: 13px;
-  line-height: 1.6em;
+  font-size: 12px;
+  line-height: 1.3em;
   opacity: 0;
   transition: opacity .25s ease;
   pointer-events: none;
+  font-family: 'proxima_nova';
 }
 
 .panel-shown {
@@ -104,16 +136,18 @@ canvas {
 }
 
 .column {
-    width: 47%;
+    width: 44%;
     display: inline-block;
     margin: 0 20px 0 0;
-    vertical-align: top;
+    vertical-align: bottom;
     text-align: left;
+
 }
 
 .panel .header {
-  font-size: 1.75em;
-  line-height: normal;
+    font-family: 'trade_gothic';
+    font-size: 1.4em;
+  line-height: 1.5em;
 }
 
 .panel.intro {
@@ -125,17 +159,59 @@ canvas {
 }
 
 .next-button, .start-button {
-  margin: 40px 0 0;
-  -webkit-text-stroke-width: 1px;
-  -webkit-text-stroke-color: white;
+  margin: 40px 0 0px;
   color: rgba(255,255,255,0);
   transition: color .25s ease;
   font-size: 56px;
   cursor: pointer;
+  color: rgba(255,255,255,.33);
+  position: relative;
+  display: inline-block;
+  line-height: 0;
+  font-family: 'trade_gothic';
+  width: 50px;
+  height: 50px;
+  z-index: 1;
+}
+
+.skip-button {
+    text-transform: uppercase;
+    font-family: trade_gothic;
+    margin-top: -20px;
+    cursor: pointer;
+    z-index: 10;
+    position: relative;
 }
 
 .next-button:hover, .start-button:hover {
   color: white;
+}
+
+.next-button:before, .start-button:before {
+    content: "next";
+        text-transform: uppercase;
+        position: absolute;
+        font-size: 14px;
+        -webkit-text-stroke-width: 0px;
+        color: #fff;
+        left: 50%;
+        /* top: 80%; */
+        transform: translate(-50%,7px);
+        /* height: 14px; */
+        transition: color .25s ease;
+}
+
+.start-button:before {
+  content: "start";
+}
+
+.next-button:hover:before, .start-button:hover:before {
+  /*color: black;*/
+  mix-blend-mode: difference;
+}
+
+.animation-controls, .polarization-controls, .transform-controls, .render-controls {
+max-width: 400px;
 }
 
 .animation-controls .next-button, .polarization-controls .next-button, .transform-controls .next-button, .render-controls .next-button {
@@ -143,6 +219,12 @@ canvas {
   position: absolute;
   top: 50%;
   margin: 0;
+}
+
+.animation-controls .skip-button, .polarization-controls .skip-button, .transform-controls .skip-button, .render-controls .skip-button {
+  right: -80px;
+  position: absolute;
+  top: 70px;
 }
 
 .panel .icon {
@@ -165,10 +247,12 @@ canvas {
 }
 
 .drag-icon {
+    margin-left: -10px;
     background-image: url(../images/drag-icon.svg);
 }
 
 .measure-icon {
+    margin-left: -10px;
     background-image: url(../images/measure-icon.svg);
 }
 

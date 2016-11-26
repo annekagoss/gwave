@@ -107,18 +107,17 @@ function setMeasurements(){
 }
 
 function setPointLock(e) {
+    console.log(pointLocked);
   if (playing) {
     if (e.target.localName = 'canvas') {
-      pointLocked = false;
-      repositionMeasurements(e.clientX, e.clientY);
-      highlightSphere.visible = false;
-
-      if (intersects.length > 0 && !pointLocked) {
+      if (pointLocked) {
+          pointLocked = false;
+          repositionMeasurements(e.clientX, e.clientY);
+          highlightSphere.visible = false;
+      }
+      else if (intersects.length > 0 && !pointLocked) {
         pointLocked = true;
         lockedPoint = selectedPoint;
-      }
-      else {
-        pointLocked = false;
       }
     }
   }

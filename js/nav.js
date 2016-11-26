@@ -52,11 +52,19 @@ jQuery('.nav-instructions .next-button').on('mousedown', function(e) {
   }
 });
 
+function startVisualization() {
+	jQuery('.nav-instructions').removeClass('shown');
+    jQuery('.shroud').removeClass('shown');
+    setTimeout(function(){
+      playing = true;
+      loop();
+    },500);
+}
+
 jQuery('.nav-instructions .start-button').on('mousedown', function() {
-  jQuery('.nav-instructions').removeClass('shown');
-  jQuery('.shroud').removeClass('shown');
-  setTimeout(function(){
-    playing = true;
-    loop();
-  },500);
+  startVisualization();
+});
+
+jQuery('.nav-instructions .skip-button').on('mousedown', function() {
+  startVisualization();
 });
