@@ -71,6 +71,7 @@ function loadData() {
 		error: function(req, status, err) {console.log(status, err);},
 		complete: function(data) {
 			console.log("black hole velocity data complete");
+			console.log(data.responseText);
 			processVelocityData(data.responseText);
 		}
 	  });
@@ -87,7 +88,9 @@ function loadData() {
 		error: function(req, status, err) {console.log(status, err);},
 		complete: function(data) {
 			console.log("black hole separation data complete");
+			console.log(data.responseText);
 			processSeparationData(data.responseText);
+			
 		}
 	  });
 	}
