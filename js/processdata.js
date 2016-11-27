@@ -100,13 +100,14 @@ function loadData() {
 // 		});
 // 	}
 	function checkForAllData(){
-		console.log(blackHoleDatasets[0].data+', '+blackHoleDatasets[1].data);
 		if (!(blackHoleDatasets[0].data && blackHoleDatasets[1].data)) {
+			console.log('checking');
 			setTimeout(function(){
 				checkForAllData();
 			},10);
 		}
 		else {
+			console.log(blackHoleDatasets[0].data+', '+blackHoleDatasets[1].data);
 			loadH1Data();
 		}
 	}
