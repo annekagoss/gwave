@@ -104,7 +104,7 @@ function loadData() {
 			console.log('checking');
 			setTimeout(function(){
 				checkForAllData();
-			},10);
+			},500);
 		}
 		else {
 			console.log(blackHoleDatasets[0].data+', '+blackHoleDatasets[1].data);
