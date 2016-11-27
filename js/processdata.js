@@ -18,7 +18,7 @@ function combineData(waveData) {
 	
 	function checkForAllData(){
 		console.log(blackHoleDatasets[0].data[0].seconds+', '+blackHoleDatasets[1].data[0].seconds);
-		if (blackHoleDatasets[0].data[0].seconds && blackHoleDatasets[1].data[0].seconds) {
+		if (!(blackHoleDatasets[0].data[0].seconds && blackHoleDatasets[1].data[0].seconds)) {
 			setTimeout(function(){
 				checkForAllData();
 			},10);
