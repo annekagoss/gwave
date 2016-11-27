@@ -89,18 +89,18 @@ function loadData() {
 	  });
 	}
 
-	function simulateBlackHoles(){
-		sendBlackHolesToSimulation(blackHoleDatasets, function(){
-			setTimeout(function(){
-				simulateBlackHoles();
-			},10);
-		});
-	}
+	// function simulateBlackHoles(){
+// 		sendBlackHolesToSimulation(blackHoleDatasets, function(){
+// 			setTimeout(function(){
+// 				simulateBlackHoles();
+// 			},10);
+// 		});
+// 	}
 	function loadBlackHoleData() {
 		loadSeparationData();
 		loadVelocityData();
 		loadH1Data();
-		simulateBlackHoles();
+// 		simulateBlackHoles();
 	}
 	loadBlackHoleData();
 }
