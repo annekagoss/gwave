@@ -15,6 +15,22 @@ function exportData(dataToExport) {
 }
 
 function combineData(waveData) {
+	
+	function checkForAllData(){
+		console.log(blackHoleDatasets[0]+', '+blackHoleDatasets[1]);
+		if (!blackHoleDatasets[0] || !blackHoleDatasets[1]) {
+			setTimeout(function(){
+				checkForAllData(dataToExport)
+			},10);
+		}
+		else {
+			continueCombination()'
+		}
+	}
+	
+	function continueCombination(){
+	
+	
 	var initialWaveSecs = parseFloat((waveData[0].x/timeStretch).toFixed(5));
 
 	var negWaveData = jQuery.grep(waveData, function(d, i) {
@@ -22,22 +38,23 @@ function combineData(waveData) {
 	});
 	var lengthDiff = negWaveData.length - blackHoleDatasets[0].data.length;
 
-	waveData.forEach(function(w){
-		// If black hole data exists, use that.  Otherwise use 0
-		var bhDataPointSeparation = blackHoleDatasets[0].data[waveData.indexOf(w)-lengthDiff] ? blackHoleDatasets[0].data[waveData.indexOf(w)-lengthDiff] : 0;
+		waveData.forEach(function(w){
+			// If black hole data exists, use that.  Otherwise use 0
+			var bhDataPointSeparation = blackHoleDatasets[0].data[waveData.indexOf(w)-lengthDiff] ? blackHoleDatasets[0].data[waveData.indexOf(w)-lengthDiff] : 0;
 
-		var bhDataPointVelocity = blackHoleDatasets[1].data[waveData.indexOf(w)-lengthDiff] ? blackHoleDatasets[1].data[waveData.indexOf(w)-lengthDiff] : 0;
+			var bhDataPointVelocity = blackHoleDatasets[1].data[waveData.indexOf(w)-lengthDiff] ? blackHoleDatasets[1].data[waveData.indexOf(w)-lengthDiff] : 0;
 
-		var waveSecs = parseFloat((w.x/timeStretch).toFixed(5));
+			var waveSecs = parseFloat((w.x/timeStretch).toFixed(5));
 
-		combinedData.push({
-			waveSecs: parseFloat((waveSecs).toFixed(5)),
-			waveVal: w.y,
-			holeDist: bhDataPointSeparation.distance,
-			holeVel: bhDataPointVelocity.velocity
+			combinedData.push({
+				waveSecs: parseFloat((waveSecs).toFixed(5)),
+				waveVal: w.y,
+				holeDist: bhDataPointSeparation.distance,
+				holeVel: bhDataPointVelocity.velocity
+			});
 		});
-	});
-	exportData(combinedData);
+		exportData(combinedData);
+	}
 }
 
 function loadData() {
