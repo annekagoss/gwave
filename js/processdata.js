@@ -24,12 +24,12 @@ function combineData(waveData) {
 			},10);
 		}
 		else {
-			continueCombination()'
+			continueCombination();
 		}
 	}
+	checkForAllData();
 	
 	function continueCombination(){
-	
 	
 	var initialWaveSecs = parseFloat((waveData[0].x/timeStretch).toFixed(5));
 
