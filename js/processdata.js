@@ -99,10 +99,22 @@ function loadData() {
 // 			},10);
 // 		});
 // 	}
+	function checkForAllData(){
+		console.log(blackHoleDatasets[0].data[0].distance+', '+blackHoleDatasets[1].data[0].velocity);
+		if (!(blackHoleDatasets[0].data[0].distance && blackHoleDatasets[1].data[0].velocity)) {
+			setTimeout(function(){
+				checkForAllData();
+			},10);
+		}
+		else {
+			loadH1Data();
+		}
+	}
+
 	function loadBlackHoleData() {
 		loadSeparationData();
 		loadVelocityData();
-		loadH1Data();
+		checkForAllData();
 // 		simulateBlackHoles();
 	}
 	loadBlackHoleData();
@@ -147,19 +159,8 @@ function processData(text, setName) {
 	data = jQuery.grep(data, function(d, i) {
 		return d.x > extendedStartTime && d.x < endTime;
 	});
-	function checkForAllData(){
-		console.log(blackHoleDatasets[0].data[0].distance+', '+blackHoleDatasets[1].data[0].velocity);
-		if (!(blackHoleDatasets[0].data[0].distance && blackHoleDatasets[1].data[0].velocity)) {
-			setTimeout(function(){
-				checkForAllData();
-			},10);
-		}
-		else {
-			combineData(data);
-		}
-	}
-	checkForAllData();
-// 	combineData(data);
+	
+	combineData(data);
 
 	var title = setName === "h1" ? "LIGO Hanford Observatory, Mon Sep 14 09:16:37 GMT 2015, 16384 Hz" : "Numerical Relativity Template";
 	datasets.push({name:setName,data:data,title:title});
