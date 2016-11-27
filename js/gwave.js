@@ -494,29 +494,20 @@ function transformSpaceTime(e) {
 }
 
 function sendToSimulation (d, name) {
-	currentDataset = d;
-	currentDashboard = dashboardCombined;
-	data = d;
-	dataRendered = true;
-	jQuery('.loading').addClass('done');
-	setTimeout(function(){
-		createBlackHoles(d);
-	},100);
-}
-
-function sendBlackHolesToSimulation (BHdataSets, callback) {
-	if (BHdataSets.length < 2) {
-		callback();
+	if (d) {
+		currentDataset = d;
+		currentDashboard = dashboardCombined;
+		data = d;
+		dataRendered = true;
+		jQuery('.loading').addClass('done');
+		setTimeout(function(){
+			console.log(d);
+			createBlackHoles(d);
+		},100);
 	}
 	else {
-		BHdataSets.forEach(function(d) {
-			if (d.name === "separation") {
-				separationData = d.data;
-			}
-			else if (d.name === "velocity") {
-				velocityData = d.data;
-			}
-		});
+		console.log('waiting for data');
+		loadData();
 	}
 }
 
@@ -527,7 +518,4 @@ function init() {
 	createSpaceTime();
 	createHighlightSphere();
 	render();
-	// setTimeout(function(){
-	// 	loop();
-	// },10);
 }
