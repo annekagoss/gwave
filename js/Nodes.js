@@ -45,10 +45,10 @@ var Node = function(name) {
 
 			this.mesh.position.z += ((this.initialVector[0]+1)*this.initVecZ*.1) + (1/(this.bhVector[0]+1) * this.bhZ*nodeGravityStrength*massForGravity) * this.dataMovement;
 		}
-
-		this.g = Math.min(Math.abs((this.bhVector[0]*.02)/this.initialVector[0]),1);
-		this.b = Math.min(Math.abs((this.bhVector[0]*.05)/this.initialVector[0]), 1);
-		this.r = 1- ( Math.min(Math.abs((this.bhVector[0]*.02)/this.initialVector[0]), 1));
+		
+		this.g = Math.min(Math.abs(this.bhVector[0]*.0005),1);
+		this.b = Math.min(Math.abs(this.bhVector[0]*.00075),1);
+		this.r = 1-(Math.min(Math.abs(this.bhVector[0]*.0002),1));
 
 		this.color.setRGB(this.r, this.g, this.b);
 		this.mat.color = this.color;
