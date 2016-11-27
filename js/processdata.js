@@ -100,7 +100,7 @@ function loadData() {
 // 		});
 // 	}
 	function checkForAllData(){
-		if (!blackHoleDatasets[0].data || !blackHoleDatasets[1].data) {
+		if (!blackHoleDatasets[0] || !blackHoleDatasets[1]) {
 			console.log('checking');
 			setTimeout(function(){
 				checkForAllData();
