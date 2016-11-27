@@ -18,7 +18,7 @@ function combineData(waveData) {
 	
 	function checkForAllData(){
 		console.log(blackHoleDatasets[0].data[0]+', '+blackHoleDatasets[1].data[0]);
-		if (!blackHoleDatasets[0].data || !blackHoleDatasets[1].data) {
+		if (blackHoleDatasets[0].data[0] && blackHoleDatasets[1].data[0]) {
 			setTimeout(function(){
 				checkForAllData(dataToExport);
 			},10);
