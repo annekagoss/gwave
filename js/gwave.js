@@ -17,7 +17,7 @@ var dataRendered = false;
 var dataSetH1, dataSetTemplate, data;
 
 // Animation
-var running = true;
+var running = false;
 var counter = counterStart;
 var phaseOff;
 
