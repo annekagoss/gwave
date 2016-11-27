@@ -27,7 +27,7 @@ function repositionMeasurements(newX, newY) {
 }
 
 function onMouseMove( event ) {
-  if (playing && currentRenderStyle === "nodes") {
+  if (running && currentRenderStyle === "nodes") {
   	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
   	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
       if (highlightSphere.visible && !pointLocked) {
@@ -108,7 +108,7 @@ function setMeasurements(){
 
 function setPointLock(e) {
     console.log(pointLocked);
-  if (playing) {
+  if (running) {
     if (e.target.localName = 'canvas') {
       if (pointLocked) {
           pointLocked = false;
