@@ -224,7 +224,11 @@ max-width: 400px;
 .animation-controls .skip-button, .polarization-controls .skip-button, .transform-controls .skip-button, .render-controls .skip-button {
   right: -80px;
   position: absolute;
-  top: 70px;
+  top: 80px;
+}
+
+.animation-controls .skip-button {
+	top: 60px;
 }
 
 .panel .icon {
