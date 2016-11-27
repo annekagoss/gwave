@@ -2,7 +2,6 @@ var introPlayed = false;
 
 jQuery(window).on('load', function(){
 	init();
-  playing = false;
   if (!introPlayed) {}
     var loadTimer = setInterval(function(){
         if (jQuery('.loading').hasClass('done')) {
@@ -56,7 +55,7 @@ function startVisualization() {
 	jQuery('.nav-instructions').removeClass('shown');
     jQuery('.shroud').removeClass('shown');
     setTimeout(function(){
-      playing = true;
+      running = true;
       loop();
     },500);
 }
