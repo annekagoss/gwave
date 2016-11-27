@@ -15,7 +15,6 @@ var gwData;
 var merged = false;
 var blackHolesCreated = false;
 var rotationReset = false;
-var blackHoleVertices = [];
 var newRotation;
 
 var Binary = function() {
@@ -32,14 +31,6 @@ var Binary = function() {
     this.mesh.add(blackHoleB.mesh);
 
     this.update = function(counter) {
-        if (counter === 1) {
-            console.log('reset');
-            blackHoleVertices.forEach(function(v){
-               v.reset();
-            });
-            this.mesh.children[0].children[0].visible = true;
-        }
-
         if (gwData[counter-1].waveSecs<0) {
           merged = false;
           massForGravity = smallMass;
@@ -76,9 +67,6 @@ var Binary = function() {
             if (this.mesh.children[1].children[0].scale.x === 1) {
               this.mesh.children[1].children[0].scale.set(finalRadiusRatio, finalRadiusRatio, finalRadiusRatio);
             }
-            blackHoleVertices.forEach(function(v){
-            v.updateMeshVertex(counter);
-            });
         }
     }
 }
