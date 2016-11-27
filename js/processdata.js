@@ -148,8 +148,8 @@ function processData(text, setName) {
 		return d.x > extendedStartTime && d.x < endTime;
 	});
 	function checkForAllData(){
-		console.log(blackHoleDatasets[0].data[0].seconds+', '+blackHoleDatasets[1].data[0].seconds);
-		if (!(blackHoleDatasets[0].data[0].seconds && blackHoleDatasets[1].data[0].seconds)) {
+		console.log(blackHoleDatasets[0].data[0].distance+', '+blackHoleDatasets[1].data[0].velocity);
+		if (!(blackHoleDatasets[0].data[0].distance && blackHoleDatasets[1].data[0].velocity)) {
 			setTimeout(function(){
 				checkForAllData();
 			},10);
