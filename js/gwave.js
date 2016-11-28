@@ -518,4 +518,7 @@ function init() {
 	createSpaceTime();
 	createHighlightSphere();
 	render();
+	setTimeout(function(){
+		loop();
+	},10);
 }

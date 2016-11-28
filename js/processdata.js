@@ -15,6 +15,8 @@ function exportData(dataToExport) {
 }
 
 function combineData(waveData) {
+// 	function continueCombination(){
+	
 	var initialWaveSecs = parseFloat((waveData[0].x/timeStretch).toFixed(5));
 
 	var negWaveData = jQuery.grep(waveData, function(d, i) {
@@ -22,22 +24,23 @@ function combineData(waveData) {
 	});
 	var lengthDiff = negWaveData.length - blackHoleDatasets[0].data.length;
 
-	waveData.forEach(function(w){
-		// If black hole data exists, use that.  Otherwise use 0
-		var bhDataPointSeparation = blackHoleDatasets[0].data[waveData.indexOf(w)-lengthDiff] ? blackHoleDatasets[0].data[waveData.indexOf(w)-lengthDiff] : 0;
+		waveData.forEach(function(w){
+			// If black hole data exists, use that.  Otherwise use 0
+			var bhDataPointSeparation = blackHoleDatasets[0].data[waveData.indexOf(w)-lengthDiff] ? blackHoleDatasets[0].data[waveData.indexOf(w)-lengthDiff] : 0;
 
-		var bhDataPointVelocity = blackHoleDatasets[1].data[waveData.indexOf(w)-lengthDiff] ? blackHoleDatasets[1].data[waveData.indexOf(w)-lengthDiff] : 0;
+			var bhDataPointVelocity = blackHoleDatasets[1].data[waveData.indexOf(w)-lengthDiff] ? blackHoleDatasets[1].data[waveData.indexOf(w)-lengthDiff] : 0;
 
-		var waveSecs = parseFloat((w.x/timeStretch).toFixed(5));
+			var waveSecs = parseFloat((w.x/timeStretch).toFixed(5));
 
-		combinedData.push({
-			waveSecs: parseFloat((waveSecs).toFixed(5)),
-			waveVal: w.y,
-			holeDist: bhDataPointSeparation.distance,
-			holeVel: bhDataPointVelocity.velocity
+			combinedData.push({
+				waveSecs: parseFloat((waveSecs).toFixed(5)),
+				waveVal: w.y,
+				holeDist: bhDataPointSeparation.distance,
+				holeVel: bhDataPointVelocity.velocity
+			});
 		});
-	});
-	exportData(combinedData);
+		exportData(combinedData);
+// 	}
 }
 
 function loadData() {
@@ -68,6 +71,7 @@ function loadData() {
 		error: function(req, status, err) {console.log(status, err);},
 		complete: function(data) {
 			console.log("black hole velocity data complete");
+			console.log(data.responseText);
 			processVelocityData(data.responseText);
 		}
 	  });
@@ -84,7 +88,9 @@ function loadData() {
 		error: function(req, status, err) {console.log(status, err);},
 		complete: function(data) {
 			console.log("black hole separation data complete");
+			console.log(data.responseText);
 			processSeparationData(data.responseText);
+			
 		}
 	  });
 	}
@@ -96,10 +102,23 @@ function loadData() {
 // 			},10);
 // 		});
 // 	}
+	function checkForAllData(){
+		if (!blackHoleDatasets[0] || !blackHoleDatasets[1]) {
+			console.log('checking');
+			setTimeout(function(){
+				checkForAllData();
+			},500);
+		}
+		else {
+			console.log(blackHoleDatasets[0].data+', '+blackHoleDatasets[1].data);
+			loadH1Data();
+		}
+	}
+
 	function loadBlackHoleData() {
 		loadSeparationData();
 		loadVelocityData();
-		loadH1Data();
+		checkForAllData();
 // 		simulateBlackHoles();
 	}
 	loadBlackHoleData();
@@ -144,7 +163,7 @@ function processData(text, setName) {
 	data = jQuery.grep(data, function(d, i) {
 		return d.x > extendedStartTime && d.x < endTime;
 	});
-
+	
 	combineData(data);
 
 	var title = setName === "h1" ? "LIGO Hanford Observatory, Mon Sep 14 09:16:37 GMT 2015, 16384 Hz" : "Numerical Relativity Template";
