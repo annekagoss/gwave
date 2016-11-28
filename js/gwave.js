@@ -494,14 +494,14 @@ function transformSpaceTime(e) {
 }
 
 function sendToSimulation (d, name) {
-	if (d) {
+	if (d && d[0].holeDist) {
 		currentDataset = d;
 		currentDashboard = dashboardCombined;
 		data = d;
 		dataRendered = true;
 		jQuery('.loading').addClass('done');
 		setTimeout(function(){
-			console.log(d);
+			console.log(d[0]);
 			createBlackHoles(d);
 		},100);
 	}
