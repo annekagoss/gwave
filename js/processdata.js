@@ -16,7 +16,7 @@ function exportData(dataToExport) {
 
 function combineData(waveData) {
 // 	function continueCombination(){
-	
+
 	var initialWaveSecs = parseFloat((waveData[0].x/timeStretch).toFixed(5));
 
 	var negWaveData = jQuery.grep(waveData, function(d, i) {
@@ -32,6 +32,10 @@ function combineData(waveData) {
 
 			var waveSecs = parseFloat((w.x/timeStretch).toFixed(5));
 
+			// console.log(blackHoleDatasets[0].data[0]);
+			// console.log(bhDataPointSeparation);
+			// console.log(bhDataPointVelocity);
+
 			combinedData.push({
 				waveSecs: parseFloat((waveSecs).toFixed(5)),
 				waveVal: w.y,
@@ -39,7 +43,10 @@ function combineData(waveData) {
 				holeVel: bhDataPointVelocity.velocity
 			});
 		});
-		exportData(combinedData);
+		setTimeout(function(){
+			exportData(combinedData);
+		},0);
+
 // 	}
 }
 
@@ -71,7 +78,7 @@ function loadData() {
 		error: function(req, status, err) {console.log(status, err);},
 		complete: function(data) {
 			console.log("black hole velocity data complete");
-			console.log(data.responseText);
+			// console.log(data.responseText);
 			processVelocityData(data.responseText);
 		}
 	  });
@@ -88,9 +95,8 @@ function loadData() {
 		error: function(req, status, err) {console.log(status, err);},
 		complete: function(data) {
 			console.log("black hole separation data complete");
-			console.log(data.responseText);
+			// console.log(data.responseText);
 			processSeparationData(data.responseText);
-			
 		}
 	  });
 	}
@@ -110,7 +116,7 @@ function loadData() {
 			},500);
 		}
 		else {
-			console.log(blackHoleDatasets[0].data+', '+blackHoleDatasets[1].data);
+			// console.log(blackHoleDatasets[0].data[0][0]+', '+blackHoleDatasets[1].data[0][0]);
 			loadH1Data();
 		}
 	}
@@ -163,7 +169,7 @@ function processData(text, setName) {
 	data = jQuery.grep(data, function(d, i) {
 		return d.x > extendedStartTime && d.x < endTime;
 	});
-	
+
 	combineData(data);
 
 	var title = setName === "h1" ? "LIGO Hanford Observatory, Mon Sep 14 09:16:37 GMT 2015, 16384 Hz" : "Numerical Relativity Template";
