@@ -32,10 +32,10 @@ function combineData(waveData) {
 
 			var waveSecs = parseFloat((w.x/timeStretch).toFixed(5));
 
-			console.log(blackHoleDatasets[0].data[0]);
-			console.log(bhDataPointSeparation);
-			console.log(bhDataPointVelocity);
-			
+			// console.log(blackHoleDatasets[0].data[0]);
+			// console.log(bhDataPointSeparation);
+			// console.log(bhDataPointVelocity);
+
 			combinedData.push({
 				waveSecs: parseFloat((waveSecs).toFixed(5)),
 				waveVal: w.y,
@@ -43,7 +43,10 @@ function combineData(waveData) {
 				holeVel: bhDataPointVelocity.velocity
 			});
 		});
-		exportData(combinedData);
+		setTimeout(function(){
+			exportData(combinedData);
+		},0);
+
 // 	}
 }
 
