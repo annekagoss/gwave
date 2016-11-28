@@ -32,6 +32,10 @@ function combineData(waveData) {
 
 			var waveSecs = parseFloat((w.x/timeStretch).toFixed(5));
 
+			console.log(blackHoleDatasets[0].data[0]);
+			console.log(bhDataPointSeparation);
+			console.log(bhDataPointVelocity);
+			
 			combinedData.push({
 				waveSecs: parseFloat((waveSecs).toFixed(5)),
 				waveVal: w.y,
@@ -90,7 +94,6 @@ function loadData() {
 			console.log("black hole separation data complete");
 			// console.log(data.responseText);
 			processSeparationData(data.responseText);
-
 		}
 	  });
 	}
