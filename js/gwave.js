@@ -494,6 +494,7 @@ function transformSpaceTime(e) {
 }
 
 function sendToSimulation (d, name) {
+
 	if (d && d[0].holeDist) {
 		currentDataset = d;
 		currentDashboard = dashboardCombined;
@@ -501,7 +502,8 @@ function sendToSimulation (d, name) {
 		dataRendered = true;
 		jQuery('.loading').addClass('done');
 		setTimeout(function(){
-			console.log(d[0]);
+			// console.log(JSON.stringify(d));
+			// jQuery('textarea').val(JSON.stringify(d));
 			createBlackHoles(d);
 		},100);
 	}
@@ -514,7 +516,12 @@ function sendToSimulation (d, name) {
 function init() {
 	createScene();
 	createLights();
-	loadData();
+
+	// loadData();
+	// Use pre-combined data instead of dynamically parsing with every load
+	renderDataDashboard(combinedDatasets, 'combined', 'combined');
+	sendToSimulation(combinedDatasets, 'combined');
+
 	createSpaceTime();
 	createHighlightSphere();
 	render();
