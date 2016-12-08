@@ -122,12 +122,17 @@ canvas {
   transform: translate(-50%, -50%);
   position: absolute;
   text-transform: none;
-  font-size: 12px;
-  line-height: 1.3em;
+  font-size: 14px;
+  line-height: 1.1em;
   opacity: 0;
   transition: opacity .25s ease;
   pointer-events: none;
   font-family: 'proxima_nova';
+}
+
+.data-text {
+    font-size: 9px;
+    line-height: 1em;
 }
 
 .panel-shown {
