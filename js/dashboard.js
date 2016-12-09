@@ -4,7 +4,7 @@ var Dashboard =  function(data, graphTitle, setName, counterOffset, zoomed) {
   this.name = setName;
 
   var margin = {top: 10, right: 60, bottom: 20, left: 50},
-      width = window.innerWidth*1 - margin.left - margin.right,
+      width = window.innerWidth*.75 - margin.left - margin.right,
       height = 150 - margin.top - margin.bottom,
       iconWidth = 100,
       iconHeight = 33;
